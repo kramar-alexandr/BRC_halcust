@@ -1,0 +1,134 @@
+external inner procedure GetVATCodeRow(string,row VATCodeBlock);
+external inner procedure MulVATIV(string,val,var val,var val,Integer,Integer);
+external inner function roundmode GetVATRoundMode(record RoundBlock);
+
+global
+function boolean OBS_HasItemTypeStocked(string artcode)
+begin
+  record INVc INr;
+  boolean res;
+  
+  INr.Code=artcode;
+  if ReadFirstMain(INr,1,true) then begin
+    if INr.ItemType==kItemTypeStocked then begin
+      res=true;
+    end;
+  end;
+  
+  OBS_HasItemTypeStocked=res;
+  return;
+end;
+
+
+global
+function val OBS_GetProfitVAT(record IVVc IVr)
+begin
+  record AccBlock AccBl;
+  row VATCodeBlock VATrw;
+  row IVVc IVrw;
+  val res,t,t1,totgp;
+  record RoundBlock RBl;
+  integer i,rwc;
+  
+  res=blankval;
+  if IVr.CalcProfitVAT==1 then begin
+    BlockLoad(AccBl);
+    if nonblank(AccBl.ProfitVATCode) then begin
+      rwc=MatRowCnt(IVr);
+      for (i=0;i<rwc;i=i+1) begin
+        MatRowGet(IVr,i,IVrw);
+        if IVrw.stp==kInvoiceRowTypeNormal and nonblank(IVrw.ArtCode) then begin
+          if OBS_HasItemTypeStocked(IVrw.ArtCode) then begin
+            totgp = totgp + (IVrw.Sum-IVrw.BasePrice);
+          end;
+        end;
+      end;
+      if totgp>0 then begin
+        GetVATCodeRow(AccBl.ProfitVATCode,VATrw);
+        if nonblank(VATrw.VATCode) then begin
+          BlockLoad(RBl);
+          MulVATIV(VATrw.VATCode,totgp,t,t1,1,0);
+          res = Round(t,GetVATRoundMode(RBl));
+        end;
+      end;
+    end;
+  end;
+  
+LOBS_GetProfitVAT:;
+  OBS_GetProfitVAT = res;
+  return;
+end;
+
+global
+function val OBS_GetProfitVAT2(string vatcode,val sum)
+begin
+  record RoundBlock RBl;
+  val res,t,t1;
+  
+  BlockLoad(RBl);
+  MulVATIV(vatcode,sum,t,t1,1,0);
+  res = Round(t,GetVATRoundMode(RBl));
+  OBS_GetProfitVAT2 = res;
+  return;
+end;
+
+global
+procedure OBS_PrintAdditionalFiels(record IVVc IVr)
+begin
+  row IVVc IVrw;
+  integer i,rwc;
+  boolean VATZoneIn,VATZoneOut;
+  string 255 tstr;
+  
+  if IVr.ExportFlag==1 /* or IVr.ExportFlag==3 */ then begin  //iekš ES
+    VATZoneIn=true;
+  end;
+  if IVr.ExportFlag==2 /* or IVr.ExportFlag==4 */ then begin  //ārpus ES
+    VATZoneOut=true;
+  end;
+
+  rwc=MatRowCnt(IVr);
+  for (i=0;i<rwc;i=i+1) begin
+    MatRowGet(IVr,i,IVrw);
+    if IVrw.stp==kInvoiceRowTypeNormal then begin
+      if IVrw.VATCode=="26" and VATZoneOut then begin
+        tstr=USetStr(1001000);
+        i=rwc;
+      end;
+      if IVrw.VATCode=="50" and VATZoneIn then begin
+        tstr=USetStr(1001001);
+        i=rwc;
+      end;
+    end;
+  end;
+  OutFormField("FF_SPECIALNOTE",tstr);
+
+  return;
+end;
+
+global
+function boolean OBS_InvHasNoBasePrice(record IVVc IVr,var integer rw)
+begin
+  row IVVc IVrw;
+  integer i,rwc;
+  boolean res;
+  
+  res=false;
+  
+  rwc=MatRowCnt(IVr);
+  for (i=0;i<rwc;i=i+1) begin
+    MatRowGet(IVr,i,IVrw);
+    if IVrw.stp==kInvoiceRowTypeNormal and nonblank(IVrw.ArtCode) then begin
+      if OBS_HasItemTypeStocked(IVrw.ArtCode) then begin
+        if IVrw.Sum!=blankval and IVrw.BasePrice==blankval then begin
+          res=true;
+          rw=i;
+          i=rwc;
+        end;
+      end;
+    end;
+  end;
+  
+  OBS_InvHasNoBasePrice=res;
+  return;
+end;

@@ -1,0 +1,134 @@
+external inner function LongInt MonthDiff(Date,Date);
+external inner procedure BuildCredManPayPlan(record CredManVc,var record CredManPayPlanVc,record CredManSetBlock,Boolean,Boolean);
+external inner updating procedure StoreCredManEvent(record CredManVc,var record CredManEventVc);
+
+// global
+// procedure EBS_CreateCredManEvtVClassReportDefaults(Integer wn)
+// begin
+//   record RcVc RepSpec;
+//
+//   DeselectWindow(wn,false);
+//   GetWindowRecord(wn,RepSpec);
+//   ReportDefaults(RepSpec,"EBS_CreateCredManEvtVClass");
+//
+//
+// return;
+// end;
+
+global
+function boolean EBS_CreateCredManEvtVClassOnOKWindow(integer wn)
+begin
+  record RcVc RepSpec;
+  boolean res;
+
+  res = true;
+  GetWindowRecord(wn,RepSpec);
+  if blankdate(RepSpec.d1) then begin
+    MessageBox(26123,"");
+    res = false;
+  end;
+
+LEBS_CreateCredManEvtVClassOnOKWindow:;
+  EBS_CreateCredManEvtVClassOnOKWindow = res;
+  return;
+end;
+
+global updating
+procedure EBS_CreateCredManEvtMn(Record RcVc RepSpec)
+Begin
+  record CredManTypeVc CredManTyper;
+  record CredManPayPlanVc CredManPayPlanr;
+  row CredManPayPlanVc CredManPayPlanrw;
+  record CredManEventVc CredManEventr;
+  row CredManEventVc CredManEventrw;
+  record CredManSetBlock CMSb;
+  record CredManVc CredManr;
+  record INVc INr;
+  integer i,rwc;
+  boolean wloop, testf;
+  date fromdate;
+  string 255 installitem, itemcode;
+
+  BlockLoad(CMSb);
+
+  wloop = true;
+  CredManr.SerNr = RepSpec.long1;
+  While LoopMain(CredManr,1,wloop) begin
+    if RepSpec.long1 != -1 and CredManr.SerNr != RepSpec.long1 then begin
+      wloop = false;
+    end else begin
+      testf = true;
+      if CredManr.OKFlag != 1 then begin
+        testf = false;
+      end;
+      if CredManr.FirstInvDate > RepSpec.d1 then begin
+        testf = false;
+      end;
+      if testf then begin
+        BuildCredManPayPlan(CredManr,CredManPayPlanr,CMSb,false,false);
+
+        installitem = CMSb.InstalmentItem;
+        CredManTyper.Code = CredManr.Type;
+        if Readfirstmain(CredManTyper,1,true) then begin
+          if nonblank(CredManTyper.InstalmentItem) then begin
+            installitem = CredManTyper.InstalmentItem;
+          end;
+        end;
+
+        rwc = MatRowCnt(CredManPayPlanr);
+        for(i=0;i<rwc;i=i+1)begin
+          MatRowGet(CredManPayPlanr,i,CredManPayPlanrw);
+          testf = true;
+          if CredManPayPlanrw.TransDate > RepSpec.d1 then begin
+            i = rwc;
+            testf = false;
+          end;
+          if CredManPayPlanrw.PlanType != 7 and CredManPayPlanrw.PlanType != 6 and CredManPayPlanrw.PlanType != 5 then begin
+            testf = false;
+          end;
+
+          // LogText(0,"CredManPayPlan td=" & CredManPayPlanrw.TransDate & " type=" & CredManPayPlanrw.PlanType & " sum=" & ValToString(CredManPayPlanrw.Sum,M4Rate,"",".",0) & " bal=" & CredManPayPlanrw.Bal & " accint=" & CredManPayPlanrw.AcumulatedInt);
+          if testf then begin
+            RecordNew(CredManEventr);
+            CredManEventr.CredManNr = CredManr.SerNr;
+            CredManEventr.TransDate = CredManPayPlanrw.TransDate;
+            CredManEventr.DueDate = CredManPayPlanrw.TransDate;
+            CredManEventr.CurncyCode = CredManr.CurncyCode;
+            CredManEventr.RecordNr = -1;
+            CredManEventr.FileName = "";
+            CredManEventr.PaidFlag = 0;
+            CredManEventr.Comment = "Created during maintenance";
+
+            ClearRow(CredManEventr,CredManEventrw,0);
+            if CredManPayPlanrw.PlanType == 7 then begin
+              itemcode = CMSb.DepositItem;
+              CredManEventrw.ChargeType = 0;
+              if CredManEventr.TransDate != CredManr.startDate then begin
+                CredManEventr.TransDate = CredManr.startDate;
+                CredManEventr.DueDate = CredManr.startDate;
+              end;
+            end;
+            if CredManPayPlanrw.PlanType == 6 then begin
+              itemcode = installitem;
+              CredManEventrw.ChargeType = 2; // Instalment
+            end;
+            if CredManPayPlanrw.PlanType == 5 then begin
+              itemcode = CMSb.RateItem;
+              CredManEventrw.ChargeType = 3; // Interest
+            end;
+
+            INr.Code = itemcode;
+            ReadFirstMain(INr,1,true);
+            CredManEventrw.ArtCode = itemcode;
+            CredManEventrw.Comment = INr.Name;
+            CredManEventrw.Sum = CredManPayPlanrw.Sum;
+            MatRowPut(CredManEventr,MatRowCnt(CredManEventr),CredManEventrw);
+            StoreCredManEvent(CredManr,CredManEventr);
+          end;
+        end;
+      end;
+    end;
+  end;
+
+return;
+end;

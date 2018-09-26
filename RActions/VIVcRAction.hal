@@ -1,0 +1,18 @@
+global
+updating function LongInt VIVcRecordCheck(record VIVc VIp,record VIVc VI2p,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+  
+  if (VIp.OKFlag!=0) and (VI2p.OKFlag==0)  then begin
+    if blank(VIp.InvoiceNr) then begin
+      RecordCheckError(1058,"",-1,"InvoiceNr");      
+      res = -1;
+      goto L99VIVcRecordCheck;
+    end;  
+  end;
+    
+  res = inner.VIVcRecordCheck(VIp,VI2p,stat,long4);
+L99VIVcRecordCheck:; 
+  VIVcRecordCheck = res;
+  return;
+end;

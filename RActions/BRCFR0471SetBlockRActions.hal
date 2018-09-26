@@ -1,0 +1,35 @@
+// EVS: HAL-255
+global
+updating function LongInt BRCFR0471SetBlockCheck(var record BRCFR0471SetBlock BRCFR0471r,record BRCFR0471SetBlock BRCFR04712r,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+  Integer j,i,rwcnt,pmrwcnt;
+  row BRCFR0471SetBlock BRCFR0471rw;
+  row BRCFR0471SetBlock BRCFR04712rw;
+  
+  res = 0;
+  rwcnt = MatRowCnt(BRCFR0471r);
+  for (i=0; i<rwcnt;i=i+1) begin
+    MatRowGet(BRCFR0471r,i,BRCFR0471rw);
+    if (blank(BRCFR0471rw.VECat)) then begin
+      RecordCheckError(1058,"",i,"VECat");
+      res = -1;
+      goto LBRCFR0471SetBlockCheck;        
+    end;
+    if (BRCFR0471rw.TwelvePointOne < 0 or BRCFR0471rw.TwelvePointOne > 100) then begin
+      RecordCheckError(1000000,"",i,"TwelvePointOne");
+      res = -1;
+      goto LBRCFR0471SetBlockCheck;        
+    end;
+    if (BRCFR0471rw.Fourteen < 0 or BRCFR0471rw.TwelvePointOne > 100) then begin
+      RecordCheckError(1000000,"",i,"Fourteen");
+      res = -1;
+      goto LBRCFR0471SetBlockCheck;        
+    end;
+  end; 
+  
+LBRCFR0471SetBlockCheck:;  
+  BRCFR0471SetBlockCheck = res;
+  return;
+end;
+// :EVS

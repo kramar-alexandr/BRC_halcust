@@ -1,0 +1,253 @@
+external inner function RoundMode SetRoundModeD(integer);
+external inner function val FindVAT(string,val,Integer,Integer);
+remote inner procedure CredManSumup(var record CredManVc);
+remote updating function longint EBS_CreateSDFromCredMan(record CredManVc, var record SDVc);
+remote procedure BRC_CredManVc_PasteArtCode(var record CredManVc);
+external function val CalcCredManRemVal(record CredManVc);
+remote updating function longint EBS_StopCredMan(record CredManVc, date, var record IVVc);
+remote updating function longint EBS_BuyOutCredMan(record CredManVc, var record IVVc);
+remote updating function longint EBS_CancelCredMan(record CredManVc, date, var record IVVc, var record IVVc);
+
+global updating
+procedure EBS_BuyOutCredManDsm()
+begin
+  integer wn, nwn;
+  record IVVc IVr;
+  record CredManVc CredManr;
+  longint res;
+
+  wn = CurWindow;
+
+  if WindowState(wn) != 0 then begin
+    MessageBox(22902,"");
+    GoTo LEBS_BuyOutCredManDsm;
+  end;
+
+  GetWindowRecord(wn,CredManr);
+
+  if CredManr.StopFlag == 1 then begin
+    MessageBox(1000001,"");
+    GoTo LEBS_BuyOutCredManDsm;
+  end;
+  if CredManr.CancelFlag == 1 then begin
+    MessageBox(1000002,"");
+    GoTo LEBS_BuyOutCredManDsm;
+  end;
+
+  if CredManr.OKFlag==1 then begin
+    res = EBS_BuyOutCredMan(CredManr, IVr);
+    if res!=0 then begin
+      MessageBox(res,"");
+      GoTo LEBS_BuyOutCredManDsm;
+    end;
+
+    Putwindowrecord(wn,CredManr);
+    WindowDoOk(wn,0);
+
+    if (MatRowCnt(IVr)!=0) then begin
+      nwn = OpenWindow("IVDClass",1,0,"","",IVr);
+    end;
+  end;
+
+LEBS_BuyOutCredManDsm:;
+  return;
+end;
+
+global updating
+procedure EBS_StopCredManDsm()
+begin
+  integer wn, nwn;
+  record IVVc IVr;
+  record CredManVc CredManr;
+  longint res;
+
+  wn = CurWindow;
+
+  if WindowState(wn) != 0 then begin
+    MessageBox(22902,"");
+    GoTo LEBS_StopCredManDsm;
+  end;
+
+  GetWindowRecord(wn,CredManr);
+  if CredManr.StopFlag==0 and CredManr.CancelFlag==0 and CredManr.OKFlag==1 then begin
+    // res = EBS_StopCredMan(CredManr, CurrentDate, IVr);
+    // if res!=0 then begin
+    //   MessageBox(res,"");
+    //   GoTo LEBS_StopCredManDsm;
+    // end;
+
+    CredManr.StopFlag = 1;
+    Putwindowrecord(wn,CredManr);
+    WindowDoOk(wn,0);
+
+    if (MatRowCnt(IVr)!=0) then begin
+      nwn = OpenWindow("IVDClass",1,0,"","",IVr);
+    end;
+  end;
+
+LEBS_StopCredManDsm:;
+  return;
+end;
+
+global updating
+procedure EBS_CancelCredManDsm()
+begin
+  integer wn, nwn;
+  record IVVc IVr, credIVr;
+  record CredManVc CredManr;
+  longint res;
+
+  wn = CurWindow;
+
+  if WindowState(wn) != 0 then begin
+    MessageBox(22902,"");
+    GoTo LEBS_CancelCredManDsm;
+  end;
+
+  GetWindowRecord(wn,CredManr);
+  if CredManr.StopFlag==0 and CredManr.CancelFlag==0 and CredManr.OKFlag==1 then begin
+    res = EBS_CancelCredMan(CredManr, CurrentDate, IVr, credIVr);
+    if res!=0 then begin
+      MessageBox(res,"");
+      GoTo LEBS_CancelCredManDsm;
+    end;
+
+    CredManr.CancelFlag = 1;
+    Putwindowrecord(wn,CredManr);
+    WindowDoOk(wn,0);
+
+    OpenWindow("IVDClass",1,0,"","",IVr);
+    nwn = OpenWindow("IVDClass",1,0,"","",credIVr);
+    WindowDoOK(nwn,0)
+  end;
+
+LEBS_CancelCredManDsm:;
+  return;
+end;
+
+global updating
+procedure EBS_CreateSDFromCredManDsm()
+begin
+  integer wn, nwn;
+  longint res;
+  record CredManVc CredManr;
+  record SDVc SDr;
+
+  wn = CurWindow;
+
+  if WindowState(wn) != 0 then begin
+    MessageBox(22902,"");
+    GoTo LEBS_CreateSDFromCredManDsm;
+  end;
+
+  GetWindowRecord(wn,CredManr);
+  if blank(CredManr.ArtCode) then begin
+    MessageBox(10417,"");
+    GoTo LEBS_CreateSDFromCredManDsm;
+  end;
+
+  res = EBS_CreateSDFromCredMan(CredManr, SDr);
+  if res!=0 then begin
+    MessageBox(res,"");
+    GoTo LEBS_CreateSDFromCredManDsm;
+  end;
+
+  CreateRecordLink(CredManr,CurrentCompany,SDr,CurrentCompany);
+  CreateRecordLink(SDr,CurrentCompany,CredManr,CurrentCompany);
+  nwn = OpenWindow("SDDClass",1,0,"","",SDr);
+
+LEBS_CreateSDFromCredManDsm:;
+  return;
+end;
+
+function Boolean CredManDClassRemBuyPrcEFAfter(Integer wn,Integer rownr,Boolean changedf)
+begin
+  record CredManVc CredManr;
+
+  if (changedf) then begin
+    GetWindowRecord(wn,CredManr);
+    CredManr.RemBuyAmt = CalcCredManRemVal(CredManr);
+    CredManSumup(CredManr);
+    PutWindowRecord(wn,CredManr);
+  end;
+  CredManDClassRemBuyPrcEFAfter = true;
+  return;
+end;
+
+function Boolean CredManDClassArtCodeEFAfter(Integer wn,Boolean changedf)
+begin
+  record CredManVc CredManr;
+
+  if (changedf) then begin
+    GetWindowRecord(wn,CredManr);
+    BRC_CredManVc_PasteArtCode(CredManr);
+    PutWindowRecord(wn,CredManr);
+  end;
+  CredManDClassArtCodeEFAfter = true;
+  return;
+end;
+
+function Boolean CredManDClassSumWOVATEFAfter(Integer wn,Boolean changedf)
+begin
+  record CredManVc CredManr;
+  record CredManSetBlock CredManSetb;
+  val vatsum;
+  string 10 vatcode;
+
+  if (changedf) then begin
+    BlockLoad(CredManSetb);
+
+    GetWindowRecord(wn,CredManr);
+    vatcode = CredManSetb.VATCode;
+    if nonblank(CredManr.VATCode) then begin
+      vatcode = CredManr.VATCode;
+    end;
+    vatsum = Round(FindVAT(vatcode, CredManr.SumWOVAT, 0, 0), SetRoundModeD(2));
+    CredManr.InvSum4 = CredManr.SumWOVAT + vatsum;
+    CredManSumup(CredManr);
+    PutWindowRecord(wn,CredManr);
+  end;
+  CredManDClassSumWOVATEFAfter = true;
+  return;
+end;
+
+global
+function Boolean CredManDClassAfterEditField(Integer wn,string fieldname,Integer fn, Integer rownr,Integer changed)
+BEGIN
+  Boolean res;
+
+  res = inner.CredManDClassAfterEditField(wn,fieldname,fn,rownr,changed);
+
+  switch (fieldname) begin
+    case "RemBuyPrc": res = CredManDClassRemBuyPrcEFAfter(wn,rownr,changed!=0);
+    case "ArtCode": res = CredManDClassArtCodeEFAfter(wn,changed!=0);
+    case "SumWOVAT": res = CredManDClassSumWOVATEFAfter(wn,changed!=0);
+  end;
+
+  return;
+end;
+
+global
+function Boolean CredManDClassStopFlagButtonAction(Integer wn,Integer value)
+BEGIN
+  Boolean res;
+
+  CredManDClassStopFlagButtonAction = res;
+  return;
+end;
+
+global
+function Boolean CredManDClassCancelFlagButtonAction(Integer wn,Integer value)
+BEGIN
+  Boolean res;
+  record CredManVc CredManr;
+
+  // allow to remove this chechbox
+  GetWindowRecord(wn,CredManr);
+  if CredManr.CancelFlag == 1 then begin
+    res = true;
+  end;
+
+  CredManDClassCancelFlagButtonAction = res;
+  return;
+end;

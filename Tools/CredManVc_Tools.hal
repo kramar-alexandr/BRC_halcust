@@ -1,0 +1,620 @@
+external inner function Integer CreateCreditNoteIV(record IVVc,Integer,var record IVVc,string,Boolean);
+external inner function Boolean IVVc_PasteArtCode(var record IVVc,Integer,var string,var string,Boolean,var Integer);
+external inner function Boolean SDVc_PasteArtCode(var record SDVc,Integer,Integer,var string,var string);
+external inner function Boolean SDVc_PasteQty(var record SDVc,Integer);
+external inner function Boolean ReadFirstItem(string,var record INVc,Boolean,Boolean);
+external inner function val FindVAT(string,val,Integer,Integer);
+external inner function RoundMode SetRoundModeD(integer);
+external inner function integer CountObjects(string);
+external inner procedure IVVc_PastePayDeal(var record IVVc,string,string);
+external inner procedure GetFullCurncyRate (var string,Date,var val,var val,var val,var val,var val);
+external inner procedure IVSumup(var record IVVc,Boolean);
+external inner procedure IVDchsum(var record IVVc,Integer);
+external inner procedure PasteCredManToInv(var record IVVc,record CredManVc,boolean);
+external inner updating procedure BuildIVFromCredMan2(record RcVc,var record IVVc,var record CredManEventVc,record CredManVc,Date,Boolean,Boolean,date);
+external inner procedure IVVc_PasteVATCode(var record IVVc,Integer,string,var Boolean);
+external inner procedure IVVc_PasteInvDate(var record IVVc,record LocalMachineBlock,var Integer,var Integer);
+
+global
+function val CalcCredManRemVal(record CredManVc CredManr)
+begin
+  val res;
+  record CredManTypeVc CredManTyper;
+
+  res = 0;
+  res = CredManr.RemBuyPrc * CredManr.InvSum4 / 100;
+
+LCalcCredManRemVal:;
+  CalcCredManRemVal = res;
+  return;
+end;
+
+global updating
+function longint EBS_CreateSDFromCredMan(record CredManVc CredManr, var record SDVc SDr)
+begin
+  longint res;
+  row SDVc SDrw;
+  record CredManSetBlock CredManSetr;
+  string 255 tstr;
+
+  res = 0;
+
+  BlockLoad(CredManSetr);
+
+  SDr.TransDate = CredManr.TransDate;
+  SDr.CostAcc = CredManSetr.DeprAccount;
+  SDr.Location = CredManr.Location;
+
+  SDrw.ArtCode = CredManr.ArtCode;
+  MatRowPut(SDr,0,SDrw);
+  SDVc_PasteArtCode(SDr,0,1,tstr,tstr);
+
+  MatRowGet(SDr,0,SDrw);
+  SDrw.Qty = 1;
+  MatRowPut(SDr,0,SDrw);
+  SDVc_PasteQty(SDr,0);
+
+  SDr.SerNr = NextSerNr("SDVc",SDr.TransDate,-1,false,"");
+  if SDr.SerNr == -1 then begin
+    res = 1747;
+    GoTo LEBS_CreateSDFromCredMan;
+  end;
+
+  RecordStore(SDr,false);
+
+LEBS_CreateSDFromCredMan:;
+  EBS_CreateSDFromCredMan = res;
+  return;
+end;
+
+global
+function val GetCredManBalance(record CredManVc CredManr)
+begin
+  val res;
+  record CredManEventVc CredManEventr;
+
+  res = 0;
+  CredManEventr.TransDate = AddYear(CurrentDate, 10);
+  if (ReadLastkey("CredManTransDate:" & CredManr.SerNr,CredManEventr,1,false)) then begin
+    if CredManr.SerNr == CredManEventr.CredManNr then begin
+      res = CredManEventr.CredManBal;
+    end else begin
+      res = CredManr.InvSum4;
+    end;
+  end;
+
+  GetCredManBalance = res;
+  return;
+end;
+
+global
+procedure EBS_PrintCredManInfo(record IVVc IVr)
+begin
+  record CredManVc CredManr;
+  record INVc INr;
+
+  if (IVr.CredManNr>0) then begin
+    CredManr.SerNr = IVr.CredManNr;
+    if ReadFirstMain(CredManr,1,true) then begin
+      if (ReadFirstItem(CredManr.ArtCode,INr,true,false)) then begin
+        OutFormField("FF_CREDMANITEMCODE", INr.Code);
+        OutFormField("FF_CREDMANITEMNAME", INr.Name);
+      end;
+    end;
+  end;
+
+  return;
+end;
+
+global
+function boolean EBS_ShouldItemChangeBal(record CredManVc CredManr,string artcode, val sum)
+begin
+  row CredManVc CredManrw;
+  integer i,rwc;
+  boolean res;
+
+  res = true;
+  rwc = MatRowCnt(CredManr);
+  for(i=0;i<rwc;i=i+1)begin
+    MatRowGet(CredManr,i,CredManrw);
+    if CredManrw.ArtCode == artcode and CredManrw.Sum == sum and CredManrw.FeeBalType==0 then begin
+      res = false;
+      i = rwc;
+    end;
+  end;
+
+  EBS_ShouldItemChangeBal = res;
+  return;
+end;
+
+global
+procedure BRC_CredManVc_PasteArtCode(var record CredManVc CredManr)
+begin
+  record INVc INr;
+  record ITVc ITr;
+
+  if ReadFirstItem(CredManr.ArtCode,INr,true,false) then begin
+    ITr.Code = INr.Group;
+    if ReadFirstMain(ITr,1,true) then begin
+      CredManr.ARAcc = ITr.InvAcc;
+    end;
+  end;
+
+  return;
+end;
+
+global
+procedure CredManVc_CalcVAT(var record CredManVc CredManr, string vatcode)
+begin
+  record CUVc CUr;
+  val vatsum;
+
+  vatsum = Round(FindVAT(vatcode, CredManr.SumWOVAT, 0, 0), SetRoundModeD(2));
+  // CredManr.InvSum4 = CredManr.SumWOVAT + vatsum;
+
+  CredManr.VATSum = blankval;
+  CUr.Code = CredManr.CustCode;
+  if ReadFirstMain(CUr,1,true) then begin
+    if CUr.CustType == 0 then begin
+      CredManr.VATSum = vatsum;
+    end;
+  end;
+
+  return;
+end;
+
+global
+function val FIN_PMT(val monthly_rate, integer payments, val total_sum)
+begin
+  val t, t2;
+  t = monthly_rate / (power(1 + monthly_rate, payments) - 1) * (total_sum * power(1 + monthly_rate, payments));
+
+  FIN_PMT = t;
+  return;
+end;
+
+global
+function val FIN_PPMT(val monthly_rate, integer payments, val total_sum, integer payment_nr)
+begin
+  val res, t, c;
+
+  c = -FIN_PMT(monthly_rate, payments, total_sum);
+  // LogText(0,"FIN_PPMT c = " & c);
+  res = c + (c * (power(1 + monthly_rate, payment_nr-1) - 1) / monthly_rate + total_sum * power(1 + monthly_rate, payment_nr-1)) * monthly_rate;
+  // LogText(0,"FIN_PPMT res = " & res);
+  FIN_PPMT = -res;
+  return;
+end;
+
+global
+procedure GetMonthlyVatVector(val VATSum, string VATAddMonths,var vector val vatPayments)
+begin
+  integer totmonths, cnt;
+  val monthly_sum, remsum;
+  longint pos;
+  string 20 onestr;
+
+  totmonths = CountObjects(VATAddMonths);
+  monthly_sum = Round(VATSum / totmonths, SetRoundModeD(2));
+  remsum = VATSum;
+
+  while (GetNextSubstring(VATAddMonths,pos,",",onestr)) begin
+    cnt = cnt + 1;
+    if cnt != totmonths then begin
+      remsum = remsum - monthly_sum;
+      vatPayments[onestr] = monthly_sum;
+    end else begin
+      vatPayments[onestr] = remsum;
+    end;
+  end;
+
+  return;
+end;
+
+global
+procedure FindLastPUSums(string item, var val totsum, var val vatsum)
+begin
+  record ItemHistVc IHr;
+  record PUVc PUr;
+  row PUVc PUrw;
+
+  totsum = blankval;
+  vatsum = blankval;
+
+  IHr.FileName = "PUVc";
+  IHr.ArtCode = item;
+  IHr.TransDate = AddYear(CurrentDate,10);
+  if ReadLastKey("FNArtCode",IHr,3,false) then begin
+    if IHr.FileName == "PUVc" and IHr.ArtCode == item then begin
+      PUr.SerNr = IHr.TransNr;
+      if ReadFirstMain(PUr,1,true) then begin
+        MatRowGet(PUr,IHr.Row,PUrw);
+        if PUrw.ArtCode == item then begin
+          totsum = PUrw.CostPrice;
+          vatsum = Round(FindVAT(PUrw.VATCode,PUrw.CostPrice,PUr.InclVAT,PUr.NoTAXonVAT), SetRoundModeD(2));
+        end;
+      end;
+    end;
+  end;
+
+  return;
+end;
+
+procedure SetupIVFromScratch(var record IVVc IVp,record CredManVc CredManr,Date invdate)
+begin
+  record PLDefVc PLDefR;
+  record CUVc CUr;
+  record CUVc invtoCUr;
+
+  RecordNew(IVp);
+  IVp.InvDate = invdate;
+  IVp.TransDate = invdate;
+  invtoCUr.Code = "";
+  CUr.Code = CredManr.CustCode;
+  if (ReadFirstMain(CUr,1,true)) then begin
+    IVp.CustCode = CUr.Code;
+    if (nonblank(CUr.InvoiceToCode)) then begin
+      invtoCUr.Code = CUr.InvoiceToCode;
+      if (ReadFirstMain(invtoCUr,1,true)) then begin
+        IVp.CustCode = invtoCUr.Code;
+      end;
+    end;
+  end;
+  if (nonblank(CredManr.InvoiceToCode)) then begin
+    invtoCUr.Code = CredManr.InvoiceToCode;
+    if (ReadFirstMain(invtoCUr,1,true)) then begin
+      IVp.CustCode = invtoCUr.Code;
+    end;
+  end;
+  if (blank(IVp.CustCode)) then begin
+    IVp.CustCode = CredManr.CustCode;
+  end;
+  PasteCredManToInv(IVp,CredManr,true);
+
+  return;
+end;
+
+global
+updating procedure CreateTotalSumInvoice(var record CredManVc CredManr)
+begin
+  record IVVc IVp;
+  Boolean res,addf;
+  row IVVc IVrw;
+  string 255 tstr,t2;
+  LongInt oldser;
+  LongInt i,rwcnt,rownr;
+  Date invd,sdp,edp,firstdat;
+  val fr,to1,to2,br1,br2;
+  string 5 crncy;
+  Integer sernrf;
+
+  invd = CredManr.startDate;
+  SetupIVFromScratch(IVp,CredManr,invd); //cretes invoice header, does not touch rows
+  IVp.ARAcc = CredManr.CredManAcc;
+
+  tstr = USetStr(1168);
+  t2 = CredManr.SerNr;
+  tstr = tstr & t2;
+  ClearRow(IVp,IVrw,1);
+  IVrw.Spec = tstr;
+  MatRowPut(IVp,MatRowCnt(IVp),IVrw);
+
+  ClearRow(IVp,IVrw,1);
+  IVrw.Spec = " ";
+  MatRowPut(IVp,MatRowCnt(IVp),IVrw);
+
+  IVp.CredManTotSumInv = 1;
+  IVp.Objects = CredManr.Objects;
+  IVp.InvDate = invd;
+  IVp.LangCode = CredManr.LangCode;
+  IVp.TransDate = IVp.InvDate;
+  IVVc_PastePayDeal(IVp,"","");
+  IVp.SerNr = NextSerNr("IVVc",IVp.TransDate,oldser,false,IVp.LangCode);
+  crncy = IVp.CurncyCode;
+  GetFullCurncyRate(crncy,IVp.TransDate,fr,to1,to2,br1,br2);
+  IVp.CurncyCode = crncy;
+  IVp.FrRate = fr;
+  IVp.ToRateB1 = to1;
+  IVp.ToRateB2 = to2;
+  IVp.BaseRate1 = br1;
+  IVp.BaseRate2 = br2;
+  rownr = MatRowCnt(IVp);
+
+  ClearRow(IVp,IVrw,1);
+  IVrw.ArtCode = CredManr.ArtCode;
+  IVrw.Quant = 1;
+  MatRowPut(IVp,rownr,IVrw);
+  if (IVVc_PasteArtCode(IVp,rownr,tstr,tstr,false,sernrf)) then begin
+  end;
+  MatRowGet(IVp,rownr,IVrw);
+  IVrw.SalesAcc = CredManr.ARAcc;
+  IVrw.Price = CredManr.SumWOVAT;
+  IVrw.Sum = CredManr.SumWOVAT;
+  MatRowPut(IVp,rownr,IVrw);
+  IVSumup(IVp,true);
+  if (IVp.SerNr<>-1) then begin
+    if (RecordInsert(IVp,false)) then begin end;
+    CredManr.TotInvoiceNr = IVp.SerNr;
+    CreateRecordLink(CredManr,CurrentCompany,IVp,CurrentCompany);
+    CreateRecordLink(IVp,CurrentCompany,CredManr,CurrentCompany);
+  end;
+
+  return;
+end;
+
+global updating
+function longint EBS_BuyOutCredMan(record CredManVc CredManr, var record IVVc IVp)
+begin
+  record CredManEventVc CredManEventr;
+  record RcVc RepSpec;
+  Date bldat;
+  longint res;
+  row IVVc IVrw;
+  integer i,rwc;
+  boolean foundf;
+
+  res = 0;
+
+  RepSpec.UsedOnly = 0;
+  RepSpec.Stext = "";
+  RepSpec.ObjStr = "";
+  RepSpec.sStartDate = bldat; //CurrentDate; //bldat;
+  RepSpec.sEndDate = bldat; //AddDay(AddMonth(RepSpec.sStartDate,CredManr.perLength),-1); //bldat;
+  RepSpec.f12 = "1";
+  BuildIVFromCredMan2(RepSpec,IVp,CredManEventr,CredManr,bldat,true,false,bldat);
+
+  foundf = false;
+  rwc = MatRowCnt(IVp);
+  for(i=0;i<rwc;i=i+1)begin
+    MatRowGet(IVp,i,IVrw);
+    if nonblank(IVrw.ArtCode) then begin
+      foundf = true;
+    end;
+  end;
+  if !foundf then begin
+    RecordDelete(IVp);
+    res = 1000003;
+  end;
+
+LEBS_BuyOutCredMan:;
+  EBS_BuyOutCredMan = res;
+  return;
+end;
+
+global updating
+function longint EBS_StopCredMan(record CredManVc CredManr, date stop_date, var record IVVc IVp)
+begin
+  record CredManEventVc CredManEventr;
+  record RcVc RepSpec;
+  Date bldat;
+  longint res;
+  row IVVc IVrw;
+  integer i,rwc;
+  boolean foundf;
+
+  res = 0;
+
+  RepSpec.UsedOnly = 0;
+  RepSpec.Stext = "";
+  RepSpec.ObjStr = "";
+  RepSpec.sStartDate = bldat; //CurrentDate; //bldat;
+  RepSpec.sEndDate = bldat; //AddDay(AddMonth(RepSpec.sStartDate,CredManr.perLength),-1); //bldat;
+  BuildIVFromCredMan2(RepSpec,IVp,CredManEventr,CredManr,bldat,true,false,stop_date);
+
+  foundf = false;
+  rwc = MatRowCnt(IVp);
+  for(i=0;i<rwc;i=i+1)begin
+    MatRowGet(IVp,i,IVrw);
+    if nonblank(IVrw.ArtCode) then begin
+      foundf = true;
+    end;
+  end;
+  if !foundf then begin
+    RecordDelete(IVp);
+    res = 1000003;
+  end;
+
+  EBS_StopCredMan = res;
+  return;
+end;
+
+global updating
+function longint EBS_CreateCreditNoteForCredManTotInv(record IVVc IVp)
+begin
+  record CredManTypeVc CredManTyper;
+  record CredManVc CredManr;
+  record CredManSetBlock CredManSetb;
+  record IVVc creditIVVp,totIVr,oldIVr;
+  row IVVc IVrw;
+  integer i,rwc,res,err1,err2;
+  string 20 installitem, vat_code,old_vat_code;
+  val creditnotesum;
+  boolean chsum, foundf;
+  record LocalMachineBlock LMb;
+
+  if IVp.CredManCancelInv==1 or IVp.CredManTotSumInv==1 then begin //IVp.CredManBuyOutInv==1 or IVp.CredManDepositInv==1 or
+    GoTo LEBS_CreateCreditNote;
+  end;
+
+  BlockLoad(CredManSetb);
+  CredManr.SerNr = IVp.CredManNr;
+  if (ReadFirstMain(CredManr,1,true)) then begin
+    if IVp.CredManDepositInv==1 then begin
+      installitem = CredManSetb.DepositItem;
+    end else begin
+      installitem = CredManSetb.InstalmentItem;
+      CredManTyper.Code = CredManr.Type;
+      if Readfirstmain(CredManTyper,1,true) then begin
+        if nonblank(CredManTyper.InstalmentItem) then begin
+          installitem = CredManTyper.InstalmentItem;
+        end;
+      end;
+    end;
+  end;
+
+  totIVr.SerNr = CredManr.TotInvoiceNr;
+  if !ReadFirstMain(totIVr,1,true) then begin
+    LogText(0, "EBS_CreateCreditNoteForCredManTotInv ERROR :: Could not find total invoice " & CredManr.SerNr & " for Credit Agreement " & CredManr.SerNr);
+    GoTo LEBS_CreateCreditNote;
+  end;
+
+  // Find sum to credit
+  foundf = false;
+  rwc = MatRowCnt(IVp);
+  for(i=0;i<rwc;i=i+1)begin
+    MatRowGet(IVp,i,IVrw);
+    if IVrw.ArtCode == installitem and nonblank(IVrw.ArtCode) then begin
+      foundf = true;
+      creditnotesum = IVrw.Sum;
+      vat_code = IVrw.VATCode;
+      i = rwc;
+    end;
+  end;
+
+  if !foundf then begin
+    LogText(0, "EBS_CreateCreditNoteForCredManTotInv INFO :: Could not find installment item in invoice " & IVp.SerNr & " could be deposit or total sum invoie");
+    GoTo LEBS_CreateCreditNote;
+  end;
+
+  // Create credit note for total invoice
+  res = CreateCreditNoteIV(totIVr,kInvoiceTypeCredit,creditIVVp,"",false);
+  if (res!=0) then begin
+    RecordDelete(IVp);
+    GoTo LEBS_CreateCreditNote;
+    // MessageBox(res,"");
+  end;
+
+  creditIVVp.TransDate = IVp.TransDate;
+  creditIVVp.InvDate = IVp.InvDate;
+  IVVc_PasteInvDate(creditIVVp,LMb,err1,err2);
+
+  // Edit credit note sum
+  rwc = MatRowCnt(creditIVVp);
+  for(i=0;i<rwc;i=i+1)begin
+    MatRowGet(creditIVVp,i,IVrw);
+    if nonblank(IVrw.ArtCode) and IVrw.stp==kInvoiceRowTypeNormal then begin
+      if IVrw.SalesAcc != CredManr.ARAcc then begin
+        IVrw.SalesAcc = CredManr.ARAcc;
+        MatRowPut(creditIVVp,i,IVrw);
+        MatRowGet(creditIVVp,i,IVrw);
+      end;
+      if IVrw.VATCode != vat_code then begin
+        old_vat_code = IVrw.VATCode;
+        IVrw.VATCode = vat_code;
+        MatRowPut(creditIVVp,i,IVrw);
+        IVVc_PasteVATCode(creditIVVp,i,old_vat_code,chsum);
+        if (chsum) then begin
+          IVDchsum(creditIVVp,i);
+          IVSumup(creditIVVp,true);
+        end;
+        MatRowGet(creditIVVp,i,IVrw);
+      end;
+      if IVrw.Price != creditnotesum then begin
+        IVrw.Price = creditnotesum;
+        IVrw.Sum = creditnotesum;
+        MatRowPut(creditIVVp,i,IVrw);
+        IVSumup(creditIVVp,true);
+      end;
+    end;
+  end;
+
+  creditIVVp.UpdStockFlag = 0;
+  creditIVVp.CredManSourceInv = IVp.SerNr;
+  creditIVVp.SerNr = NextSerNr("IVVc",creditIVVp.TransDate,-1,false,creditIVVp.LangCode);
+  if RecordStore(creditIVVp,true) then begin
+    CreateRecordLink(creditIVVp,CurrentCompany,IVp,CurrentCompany);
+    CreateRecordLink(IVp,CurrentCompany,creditIVVp,CurrentCompany);
+    RecordCopy(oldIVr,creditIVVp);
+    creditIVVp.OKFlag = 1;
+    if RecordUpdate(oldIVr,creditIVVp,true) !=0 then begin
+      LogText(0, "EBS_CreateCreditNoteForCredManTotInv ERROR :: Could not OK invoice " & creditIVVp.SerNr & " for Credit Agreement " & CredManr.SerNr);
+    end;
+  end;
+
+LEBS_CreateCreditNote:;
+  return;
+end;
+
+global updating
+function longint EBS_CancelCredMan(record CredManVc CredManr, date stop_date, var record IVVc IVp, var record IVVc creditIVVp)
+begin
+  longint res;
+  record CredManSetBlock CredManSetr;
+  record IVVc IVr;
+  row IVVc IVrw;
+  integer i,rwc;
+  boolean wloop, testf;
+  string 255 tstr;
+  integer sernrf;
+  val rembal;
+
+  res = EBS_StopCredMan(CredManr,stop_date,IVp);
+  if res != 0 then begin
+    GoTo LEBS_CancelCredMan;
+  end;
+
+  BlockLoad(CredManSetr);
+  // IVr.CredManNr = CredManr.SerNr;
+  IVr.InvDate = CredManr.startDate;
+  wloop = true;
+  While LoopKey("InvDate",IVr,1,wloop) begin
+    if IVr.InvDate != CredManr.startDate then begin
+      wloop = false;
+    end else begin
+      testf = true;
+      if IVr.CredManNr != CredManr.SerNr then begin
+        testf = false;
+      end;
+      if IVr.OKFlag != 1 then begin
+        testf = false;
+      end;
+      if testf then begin
+        testf = false;
+        rwc = MatRowCnt(IVr);
+        for(i=0;i<rwc;i=i+1)begin
+          MatRowGet(IVr,i,IVrw);
+          if nonblank(IVrw.ArtCode) and IVrw.ArtCode == CredManr.ArtCode and IVrw.Sum == CredManr.SumWOVAT then begin
+            testf = true;
+            i = rwc;
+          end;
+        end;
+      end;
+      if testf then begin
+        wloop = false;
+        res = CreateCreditNoteIV(IVr,kInvoiceTypeCredit,creditIVVp,"",false);
+        if (res!=0) then begin
+          RecordDelete(IVp);
+          GoTo LEBS_CancelCredMan;
+          // MessageBox(res,"");
+        end;
+
+        rwc = MatRowCnt(creditIVVp);
+        for(i=0;i<rwc;i=i+1)begin
+          MatRowGet(creditIVVp,i,IVrw);
+          if nonblank(IVrw.ArtCode) and IVrw.ArtCode != CredManSetr.RemBalItem then begin
+            IVrw.ArtCode = CredManSetr.RemBalItem;
+            if (IVVc_PasteArtCode(creditIVVp,i,tstr,tstr,false,sernrf)) then begin
+            end;
+          end;
+          MatRowGet(creditIVVp,i,IVrw);
+          if nonblank(IVrw.ArtCode) then begin
+            rembal = GetCredManBalance(CredManr);
+            IVrw.SalesAcc = CredManr.ARAcc;
+            MatRowPut(creditIVVp,i,IVrw);
+            if IVrw.Price != rembal then begin
+              MatRowGet(creditIVVp,i,IVrw);
+              IVrw.Price = rembal;
+              IVrw.Sum = rembal;
+              MatRowPut(creditIVVp,i,IVrw);
+              IVSumup(creditIVVp,true);
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+LEBS_CancelCredMan:;
+  EBS_CancelCredMan = res;
+  return;
+end;

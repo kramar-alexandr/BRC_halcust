@@ -1,0 +1,34 @@
+SetLangMode(LangLithuanian,"LIT",2);
+
+// EVS: HAL-225
+window BRCFR0471EClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+
+  WindowBegin("BRC - FR0471 išmokos gyventojams",BRCFR0471EClass,CGECW,RcType);
+  SetWRect(20,80,420,250);
+  UseView(RcVc);
+  PeriodField(150,25,"Periodas");
+  EndWindow;
+
+  return;
+end;
+
+window BRCFR0471SetTClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v;
+  WindowBegin("BRC - FR0471 eksportas",BRCFR0471SetTClass,CGHbl,HBlRecType);
+  SetBlid(BRCFR0471SetBlock);
+  SetWRect(20,80,520,291);
+  Sizeable(-1,-1,0,0);
+  h = 20; v = 27;
+  MatrixBegin(h,v,-40,-10,-,299);
+  MatCol(1,29,"Kategorija",0,VECat,false,VGSClass);
+  MatCol(1,-240,"12.1",0,TwelvePointOne,false,0);
+  MatCol(1,-160,"14",0,Fourteen,false,0);
+  MatCol(1,-80,"Nuolat. gyv.",0,YesNo,false,SetSClass);
+  EndMatrix;
+  EndWindow;
+end;
+// :EVS

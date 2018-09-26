@@ -1,0 +1,78 @@
+external updating procedure UpdateCUAddr(integer,string,string,integer,Integer);
+//cust + TS 2014/11
+external procedure SendEstAddressLookup(Integer,string,string,Integer);
+
+global
+updating procedure UpdCustomerAddressCUDsm()
+BEGIN
+  record CUVc CUr;
+  integer wn;
+  string 60 regno;
+  
+  wn = CurWindow;
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,CUr);
+//cust - begin: TS 2015/03
+  if (HasLocalization("EST")==true) then begin
+    regno = CUr.RegNr1;
+    SendEstAddressLookup(wn,regno,CUr.Name,WindowState(wn));
+  end else begin
+//cust - end
+    if (nonblank(CUr.RegNr2)) then begin
+      regno = CUr.RegNr2;
+    end else begin
+      regno = CUr.RegNr1;
+    end;
+    UpdateCUAddr(wn,CUr.InvAddr4,regno,1,CUr.CustType);
+  end;
+  RETURN;
+END;
+
+global
+updating procedure UpdAddressDelAddrDsm()
+begin
+  record DelAddrVc DelAddrr;
+  integer wn;
+  
+  wn = CurWindow;
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,DelAddrr);
+//cust - begin: TS 2015/03
+  if (HasLocalization("EST")==true) then begin
+    SendEstAddressLookup(wn,"",DelAddrr.Name,WindowState(wn));
+  end else begin
+//cust - end
+    UpdateCUAddr(wn,DelAddrr.DelAddr4,"",1,0);
+  end;
+  return;
+end;
+
+global
+updating procedure LookupNewCUAddressDsm()
+begin
+  integer wn,mwn;
+  record RcVc RepSpec;
+  
+  wn = CurWindow;
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  CloseWindow(wn);
+  mwn = RepSpec.ArtMode;//MotherWindow(wn);
+//cust - begin: TS 2015/03
+  if (HasLocalization("EST")==true) then begin
+    SendEstAddressLookup(mwn,RepSpec.f2,RepSpec.f3,WindowState(mwn));
+  end else begin
+//cust - end
+    UpdateCUAddr(mwn,Repspec.f1,RepSpec.f2,1,0);
+  end;
+  return;
+end;
+
+//cust - begin: TS 2015/03
+global
+updating function Boolean NewCUHelperWClassOnOKWindow(Integer wn)
+begin
+  LookupNewCUAddressDsm;
+  RETURN;
+END;
+//cust - end

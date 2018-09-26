@@ -1,0 +1,285 @@
+external inner procedure RateField(real,real,real,string,integer,string,boolean,real,real,string,boolean);
+external inner function Boolean HasCategories();
+external inner function Boolean HasContactClassification();
+external inner function Boolean HasMultiCurrency();
+external inner function Boolean HasMainPartner();
+external inner function Boolean IsEnterprise();
+external inner function Boolean StandardHansa();
+external inner function Boolean HasInvoiceOfficialSerNr();
+external inner function Boolean HasOfficialSerNr();
+
+SetLangMode(LangLithuanian,"LIT",2);
+
+window CredManSetTClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,v,vs;
+  WindowBegin("Kredito sutarčių parametrai",CredManSetTClass,CGSbl,-);
+  SetWRect(64,80,400,350);
+  SetBlid(CredManSetBlock);
+  v = 6;
+  vs = 20; h=180; h2=300;
+  EditField(h,v,100,"Kredito sutarčių kontrolinė sąsk.",Normal,CredManAcc,false,AccSClass);
+  EditField(h,v+=vs,100,"Debitorių sąsk.",Normal,ARAcc,false,AccSClass);
+  EditField(h,v+=vs,100,"Gauto PVM sąsk.",Normal,PurchVatAcc,false,AccSClass); //EBS
+  EditField(h,v+=vs,50,"Mokėjimo diena",Normal,InvDay,false,0);
+  EditField(h,v+=vs,50,"Dalinių mokėj. apvalinimas",Normal,InstalmentRoundOff,false,0);
+  EditField(h,v+=vs,50,"Delspinigių apvalinimas",Normal,RateRoundOff,false,0);
+  EditField(h,v+=vs,50,"Deposit Round Off",Normal,DepositRoundOff,false,0);
+  EditField(h,v+=vs,100,"Sutarties tipas nenurodžius kitaip",Normal,DefaultType,false,CredManTypeSClass);
+  EditField(h,v+=vs,100,"Dalinių mokėj. prekė",Normal,InstalmentItem,false,INSClass);
+  EditField(h,v+=vs,100,"Užstato prekė",Normal,DepositItem,false,INSClass);
+  EditField(h,v+=vs,100,"Likutines vertes prekė",Normal,RemBuyItem,false,INSClass); //EBS
+  EditField(h,v+=vs,100,"Sutarties mokesčio prekė",Normal,ServFeeItem,false,INSClass); //EBS
+  EditField(h,v+=vs,100,"Balanso prekė",Normal,RemBalItem,false,INSClass); //EBS
+  EditField(h,v+=vs,100,"Palūkanų prekė",Normal,RateItem,false,INSClass);
+  EditField(h,v+=vs,100,"Fiksuota vėluojamo dalinio mokėj. prekė",Normal,LateFeeItem,false,INSClass);
+  EditField(h,v+=vs,100,"Vėluojamų palūkanų prekė",Normal,LateRateItem,false,INSClass);
+  EditField(h,v+=vs,100,"Default location",Normal,DefaultLocation,false,LocationSClass); //EBS
+  EditField(h,v+=vs,100,"Depr. account",Normal,DeprAccount,false,AccSClass); //EBS
+  EditField(h,v+=vs,100,"VAT Code",Normal,VATCode,false,VatCodeSClass); //EBS
+  EditField(h,v+=vs,100,"Faktūrų kalba",Normal,InvLang,false,LangSClass); //EBS
+  EndWindow;
+end;
+
+window CredManDClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,h3,h4,t,v,vm,vs;
+  WindowBegin("Kredito sutartys",CredManDClass,CGview,-);
+  SetWRect(20,80,900,500);
+  Sizeable(-1,-1,0,0);
+  UseView(CredManVc);
+  FormName(CredManForm);
+  h = 120; h2 = 320; h3 = 550; h4 = 670; vs = 20;
+  Tile(0,290,false,"",SerNr);
+  EditField(h,vm=(v=6), 82,"Nr.",St_i,SerNr,false,TSerSClass);
+  EditField(h,v+=vs,82,"Tipas",Normal,Type,false,CredManTypeSClass);
+  EditField(h2,v,-40,"Delspinigiai",Normal,InstalmentType,false,SetSClass);
+  EditField(h,v+=vs,82, "Klientas",Normal,CustCode,false,CUSClass);
+  EnterSkip(InvSum4);
+  EditField(h2,v,-40,"Pavadinimas",Normal,Addr0,false,0);
+  EditField(h,v+=vs,82,"Pardavėjas",Normal,SalesMan,false,UserSClass);
+  EditField(h2,v,-40,"Kont.",Normal,ClientContact,false,ContactSClass);
+  EditField(h,v+=vs,82,"Prekė",Normal,ArtCode,false,INSClass); //EBS
+  EditField(h2,v,100,"Patalpa",Normal,Location,false,LocationSClass); //EBS
+  EditField(h3,v,82,"VAT Code",Normal,VATCode,false,VatCodeSClass); //EBS
+  EditField(h,vm=(v+=vs),82,"Viso suma be PVM",Normal,SumWOVAT,true,0); //EBS
+  EditField(h,v+=vs,82,"Viso suma",Normal,InvSum4,true,0);
+  EditField(h,v+=vs,30,"Palūkanų %",Normal,IntRate,false,0);
+  EditField(h,v+=vs,30,"Mėnesiai",Normal,InstalmentMonths,false,0);
+  EditField(h,v+=vs,30,"Mok. terminai",Normal,PayDeal,false,PDSClass);
+  EditField(h,v+=vs,30,"Tot.inv. pay. terms",Normal,TotInvPayDeal,false,PDSClass); //EBS
+  EditField(h,v+=vs,30,"Likutinės vertės %",Normal,RemBuyPrc,true,0); //EBS
+  EditField(h,v+=vs,30,"Užstatas % ",Normal,DepositPrc,false,0);
+  EditField(h,v+=vs,82,"Užstato suma",Normal,DepositSum,true,0);
+  EditField(h2,v=vm,82,"Pradžios data",Normal,startDate,false,PasteCurDate);
+  EditField(h2,v+=vs,82,"Pirmoji faktūros data",Normal,FirstInvDate,false,PasteCurDate);
+  EditField(h2,v+=vs,82,"Pirmoji palūkanų data",Normal,FirstIntDate,false,PasteCurDate);
+  EditField(h2,v+=vs,82,"Pabaigos data",ViewOnly,endDate,false,PasteCurDate);
+  EditField(h2,v+=vs,82,"Sukūrimo data",ViewOnly,TransDate,false,PasteCurDate);
+  EditField(h3,v=vm,82,"Mėnesiniai įnašai",ViewOnly,MonthlySum,false,0);
+  EditField(h3,v+=vs,82,"VAT Sum",ViewOnly,VATSum,true,0); //EBS
+  EditField(h3,v+=vs,82,"VAT months",Normal,VATAddMonths,false,0); //EBS
+  ButtonFrame(h4,v=vm+20,150,2,"Skaičiavimo metodas");
+  RadioButton(h4,v,0,0,"Kaupiamas balansas",ChargeMethod);
+  RadioButton(h4,v+=16,1,0,"Mėnesinės faktūros",ChargeMethod);
+  // CheckBox(h4,v+=30,0,"Total inv. created",TotInvoicef); //EBS
+
+//  EditField(h2,v,82,"Specifiniai įnašai",Normal,Instalment,false,InstallmentSClass);
+/*
+  ButtonFrame(h3,v=vm+vs,100,2,"Interest Type");
+  RadioButton(h3,v,0,0,"Fixed",RateType);
+  RadioButton(h3,v+=16,1,0,"Floating",RateType);
+*/
+  TileButton(1,"Įvykiai");
+  TileButton(2,"Suplanuoti mokesčiai");
+  TileButton(3,"Valiuta");
+  TileButton(4,"Sąlygos");
+  Tile(1,200,true,"",CurncyCode);
+  CheckBox(40,-61,0,"Sustabdyta",StopFlag); //EBS
+  CheckBox(40,-41,0,"Patvirtinta",Approved);
+  CheckBox(40,-21,0,"OK",OKFlag);
+  CheckBox(200,-61,0,"Nutraukta",CancelFlag); //EBS
+  EditField(200,-21,50,"Valiuta",Normal,CurncyCode,false,CurncyCodeSClass);
+  EditField(-340,-41,80,"Viso delsp.",ViewOnly,TotalInterest,true,0);
+  EditField(-340,-21,80,"Viso vertė baz.val.",ViewOnly,BaseTotalSum,true,0);
+  EditField(-120,-61,80,"Likutine verte",ViewOnly,RemBuyAmt,true,0); //EBS
+  EditField(-120,-41,80,"Viso be Užstato",ViewOnly,TotalSumExclDep,true,0);
+  EditField(-120,-21,80,"Viso vertė",ViewOnly,TotalSum,true,0);
+  RecordList2(10,10,-30,-100,"CredManEventVc");
+  RlColKey(4,4,"Oper. data",TransDate,false,CredManTransDate);
+  RlColKey(100,100,"Iki datos",DueDate,false,CredManTransDate);
+  RlColKey(200,200,"Komentaras",Comment,false,CredManComment);
+//  RlColKey(-370,-370,"Sub. Type",FileName,false,FindOriginalRecord);
+//  RlColKey(-300,-300,"Sub. Record",RecordNr,false,FindOriginalRecord);
+  RlColKey(-300,-300,"Išleista",InvSum,true,CredManPaidFlag);
+  RlColKey(-200,-200,"Sumokėta",PaidSum,true,CredManPaidFlag);
+  RlColKey(-100,-100,"Balansas",CredManBal,true,CredManTransDate);
+  Tile(2,70,true,"2",Math);
+  MatrixBegin(10,v=24,-50,-20,-,99);
+  Flip(0);
+  MatCol(t=1,32,"Prekė",0,ArtCode,false,INSClass);
+  MatCol(t,100,"Kiekis",0,Quant,true,0);
+  MatCol(t,160,"Tipas",0,ChargeType,false,SetSClass);
+  MatCol(t,310,"Aprašymas",0,Comment,false,0);
+  Flip(1);
+  MatCol(t,-370,"Data",0,AddPayDate,false,PasteCurDate);
+  MatCol(t,-300,"Balansas",0,FeeBalType,false,SetSClass);
+  MatCol(t,-220,"Vnt kaina",0,Price,true,0);
+  MatCol(t,-140,"%",0,vRebate,true,0);
+  MatCol(t,-100,"Suma",0,Sum,true,0);
+  Flip(2);
+  MatCol(t,-300,"Faktūros nr.",0,InvoicedOn,false,0);
+  MatCol(t,-200,"Faktūruota suma",0,InvoicedSum,true,0);
+  MatCol(t,-100,"Suma",0,Sum,true,0);
+  EndMatrix;
+  vs = 22;
+  v = 24; VTab(-35,v,-16,v+vs,ToolFlip,1,"A");
+  v=v+ vs; VTab(-35,v,-16,v+vs,ToolFlip,2,"B");
+  InsertRowTest;
+  DeleteRowTest;
+  Tile(3,70,false,"3",FrRate);
+  vs = 20;
+  EditField(h=110,v=6,50,"Valiuta",Normal,CurncyCode,false,CurncyCodeSClass);
+  EditField(h,v+vs,50,"Baz. val. 1",Normal,BaseRate1,true,0);
+  EditField(h,v+(vs*2),50,"Baz. val. 2",Normal,BaseRate2,true,0);
+  EditField(h2=295,v,50,"Kursas",Normal,FrRate,true,0);
+  RateField(h3=360,v,50,":",Normal,"ToRateB1",true,h3+60,v+14,"Baz. val. 1",false);
+  RateField(h3,v+=vs,50,":",Normal,"ToRateB2",true,h3+60,v+14,"Baz. val. 2",false);
+  Tile(4,190,false,"4",InvoiceToCode);
+  h = 120; h2 = 360; h3 = 230; vs = 20;
+  EditField(h,v=6,100,"Faktūra kam",Normal,InvoiceToCode,false,CUSClass);
+  EditField(h2,v,-40,"Mūsų nuor.",Normal,OurContact,false,0);
+  EditField(h,v+=vs,60,"Kontrolinė sąsk.",Normal,CredManAcc,false,AccSClass);
+  EditField(h2,v,-40,"Objektai",Normal,Objects,false,ObjSClass);
+  EditField(h,v+=vs,60,"Debitoriai",Normal,ARAcc,false,AccSClass);
+  EditField(h2,v,-40,"Debit. objektai",Normal,ARAccObject,false,ObjSClass);
+  EditField(h,v+=vs,100,"Faktūra",ViewOnly,IVNr,false,0);
+  EditField(h2,v,100,"Total Invoice",Normal,TotInvoiceNr,false,IVSClass); //EBS
+  EditField(h,v+=vs,100,"Pasiūlymas",ViewOnly,QTNr,false,0);
+  EditField(h,vm=(v+=vs),40,"Kainoraštis",Normal,PriceList,false,PLDefSClass);
+  EditField(h,v+=vs,40,"Kalba",Normal,LangCode,false,LangSClass);
+  EditField(h,v+=vs,40,"Maks. vėlavimo dienų",Normal,LateFeeDays,false,0);
+//  EditField(h,v+=vs,40,"Interest Free Days",Normal,FreeDays,false,0);
+  EditField(h,v+=vs,40,"Sutarti mėnesiai",Normal,SettleLimit,false,0);
+  ButtonFrame(h2,v=vm,150,2,"Vėluotini delspinigiai skaičiuojami");
+  RadioButton(h2,v,0,0,"Nuo datos",LateRateOption);
+  RadioButton(h2,v+=16,1,0,"Operacijos datos",LateRateOption);
+  SpecialMenu("Atidaryti DK operaciją",'t',2,"OpenTRFromCredMan");
+  SpecialMenu("Atidaryti pirminį įrašą",' ',3,"OpenSubsysCredManDsm");
+  SpecialMenu("Sustabdyti kontraktą",'',1,"EBS_StopCredManDsm"); //EBS
+  SpecialMenu("Nutraukti kontraktą",'',1,"EBS_CancelCredManDsm"); //EBS
+  SpecialMenu("Išpirkti likutinę vertę",'',1,"EBS_BuyOutCredManDsm"); //EBS
+  SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);
+  SpecialMenu("Kredito sutarties inform.",'I',0,"CredManInfoDsm");
+  SpecialMenu("Sukurti faktūrą",'F',1,"InvoiceCredManDsm");
+  SpecialMenu("Sukurti įplauką",'r',1,"ReceiptCredManDsm");
+  SpecialMenu("Stock Depreciation",'',1,"EBS_CreateSDFromCredManDsm"); //EBS
+  EndWindow;
+end;
+
+window CredManTypeDClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,h3,t,v,vm,vm2,vs;
+  WindowBegin("Kredito sutarčių tipai",CredManTypeDClass,CGview,-);
+  SetWRect(20,80,640,380);
+  h = 150; h2 = 300; h3 = 440; v = 6; vs=20;
+  UseView(CredManTypeVc);
+  EditField(h,v,80,"Kodas",St_i,Code,false,0);
+  EditField(h2,v,-40,"Delspinigiai",Normal,InstalmentType,false,SetSClass);
+  EditField(h,v+=vs,-40,"Komentaras",Normal,Comment,false,0);
+  EditField(h,v+=vs,40,"Privalomi mėnesiai",Normal,InstalmentMonths,false,0);
+  EditField(h,vm=(v+=vs),40,"Mok. sąlygos",Normal,PayDeal,false,PDSClass);
+  EditField(h,v+=vs,40,"Maks. vėluotinos dienos",Normal,LateFeeDays,false,0);
+  EditField(h,v+=vs,40,"Kursas %",Normal,IntRate,false,0);
+  EditField(h,v+=vs,40,"Užstatas % ",Normal,DepositPrc,false,0);
+  EditField(h,v+=vs,40,"Likutine verte %",Normal,RemBuyPrc,false,0); //EBS
+  EditField(h,v+=vs,40,"Įmokos prekė",Normal,InstalmentItem,false,0); //EBS
+//  EditField(h,v+=vs,40,"Interest Free Days",Normal,FreeDays,false,0);
+  EditField(h,v+=vs,40,"Nemokėtini mėnesiai",Normal,SettleLimit,false,0);
+  EditField(h,vm2=(v+=vs),82,"Fiksuotas Užstatas",Normal,DepositSum,true,0);
+  ButtonFrame(h2,v=vm,150,2,"Vėluojamų delspinigių skaičiavimas");
+  RadioButton(h2,v,0,0,"Nuo datos",LateRateOption);
+  RadioButton(h2,v+=16,1,0,"Oper.datos",LateRateOption);
+  ButtonFrame(h2,v+=40,150,2,"Skaičiavimo meodas");
+  RadioButton(h2,v,0,0,"Kaupiamas balansas",ChargeMethod);
+  RadioButton(h2,v+=16,1,0,"Mėnesinės faktūros",ChargeMethod);
+/*
+  ButtonFrame(h=50,vm=(v+=45),140,2,"Default Interest Type");
+  RadioButton(h,v,0,0,"Fixed",RateType);
+  RadioButton(h,v+=16,1,0,"Floating",RateType);
+*/
+
+  MatrixBegin(20,vm=(vm2+=40),-30,-10,-,99);
+  MatCol(t=1,32,"Prekė",0,ArtCode,false,INSClass);
+  MatCol(t,100,"Kiekis",0,Quant,true,0);
+  MatCol(t,140,"Tipas",0,ChargeType,false,SetSClass);
+  MatCol(t,220,"Aprašymas",0,Comment,false,0);
+  MatCol(t,-210,"Vnt. kaina",0,Price,true,0);
+  MatCol(t,-120,"%",0,vRebate,true,0);
+  MatCol(t,-90,"Suma",0,Sum,true,0);
+  EndMatrix;
+  EndWindow;
+end;
+
+window CuPer2RClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,v,v1,vm;
+  WindowBegin("Periodinė pirkėjų būklė",CuPer2RClass,CGRcW,RcType);
+  SetWRect(20,80,450,430);
+    h = 120;
+  PeriodField(h,v=6,"Periodas");
+  EditFieldTL(h,v+=20, 150,"Pirkėjas",   M4UStr,Normal,30,f1,false,CUSClass);
+  if (HasCategories) then begin
+  EditFieldTL(h,v+=20,50, "Kategorija",   M4UStr,Normal,5,f3,false,CCatSClass);
+  end;
+  if (HasContactClassification) then begin
+    EditFieldTL(h,v+=20,150, "Klasė",   M4UStr,Normal,30,f4,false,CClassSClass);
+  end;
+  if (HasMultiCurrency) then begin
+    EditFieldTL(h,v+=20,50, "Valiuta",M4Code,Normal,5,CurncyCode,false,CurncyCodeSClass);
+  end;
+  if (HasMainPartner) then begin
+    EditFieldTL(h,v+=20,80, "Pagr. parteris",   M4UStr,Normal,20,LastAcc,false,CUSClass);
+  end;
+  if (IsEnterprise or HasLocalization("PRT")) then begin
+    EditFieldTL(h,v+=20 ,80,"Debitorių sąsk.",M4UStr,Normal,10,FirstAcc,false,AccSClass);
+  end;
+  if (IsEnterprise) then begin
+    StaticText(h+85,v+14,"Ignoruojama prad. lik. ir peržiūroje",false);
+  end;
+  h = 30;
+  if (HasMultiCurrency) then begin
+    CheckBox(h,vm=(v+=25),0,"Sumos valiuta",flags[2]);
+  end;
+  if (HasOfficialSerNr or HasInvoiceOfficialSerNr) then begin
+  CheckBox(h,v+=16,0,"Rodyti oficialų nr.",flags[15]);
+  end;
+
+  CheckBox(h,v+=16,0,"Rodyti fakt. prad. likutį",flags[10]);
+  CheckBox(h,v+=16,0,"Naujas puslapis klientui",flags[6]);
+  v1 = v;
+
+  CheckBox(h2=220,v=vm,0,"Rodyti faktūrų įrašus",flags[9]);
+  CheckBox(h2,v+=16,0,"Sumuoti įplaukas",flags[8]);
+  CheckBox(h2,v+=16,0,"Neigiamos sumos #Kredito pažymoms#",flags[7]);
+  CheckBox(h2,v+=16,0,"Do not show credit agreement data",flags[16]); //EBS
+  ButtonFrame(h,vm=(v=(v1+40)),123,2,"Funkcija");
+  RadioButton(h,v,0,0,"Peržiūra",ArtMode);
+  RadioButton(h,v+=16,1,0,"Detaliai",ArtMode);
+
+  ButtonFrame(h,v+=40,200,3,"Pirkėjai");
+  RadioButton(h,v,0,0,"Visi",flags[1]);
+  RadioButton(h,v+=16,1,0,"Su operacijomis ar likučiu",flags[1]);
+  RadioButton(h,v+=16,2,0,"Su likučiu (tik Peržiūra)",flags[1]);
+
+  ButtonFrame(h2=220,v=vm,123,2,"Rūšiavimas (Detaliai)");
+  RadioButton(h2,v,0,0,"Oper. data",flags[5]);
+  RadioButton(h2,v+=16,1,0,"Mok. data",flags[5]);
+
+  //CheckBox(h,v=v-130,0,"Include received Receipts",flags[4]);
+  EndWindow;
+end;

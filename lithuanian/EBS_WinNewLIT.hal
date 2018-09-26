@@ -1,0 +1,61 @@
+
+SetLangMode(LangLithuanian,"LIT",2);
+
+window EBS_CreateCredManInvVClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,h3,t,v,vm,vm2,vs;
+
+  WindowBegin("Sukurti menesines fakturas",EBS_CreateCredManInvVClass,CGMnt,RcType);
+    SetWRect(20,80,450,150);
+    PeriodField(h=100,v=10,"Periodas");
+    EditFieldTL(h,v+=20,100,"Kredito sutartis",M4Long,Normal,10,long1,false,CredManSClass);
+  EndWindow;
+
+  return;
+end;
+
+window EBS_CreateCredManEvtVClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v;
+
+  WindowBegin("Sukurti credit sutarčių įvykius praėjusiems periodams",EBS_CreateCredManEvtVClass,CGMnt,RcType);
+    SetWRect(20,80,450,150);
+    EditFieldTL(h=100,v=10,100,"Data",M4Date,Normal,10,d1,false,PasteCurDate);
+    EditFieldTL(h,v+=20,100,"Kontrakto nr.",M4Long,Normal,10,long1,false,CredManSClass);
+  EndWindow;
+
+  return;
+end;
+
+window IVSClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real pos;
+  Boolean acptf;
+
+  WindowBegin("Faktūros",IVSClass,CGslist,-);
+  pos = 820;
+  SetWRect(20,80,pos,298);
+  Sizeable(-1,-1,0,0);
+  SpawnClass(IVDClass);
+  UseView(IVVc);
+  RecordList(4,17,-21,-39);
+  RlColKey(4,4,"Nr.",SerNr,false,SerNr);
+  RlColKey(79,79,"OK",OKFlag,false,OKFlag);
+  RlColKey(111,111,"Fakt. data",InvDate,false,InvDate);
+  RlColKey(191,191,"Oficial. Nr.",OfficialSerNr,false,OfficialSerNr);
+  RlColKey(301,301,"Užsk. Nr.",OrderNr,false,OrderNr);
+  pos = 381;
+  RlColKey(pos,pos,"Pirkėjas",CustCode,false,CustCode); pos = pos + 60;
+  RlColKey(pos,pos,"Pavadinimas",Addr0,false,Name);
+  RlColKey(-130,-130,"Viso",Sum4,true,Sum4);
+  RlCol(-60,-60,"",CredMark,true);
+  RlCol(-40,-40,"Val.",CurncyCode,true);
+  RlCol(-1,-1,"",Invalid,true);
+  SearchField("Ieškoti");
+  EndWindow;
+
+  return;
+end;

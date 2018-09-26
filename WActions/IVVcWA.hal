@@ -1,0 +1,35 @@
+remote inner procedure IVSumup(var record IVVc,Boolean);
+
+global
+function Boolean IVDClassCalcProfitVATButtonAction(Integer wn,Integer value)
+begin
+  Boolean res;
+  record IVVc IVr;
+
+  res = true;
+  GetWindowRecord(wn,IVr);
+  if IVr.OKFlag==1 then begin
+    res=false;
+  end;
+  
+  IVDClassCalcProfitVATButtonAction = res;
+  return;
+End;
+
+global
+function Boolean IVDClassCalcProfitVATButtonAfter(Integer wn,Boolean changedf)
+begin
+  record IVVc IVr;
+  Boolean res;
+
+  res=true;
+  
+  if changedf then begin
+    GetWindowRecord(wn,IVr);
+    IVSumup(IVr,true);
+    PutWindowRecord(wn,IVr);
+  end;
+  
+  IVDClassCalcProfitVATButtonAfter = res;
+  return;
+end;

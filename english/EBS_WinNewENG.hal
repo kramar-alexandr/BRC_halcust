@@ -1,0 +1,57 @@
+
+window EBS_CreateCredManInvVClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,h3,t,v,vm,vm2,vs;
+
+  WindowBegin("Create monthly invoices",EBS_CreateCredManInvVClass,CGMnt,RcType);
+    SetWRect(20,80,450,150);
+    PeriodField(h=100,v=10,"Period");
+    EditFieldTL(h,v+=20,100,"Credit Agreement",M4Long,Normal,10,long1,false,CredManSClass);
+  EndWindow;
+
+  return;
+end;
+
+window EBS_CreateCredManEvtVClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v;
+
+  WindowBegin("Create credit agreement events",EBS_CreateCredManEvtVClass,CGMnt,RcType);
+    SetWRect(20,80,450,150);
+    EditFieldTL(h=100,v=10,100,"Date",M4Date,Normal,10,d1,false,PasteCurDate);
+    EditFieldTL(h,v+=20,100,"Contract no.",M4Long,Normal,10,long1,false,CredManSClass);
+  EndWindow;
+
+  return;
+end;
+
+window IVSClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real pos;
+  Boolean acptf;
+
+  WindowBegin("Invoices",IVSClass,CGslist,-);
+  pos = 820;
+  SetWRect(20,80,pos,298);
+  Sizeable(-1,-1,0,0);
+  SpawnClass(IVDClass);
+  UseView(IVVc);
+  RecordList(4,17,-21,-39);
+  RlColKey(4,4,"No.",SerNr,false,SerNr);
+  RlColKey(79,79,"OK",OKFlag,false,OKFlag);
+  RlColKey(111,111,"Invoice Date",InvDate,false,InvDate);
+  RlColKey(191,191,"Official No.",OfficialSerNr,false,OfficialSerNr);
+  RlColKey(301,301,"Order No.",OrderNr,false,OrderNr);
+  pos = 381;
+  RlColKey(pos,pos,"Customer",CustCode,false,CustCode); pos = pos + 60;
+  RlColKey(pos,pos,"Name",Addr0,false,Name);
+  RlColKey(-130,-130,"Total",Sum4,true,Sum4);
+  RlCol(-60,-60,"",CredMark,true);
+  RlCol(-40,-40,"Cur.",CurncyCode,true);
+  RlCol(-1,-1,"",Invalid,true);
+  SearchField("Search");
+  EndWindow;
+end;

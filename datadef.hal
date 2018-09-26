@@ -1,0 +1,440 @@
+//KB updated to ERP 8.4 2017-06-30 build 84150009 on 17.07.2017
+
+begin
+
+
+  SourceFile("halcust//Exports",3);
+  SourceFile("halcust//Imports",3);
+  SourceFile("halcust//Maint",3);
+  SourceFile("halcust//RActions",3);
+  SourceFile("halcust//Reports",3);
+  SourceFile("halcust//Tools",3);
+  SourceFile("halcust//WActions",3);
+  SourceFile("halcust//level0",0);
+
+
+  SourceFile("halcust//estonian",3);
+  SourceFile("halcust//latvian",3);
+  SourceFile("halcust//lithuanian",3);
+  SourceFile("halcust//english",3);
+  
+  SourceFile("halcust//Swedbank",3);// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:48:54
+
+  SourceFile("halcust//level0//Reports",0);
+  SourceFile("halcust//level0//WActions",0);
+  SourceFile("halcust//level0//RActions",0);
+  SourceFile("halcust//level0//Tools",0);
+  SourceFile("halcust//level0//Maint",0);
+  SourceFile("halcust//level0//Documents",0);
+  SourceFile("halcust//level0//Exports",0);
+  SourceFile("halcust//level0//Imports",0);
+
+
+  SourceFile("halcust\\rik\\amainhal", 0);
+  SourceFile("halcust\\rik\\amainhal\\RIKInfoRequestServer.hob", 0);
+  SourceFile("halcust\\rik\\estonian", 0);
+  SourceFile("halcust\\rik\\tools", 0);
+  SourceFile("halcust\\rik\\wactions", 0);
+
+  RecordAddBegin(PUVc,"BRC_Purchase2");
+  //cust start 60->200
+  ChangeField(Comment,M4Str,200,0);
+  //cust end
+  EndRecordAdd;
+
+  RecordAddBegin(CredManVc,"brc_CredManVc");
+    RecordField(Location,M4Code,10,LocationVc);
+    RecordField(ArtCode,M4Code,20,INVc);
+    RecordField(RemBuyAmt,M4Val,0,0);
+    RecordField(StopFlag,M4Mark,0,0);
+    RecordField(RemBuyPrc,M4Val,0,0);
+    RecordField(VATSum,M4Val,0,0);
+    RecordField(VATAddMonths,M4UStr,10,0);
+    RecordField(TotInvoicef,M4Int,0,0);
+    RecordField(TotInvPayDeal,M4Code,2,0);
+    RecordField(SumWOVAT,M4Val,0,0);
+    RecordField(CancelFlag,M4Mark,0,0);
+    RecordField(TotInvoiceNr,M4Long,0,0);
+    RecordField(VATCode,M4Code,10,VATCodeBlock); //EBS
+
+    ChangeMatrixField(ArtCode,M4Code,20,INVc);
+    ArrayField(AddPayDate,M4Date,0,0);
+    ArrayField(FeeBalType,M4Set,12000,0);
+  EndRecordAdd;
+
+  RecordAddBegin(CredManTypeVc,"brc_CredManTypeVc");
+    RecordField(RemBuyPrc,M41Val,0,0);
+    RecordField(InstalmentItem,M4Code,20,INVc); //EBS
+  EndRecordAdd;
+
+  BlockBegin(CredManSetBlock,-,"");
+  RecordField(InstalmentRoundOff,M4Int,0,0);
+  RecordField(RateRoundOff,M4Int,0,0);
+  RecordField(InvDay,M4Long,0,0);
+  RecordField(CredManAcc,M4Code,10,AccVc);
+  RecordField(ARAcc,M4Code,10,AccVc);
+  RecordField(DepositItem,M4Code,20,INVc);
+  RecordField(InstalmentItem,M4Code,20,INVc);
+  RecordField(RateItem,M4Code,20,INVc);
+  RecordField(LateFeeItem,M4Code,20,INVc);
+  RecordField(LateRateItem,M4Code,20,INVc);
+  RecordField(DefaultType,M4Code,20,CredManTypeVc);
+  RecordField(DepositRoundOff,M4Int,0,0);
+  RecordField(DefaultLocation,M4Code,10,LocationVc); //EBS
+  RecordField(DeprAccount,M4Code,10,AccVc); //EBS
+  RecordField(RemBuyItem,M4Code,20,INVc); //EBS
+  RecordField(VATCode,M4Code,10,VATCodeBlock); //EBS
+  RecordField(PurchVatAcc,M4Code,10,AccVc); //EBS
+  RecordField(InvLang,M4Code,10,0); //EBS
+  RecordField(ServFeeItem,M4Code,20,INVc); //EBS
+  RecordField(RemBalItem,M4Code,20,INVc); //EBS
+  EndBlock;
+
+  // RIK request start
+  BlockBegin(TXTSerBlock,TXTServType,"");
+  BlockForAllCompanies;
+  BlockInServer;
+  RecordField(dbName,M4Str,20,0);
+  RecordField(dbUser,M4Str,30,0);
+  RecordField(dbPasswd,M4Str,30,0);
+  RecordField(dbNumber,M4Int,0,0);
+  EndBlock;
+//RIK request end
+
+  // EVS: HAL-255
+  BlockBegin(BRCFR0471SetBlock,-,"");
+  RecordField(Math,M4Matrix,0,0);
+  ArrayBegin(Math,-,1);
+  ArrayField(VECat,M4Code,5,VGVc);
+  ArrayField(TwelvePointOne,M4Int,0,0);
+  ArrayField(Fourteen,M4Int,0,0);
+  ArrayField(YesNo,M4Set,800,0);
+  EndArray;
+  EndBlock;
+  // :EVS
+
+  RecordAddBegin(IVVc,"BRC_ivvc");
+  RecordField(CredManSourceInv,M4Long,0,IVVc);
+  RecordField(CredManCancelInv,M4Int,0,0);
+  RecordField(CredManBuyOutInv,M4Int,0,0);
+  RecordField(CredManDepositInv,M4Int,0,0);
+  RecordField(CredManTotSumInv,M4Int,0,0);
+  RecordField(CalcProfitVAT,M4Int,0,0); //OBS
+  RecordField(TotProfitVAT,M4Val,0,0);  //OBS
+  SubsetKeyBegin2(CredManSourceInv);
+  StoreInBaseKey;
+  AppendListFieldToKeyName(SalesGroup);
+  AppendListFieldToKeyName(SalesMan);
+  KeySegment(CredManSourceInv);
+  KeySegment(SerNr);
+  EndRecordAdd;
+  
+//OBS redef block -->
+  BlockBegin(AccBlock,-,"AccBlock2");
+  CacheBlockInClient;  
+  NewAutosyncBlock(kSyncDirectionToClient);
+  RecordField(ARAcc,M4Code,10,AccVc);
+  RecordField(RndAcc,M4Code,10,AccVc);
+  RecordField(CredAcc,M4Code,10,AccVc);
+  RecordField(ERebAcc,M4Code,10,AccVc);
+  RecordField(VATBAcc,M4Code,10,AccVc);
+  RecordField(CashAcc,M4Code,10,AccVc);
+  RecordField(VATERAcc,M4Code,10,AccVc);
+  RecordField(DoCosts,M4Int,0,0);
+  RecordField(IVRef,M4Str,5,0);
+  RecordField(IPRef,M4Str,5,0);
+  RecordField(RevInclVAT,M4Int,0,0);
+  RecordField(SLAccTest,M4Int,0,0);
+  RecordField(ExtraCostAcc,M4Code,10,AccVc);
+  RecordField(RateGainAcc,M4Code,10,AccVc);
+  RecordField(RateLossAcc,M4Code,10,AccVc);
+  RecordField(RateRndOffAcc,M4Code,10,AccVc);
+  RecordField(ARUseObj,M4Int,0,0);
+  RecordField(InvUpdStock,M4Int,0,0);
+  RecordField(CredUpdStockx,M4Int,0,0); /* Not used anymore */
+  RecordField(StockAcc,M4Code,10,AccVc);
+  RecordField(PurchAcc,M4Code,10,AccVc);
+  RecordField(StockCostAcc,M4Code,10,AccVc);
+  RecordField(DomSalesAcc,M4Code,10,AccVc);
+  RecordField(EUSalesAcc,M4Code,10,AccVc);
+  RecordField(ExpSalesAcc,M4Code,10,AccVc);
+  RecordField(OnAccAcc,M4Code,10,AccVc);
+  RecordField(VATCodeDom,M4Code,10,VATCodeBlock);
+  RecordField(VATCodeEU,M4Code,10,VATCodeBlock);
+  RecordField(VATCodeExp,M4Code,10,VATCodeBlock);
+  RecordField(StockGainAcc,M4Code,10,AccVc);
+  RecordField(VATCodeCtrl,M4Int,0,0);
+  RecordField(BasePriceInclVAT,M4Int,0,0);
+  RecordField(PUExtraAcc,M4Code,10,AccVc);
+  RecordField(PUFreightAcc,M4Code,10,AccVc);
+  RecordField(PUCustomsAcc,M4Code,10,AccVc);
+  RecordField(OnAccVATAcc,M4Code,10,AccVc); 
+  RecordField(ReturnedAcc,M4Code,10,AccVc);
+  RecordField(IPBookVAT,M4Int,0,0);
+  RecordField(DiscCashVAT,M4Int,0,0);
+  RecordField(ARonTR,M4Int,0,0);
+  RecordField(EMURndOffAcc,M4Code,10,AccVc);
+  RecordField(EMUWriteOffAcc,M4Code,10,AccVc);
+  RecordField(BaseRoundOffAcc,M4Code,10,AccVc);
+  RecordField(ProdICostAcc,M4Code,10,AccVc);
+  RecordField(ProdWCostAcc,M4Code,10,AccVc);
+  RecordField(CashBackAcc,M4Code,10,AccVc);//rename to ChangeAcc
+  RecordField(DemandPPNo,M4Int,0,0);
+  RecordField(CommisionAcc,M4Code,10,AccVc);
+  RecordField(IPCostObj,M4UStr,60,ObjVc);
+  RecordField(PUCost1,M4Code,10,AccVc);
+  RecordField(PUCost2,M4Code,10,AccVc);
+  RecordField(PUCost3,M4Code,10,AccVc);
+  RecordField(PUCost4,M4Code,10,AccVc);
+  RecordField(PUCost5,M4Code,10,AccVc);
+  RecordField(UpdBaseRate,M4Int,0,0);
+  RecordField(UpdForeginRate,M4Int,0,0);
+  RecordField(CorSalesAcc,M4Int,0,0);
+  RecordField(CredInvWithNo,M4Int,0,0);
+  RecordField(ForceUniquePP,M4Int,0,0);
+  RecordField(SalesVAT,M4Code,10,AccVc);
+  RecordField(SalesTAX,M4Code,10,AccVc);
+  RecordField(BadARAcc,M4Code,10,AccVc);
+  RecordField(CredDomSalesAcc,M4Code,10,AccVc);
+  RecordField(CredEUSalesAcc,M4Code,10,AccVc);
+  RecordField(CredExpSalesAcc,M4Code,10,AccVc);
+  RecordField(CredVATCodeDom,M4Code,10,VATCodeBlock);
+  RecordField(CredVATCodeEU,M4Code,10,VATCodeBlock);
+  RecordField(CredVATCodeExp,M4Code,10,VATCodeBlock);  
+  RecordField(CredSalesAccs,M4Int,0,0);
+  RecordField(INTransferAcc,M4Code,10,AccVc);
+  RecordField(IPTransBankRowPerCU,M4Int,0,0);
+  RecordField(BankRateGainAcc,M4Code,10,AccVc);
+  RecordField(BankRateLossAcc,M4Code,10,AccVc);
+  RecordField(PreIPVATAcc,M4Code,10,AccVc); 
+  RecordField(PreIPBookVAT,M4Int,0,0);
+  RecordField(BookCreditOnPurchAcc,M4Int,0,0);
+  RecordField(ObjectonBankAcc,M4Int,0,0);
+  RecordField(NoWarnOnDupVATnoOnCU,M4Int,0,0);
+  RecordField(NoTAXonVAT,M4Int,0,0);
+  RecordField(ChronologyforInvNo,M4Int,0,0);
+  RecordField(SkipObjectsOnIVFromHeader,M4Int,0,0);
+  RecordField(VATUseObj,M4Int,0,0);
+  RecordField(IntARAcc,M4Code,10,AccVc);
+  RecordField(IntDomSalesAcc,M4Code,10,AccVc);
+  RecordField(ItemPriceVar,M4Code,10,AccVc);
+  RecordField(Cost1PriceVar,M4Code,10,AccVc);
+  RecordField(Cost2PriceVar,M4Code,10,AccVc);
+  RecordField(Cost3PriceVar,M4Code,10,AccVc);
+  RecordField(Cost4PriceVar,M4Code,10,AccVc);
+  RecordField(Cost5PriceVar,M4Code,10,AccVc);
+  RecordField(CustomsPriceVar,M4Code,10,AccVc);
+  RecordField(FreightPriceVar,M4Code,10,AccVc);
+  RecordField(BookPriceVar,M4Int,0,0);
+  RecordField(RetPUAcc,M4Code,10,AccVc);
+  RecordField(UsePUAccInRetPU,M4Int,0,0); 
+  RecordField(BookedDiscount,M4Int,0,0);
+  RecordField(DiscountAcc,M4Code,10,AccVc);
+  RecordField(NoOverPayIV,M4Int,0,0);
+  RecordField(StockLossAcc,M4Code,10,AccVc);
+  RecordField(EUStockCostAcc,M4Code,10,AccVc); 
+  RecordField(ExpStockCostAcc,M4Code,10,AccVc); 
+  RecordField(EUPurchAcc,M4Code,10,AccVc); 
+  RecordField(ExpPurchAcc,M4Code,10,AccVc); 
+  RecordField(BookVATOnlyFromDownpayment,M4Int,0,0);
+  RecordField(BookVATonRateGain,M4Int,0,0);
+  RecordField(NoAutAutoTransOnCredIV,M4Int,0,0);
+  RecordField(SetDisputedFlagsOnCredIV,M4Int,0,0);
+  RecordField(PrintNegAmountsCredNote,M4Int,0,0);
+  RecordField(DueDateBasedOnServDelDate,M4Int,0,0);
+  RecordField(NoPasteVATToIP,M4Int,0,0);
+  RecordField(DiscardedAccount,M4Code,10,AccVc);
+  RecordField(BookRateGainPerIPRow,M4Int,0,0);
+  RecordField(RndLossAcc,M4Code,10,AccVc);
+  RecordField(WriteOffLossAcc,M4Code,10,AccVc);
+  RecordField(ConsigStockAcc,M4Code,10,AccVc);
+  RecordField(ConsigPurchAcc,M4Code,10,AccVc);
+  RecordField(TotalwoTAX,M4Int,0,0);
+  RecordField(QualityControl,M4Int,0,0);
+  RecordField(SRVarAcc,M4Code,10,AccVc);
+  RecordField(BBVarAcc,M4Code,10,AccVc);
+  RecordField(InPriceVarAcc,M4Code,10,AccVc);
+  RecordField(Tax1TmpAcc,M4Code,10,AccVc);
+  RecordField(AllowItemWOCommodity,M4Int,0,0);
+  RecordField(ConnectCreditNotetoVI,M4Int,0,0);
+  RecordField(PostIVVATonVATCorr,M4Int,0,0);
+  RecordField(RetPUVar,M4Code,10,AccVc);
+  RecordField(DisassembleProdVar,M4Code,10,AccVc);
+  RecordField(DropShipCOSAccrualAcc,M4Code,10,AccVc);
+  RecordField(DropSHVar,M4Code,10,AccVc);
+  RecordField(CashSalesToFiscalControlUnit,M4Int,0,0);
+  RecordField(PostWriteOffVAT,M4Int,0,0);
+  RecordField(TaxTemplateCode,M4Code,10,TaxTemplateVc);
+  RecordField(TaxTemplateCodeEU,M4Code,10,TaxTemplateVc);
+  RecordField(TaxTemplateCodeExp,M4Code,10,TaxTemplateVc);
+  RecordField(ForexTRAcc,M4Code,10,AccVc);
+  RecordField(DisallowNegativeTotalsonSales,M4Int,0,0);
+  RecordField(DonotFPPrintRowsNegativeSum,M4Int,0,0);
+  RecordField(CalculatePerceptionTaxes,M4Int,0,0);
+  RecordField(DisallowNegativeRowSumsonSales,M4Int,0,0);
+  RecordField(EUERebAcc,M4Code,10,AccVc);
+  RecordField(ExpERebAcc,M4Code,10,AccVc);
+  RecordField(IPbeforeIVDate,M4Int,0,0);
+  RecordField(COSAccrualAcc,M4Code,10,AccVc);
+  RecordField(CheckDosageKey,M4Int,0,0);
+  RecordField(ProjMaterialsUsageAcc,M4Code,10,AccVc);
+  RecordField(BookExtraCostPerRow,M4Int,0,0);
+  RecordField(ExportFlagfromDelAddr,M4Int,0,0);
+  RecordField(RequireCreditNoteReason,M4Int,0,0);
+  RecordField(CreditIVTotNotExceedInvCheck,M4Int,0,0);
+  RecordField(ProfitVATCode,M4Code,10,VATCodeBlock); //OBS
+  EndBlock;
+//<---  
+
+	BlockBegin(BankImportSetBlock,-,"");// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:43:26
+		RecordField(ImpPaym,M4Int,0,0);
+		RecordField(ImpPaymOrd,M4Int,0,0);
+		RecordField(ImpCharges,M4Int,0,0);
+	EndBlock;
+	
+	RecordBegin(SwedbankImportVc,-,"");// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:43:18
+		RecordField(NtryRef,M4Code,50,0);
+		RecordField(OwnID,M4Code,50,0);
+		RecordField(BankID,M4Code,50,0);
+		RecordField(BookgDt,M4Date,0,0);
+		RecordField(CdtDbtInd,M4Code,10,0);
+		RecordField(AmtCcy,M45Val,0,0);
+		RecordField(RvslInd,M4Int,0,0);
+		RecordField(CurncyCode,M4Code,20,0);
+		RecordField(IBAN,M4Code,50,0);
+		RecordField(Ustrd,M4Str,250,0);
+		RecordField(IPNr,M4Long,0,0);
+		RecordField(RecName,M4Str,255,0);
+		RecordField(OPNr,M4Long,0,0);
+		RecordField(OrgId,M4Code,50,0);
+		RecordField(PrvtId,M4Code,50,0);
+		RecordField(PayType,M4Str,50,0);
+		
+		MainKeyBegin(NtryRef,0);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(BookgDt);
+  	KeySegment(BookgDt);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(CdtDbtInd);
+  	KeySegment(CdtDbtInd);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+	EndRecord;
+	
+	RecordBegin(SEBbankImportVc,-,"");// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:43:15
+		RecordField(NtryRef,M4Code,50,0);
+		RecordField(OwnID,M4Code,50,0);
+		RecordField(BankID,M4Code,50,0);
+		RecordField(BookgDt,M4Date,0,0);
+		RecordField(CdtDbtInd,M4Code,10,0);
+		RecordField(AmtCcy,M45Val,0,0);
+		RecordField(RvslInd,M4Int,0,0);
+		RecordField(CurncyCode,M4Code,20,0);
+		RecordField(IBAN,M4Code,50,0);
+		RecordField(Ustrd,M4Str,250,0);
+		RecordField(IPNr,M4Long,0,0);
+		RecordField(RecName,M4Str,255,0);
+		RecordField(OPNr,M4Long,0,0);
+		RecordField(OrgId,M4Code,50,0);
+		RecordField(PrvtId,M4Code,50,0);
+		RecordField(PayType,M4Str,50,0);
+		
+		MainKeyBegin(NtryRef,0);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(BookgDt);
+  	KeySegment(BookgDt);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(CdtDbtInd);
+  	KeySegment(CdtDbtInd);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+	EndRecord;
+	
+	RecordBegin(LuminorImportVc,-,"");// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:43:12
+		RecordField(NtryRef,M4Code,50,0);
+		RecordField(OwnID,M4Code,50,0);
+		RecordField(BankID,M4Code,50,0);
+		RecordField(BookgDt,M4Date,0,0);
+		RecordField(CdtDbtInd,M4Code,10,0);
+		RecordField(AmtCcy,M45Val,0,0);
+		RecordField(RvslInd,M4Int,0,0);
+		RecordField(CurncyCode,M4Code,20,0);
+		RecordField(IBAN,M4Code,50,0);
+		RecordField(Ustrd,M4Str,250,0);
+		RecordField(IPNr,M4Long,0,0);
+		RecordField(RecName,M4Str,255,0);
+		RecordField(OPNr,M4Long,0,0);
+		RecordField(OrgId,M4Code,50,0);
+		RecordField(PrvtId,M4Code,50,0);
+		RecordField(PayType,M4Str,50,0);
+		
+		MainKeyBegin(NtryRef,0);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(BookgDt);
+  	KeySegment(BookgDt);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(CdtDbtInd);
+  	KeySegment(CdtDbtInd);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+	EndRecord;
+	
+	RecordBegin(SiauliuImportVc,-,"");// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:43:12
+		RecordField(NtryRef,M4Code,50,0);
+		RecordField(OwnID,M4Code,50,0);
+		RecordField(BankID,M4Code,50,0);
+		RecordField(BookgDt,M4Date,0,0);
+		RecordField(CdtDbtInd,M4Code,10,0);
+		RecordField(AmtCcy,M45Val,0,0);
+		RecordField(RvslInd,M4Int,0,0);
+		RecordField(CurncyCode,M4Code,20,0);
+		RecordField(IBAN,M4Code,50,0);
+		RecordField(Ustrd,M4Str,250,0);
+		RecordField(IPNr,M4Long,0,0);
+		RecordField(RecName,M4Str,255,0);
+		RecordField(OPNr,M4Long,0,0);
+		RecordField(OrgId,M4Code,50,0);
+		RecordField(PrvtId,M4Code,50,0);
+		RecordField(PayType,M4Str,50,0);
+		
+		MainKeyBegin(NtryRef,0);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(BookgDt);
+  	KeySegment(BookgDt);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+  	
+  	KeyBegin(CdtDbtInd);
+  	KeySegment(CdtDbtInd);
+  	KeySegment(NtryRef);
+  	KeySegment(BankID);
+  	KeySegment(OwnID);
+	EndRecord;
+
+  return;
+end;

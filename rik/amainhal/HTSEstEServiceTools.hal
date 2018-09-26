@@ -1,0 +1,198 @@
+external procedure ReadTXServiceReply(var record TXServiceReplyVc,var Area,Boolean);
+external procedure SendEstEInvoiceIdleTaskRemoveIdleTask(boolean);
+external procedure ReceiveEstEInvoiceIdleTaskRemoveIdleTask(boolean);
+external procedure InitSysRunEstIdleTasksRemote(record EInvQueryIntrvlBlock);
+
+function boolean CheckIfAllCompaniesHasServiceDisabled(LongInt rtype,var boolean noservice2)
+begin
+  boolean res;
+  Integer oldcomp;
+  record EInvoiceBlock EIb;
+  record CompaniesBlock Compb;
+  row CompaniesBlock Comprw;
+  Integer i,rwcnt;
+
+  res = true; noservice2 = true;
+  oldcomp = CurrentCompany;  
+  BlockLoad(Compb);
+  rwcnt = MatRowCnt(Compb);    
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(Compb,i,Comprw);
+    if (blank(Comprw.TCPIP) and (StringToInt(Comprw.CompCode) != oldcomp)) then begin
+      if (SetCompanyCode(Comprw.CompCode,false)) then begin
+        BlockLoad(EIb);
+        switch (rtype) begin
+          case 0:
+            if (EIb.OutEstEInvoices == 1) then begin
+              res = false;
+            end;
+            if (EIb.InEstEInvoices == 1) then begin
+              noservice2 = false;
+            end;
+          case 1:
+            if (EIb.InEstEInvoices == 1) then begin
+              res = false;
+              i = rwcnt;            
+            end;
+            if (EIb.OutEstEInvoices == 1) then begin
+              noservice2 = false;
+            end;
+        end;
+      end;
+    end;
+  end;
+  ResetCompany(oldcomp);
+  CheckIfAllCompaniesHasServiceDisabled = res;
+  return;
+end;
+
+global
+updating procedure DoStopSendingEstERecords(record EInvoiceBlock EIb,LongInt rerror,string errordesc,LongInt rtype)
+BEGIN
+  boolean res,noservice2;
+  
+  res = CheckIfAllCompaniesHasServiceDisabled(rtype,noservice2);
+
+  EIb.ServiceMessage = "";
+  switch (rtype) begin
+    case 0:
+      EIb.StopEInvoices = 1;
+      EIb.OutEInvoices = 0;
+      EIb.DefaultEBehave = 0;
+//default identification for local EST transactions
+      EIb.OutEstEInvoices = 0;
+      if (res) then begin
+        SendEstEInvoiceIdleTaskRemoveIdleTask(noservice2);
+      end;
+    case 1:
+      EIb.RcvEInvoices = 0;
+      EIb.InEstEInvoices = 0;
+      if (res) then begin
+        ReceiveEstEInvoiceIdleTaskRemoveIdleTask(noservice2);
+      end;
+    case 2:
+      EIb.ArgSelfBilling = 0;
+    case 3:
+      EIb.DomesticInvoiceinBase1 = 0;
+  end;
+  if (rerror>0) then begin
+    EIb.ServiceMessage = USetStr(rerror);
+  end;
+  if (nonblank(errordesc)) then begin
+    EIb.ServiceMessage = EIb.ServiceMessage & errordesc;
+  end;
+  BlockStore(EIb);
+  RETURN;
+END;
+
+updating procedure StopSendingEstERecords(LongInt rerror,string errordesc,LongInt rtype)
+begin
+  record EInvoiceBlock EIb;
+
+  BlockLoad(EIb);
+  DoStopSendingEstERecords(EIb,rerror,errordesc,rtype);
+  return;
+end;
+
+updating procedure ActivateSendingEstERecords(LongInt rerror,string errordesc,Integer rtype)
+BEGIN
+  record EInvoiceBlock EIb;
+  record EInvQueryIntrvlBlock ESb;
+
+  BlockLoad(EIb);
+  EIb.ServiceMessage = "";
+  switch (rtype) begin
+    case 0:
+      EIb.StopEInvoices = 0;
+      EIb.DefaultEBehave = 3;
+      EIb.OutEInvoices = 1;
+      EIb.AttachPDFtoElectronicInvoice = 1;
+//default identification for local EST transactions
+      EIb.OutEstEInvoices = 1;
+    case 1:
+      EIb.RcvEInvoices = 1;
+      EIb.InEstEInvoices = 1;
+    case 2:
+      EIb.ArgSelfBilling = 1;
+    case 3:
+      EIb.DomesticInvoiceinBase1 = 1;
+  end;
+  if (rerror>0) then begin
+    EIb.ServiceMessage = USetStr(rerror);
+  end;
+  if (nonblank(errordesc)) then begin
+    EIb.ServiceMessage = EIb.ServiceMessage & errordesc;
+  end;
+  BlockStore(EIb);
+  BlockLoad(ESb);
+  InitSysRunEstIdleTasksRemote(ESb);
+  RETURN;
+END;
+
+updating procedure SendErrorToSystem(LongInt rerror)
+BEGIN
+  record EInvoiceBlock EIb;
+
+  BlockLoad(EIb);
+  EIb.StopReason = "";
+  if (rerror>0) then begin
+    EIb.StopReason = USetStr(rerror);
+    BlockStore(EIb);
+  end;
+  RETURN;
+END;
+
+global
+updating procedure HTSRegForEstEInvoiceReply(Area a_reply,Area replyheader,Boolean timedout)
+begin
+  record ServiceCacheVc SCr;
+  record EInvoiceBlock EIb;
+  record TXServiceReplyVc TXSrvReplyr;
+  record TXTSerBlock Serbl;
+  string 255 rerrordesc,service;
+  LongInt rerror,rtype,TXSerNr;
+  Integer rw;
+
+  if ((timedout) or (GetAreaLength(a_reply)<=0)) then begin
+    LogText(20235,"HTSRegForEstEInvoiceReply");
+    SendErrorToSystem(33505);
+  end else begin
+    ReadTXServiceReply(TXSrvReplyr,a_reply,true);
+    TXSerNr = TXSrvReplyr.SerNr;
+    if (TXSerNr < 0) then begin
+      goto LHTSRegForEstEInvoiceReply;
+    end;
+    rerror = TXSrvReplyr.ErrorCode;
+    rerrordesc = TXSrvReplyr.ErrorDescription;
+    rtype = TXSrvReplyr.HTSCUServiceErrorCode;
+    if (rerror<0) then begin
+      StopSendingEstERecords(rerror,rerrordesc,rtype);
+      goto LHTSRegForEstEInvoiceReply;
+    end;
+    ActivateSendingEstERecords(rerror,rerrordesc,rtype);
+    rw = 0;
+    service = GetTabTextFromArea(rw,0,a_reply);
+    while (nonblank(service)) begin
+      SCr.Code = service;
+      SCr.ServiceHost = GetTabTextFromArea(rw,1,a_reply);
+      SCr.ServicePort = GetTabTextFromArea(rw,2,a_reply);
+      SCr.FuncName = GetTabTextFromArea(rw,3,a_reply);
+      SCr.Partner = GetTabTextFromArea(rw,4,a_reply);
+      if (RecordStore(SCr,true)) then begin end;
+      if (SCr.Partner == "ESTADRLOOKUP") then begin
+        BlockLoad(Serbl);
+        Serbl.dbName = SCr.Partner;
+        Serbl.dbUser = GetTabTextFromArea(rw,5,a_reply);
+        Serbl.dbPasswd = GetTabTextFromArea(rw,6,a_reply);
+        if (Serbl.dbNumber <= 0) then begin
+          Serbl.dbNumber = 100;
+        end;
+        BlockStore(Serbl);
+      end;
+      rw = rw + 1;
+      service = GetTabTextFromArea(rw,0,a_reply);    
+    end;
+  end;
+LHTSRegForEstEInvoiceReply:;
+  return;
+end;

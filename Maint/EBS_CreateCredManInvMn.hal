@@ -1,0 +1,63 @@
+external inner updating function Integer RecordAction_raCredManToIV(var record IVVc,var record CredManEventVc,LongInt);
+
+global
+function boolean EBS_CreateCredManInvVClassOnOKWindow(integer wn)
+begin
+  record RcVc RepSpec;
+  boolean res;
+
+  res = true;
+  GetWindowRecord(wn,RepSpec);
+
+LEBS_CreateCredManInvVClassOnOKWindow:;
+  EBS_CreateCredManInvVClassOnOKWindow = res;
+  return;
+end;
+
+global updating
+procedure EBS_CreateCredManInvMn(Record RcVc RepSpec)
+Begin
+  record CredManVc CredManr;
+  record IVVc IVr;
+  record CredManEventVc CredManEventr;
+  boolean wloop, testf;
+
+  // if GetDay(RepSpec.sStartDate)!=1 then begin
+  //   GoTo LEBS_CreateCredManInvMn;
+  // end;
+  //
+  // if GetDay(RepSpec.sStartDate) != DaysInMonth(GetYear(RepSpec.sEndDate), GetMonth(RepSpec.sEndDate)) then begin
+  //   GoTo LEBS_CreateCredManInvMn;
+  // end;
+  //
+  // if GetMonth(RepSpec.sStartDate) != GetMonth(RepSpec.sEndDate) then begin
+  //   GoTo LEBS_CreateCredManInvMn;
+  // end;
+
+  CredManr.SerNr = RepSpec.long1;
+  wloop = true;
+  While LoopMain(CredManr,1,true) begin
+    if RepSpec.long1 != -1 and CredManr.SerNr != RepSpec.long1 then begin
+      wloop = false;
+    end else begin
+      testf = true;
+      if CredManr.OKFlag == 0 then begin
+        testf = false;
+      end;
+      if CredManr.StopFlag == 1 then begin
+        testf = false;
+      end;
+      if CredManr.CancelFlag == 1 then begin
+        testf = false;
+      end;
+      if testf then begin
+        Recordnew(IVr);
+        Recordnew(CredManEventr);
+        RecordAction_raCredManToIV(IVr,CredManEventr,CredManr.SerNr);
+      end;
+    end;
+  end;
+
+LEBS_CreateCredManInvMn:;
+return;
+end;

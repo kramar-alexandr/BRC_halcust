@@ -1,0 +1,22 @@
+/* setest.hal */
+
+#ifdef HAL
+
+event startup
+begin
+
+  SetLangMode(LangEstonian,"EST",0);
+
+//Bk HAL start
+  SetBegin(11667);
+  SetText(0,"vali teenus");
+  SetText(1,"HansaWorld");
+  SetText(2,"Arvete saatmine (Omniva)");
+  SetText(3,"Hankija arvete vastuvõtmine (Omniva)");
+  SetText(4,"Äriregistri päring");
+  EndSet;
+//Bk HAL end
+  
+end;
+
+#endif

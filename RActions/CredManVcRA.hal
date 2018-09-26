@@ -1,0 +1,47 @@
+external updating procedure CreateTotalSumInvoice(var record CredManVc);
+
+global
+function LongInt CredManVcRecordDefaults(var record CredManVc CredManr,record CredManVc CredMan2r,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+  record CredManSetBlock CredManSetr;
+
+  res = inner.CredManVcRecordDefaults(CredManr,CredMan2r,stat,long4);
+
+  BlockLoad(CredManSetr);
+  CredManr.Location = CredManSetr.DefaultLocation;
+  CredManr.ARAcc = ""; //EBS changed where this field comes from
+  CredManr.ChargeMethod=1;
+  CredManr.VATCode = CredManSetr.VATCode;
+
+  CredManVcRecordDefaults = res;
+  return;
+end;
+
+global
+updating function LongInt CredManVcRecordSave(var record CredManVc CredManr,record CredManVc CredMan2r,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+
+  res = inner.CredManVcRecordSave(CredManr,CredMan2r,stat,long4);
+  if (CredManr.OKFlag==1) and CredManr.TotInvoiceNr==-1 then begin
+    CreateTotalSumInvoice(CredManr);
+  end;
+
+  CredManVcRecordSave = res;
+  return;
+END;
+
+global
+updating function LongInt CredManVcRecordUpdate(var record CredManVc CredManr,record CredManVc CredMan2r,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+
+  res = inner.CredManVcRecordUpdate(CredManr,CredMan2r,stat,long4);
+  if ((CredManr.OKFlag==1) and (CredMan2r.OKFlag==0)) and CredManr.TotInvoiceNr==-1 then begin
+    CreateTotalSumInvoice(CredManr);
+  end;
+
+  CredManVcRecordUpdate = res;
+  return;
+END;
