@@ -162,7 +162,6 @@ begin
 				end;
 				SBIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 				SBIr.CurncyCode = CurCode;
-				logtext(0,"TryToSabe SBIr " & SBIr.OwnID & " - " & SBIr.BankID & " - " & SBIr.NtryRef);
 				recordstore(SBIr,true);
 			end;
 		end;
@@ -245,7 +244,6 @@ begin
 				end;
 				LRIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 				LRIr.CurncyCode = CurCode;
-				logtext(0,"TryToSabe LRIr " & LRIr.OwnID & " - " & LRIr.BankID & " - " & LRIr.NtryRef);
 				recordstore(LRIr,true);
 			end;
 		end;
@@ -382,7 +380,7 @@ begin
 			instr = BPI_ParseInvStr(SWIr.Ustrd);
 
 			BankFillIProws(IPr,k,SWIr.RecName,SWIr.CurncyCode,remsum,cucode,cufnd,instr);
-			
+			IPr.PayMode = BISb.DefPayModeSW;
 			if(recordstore(IPr,true))begin
 				SWIr.IPNr = IPr.SerNr;
 			end;
@@ -415,7 +413,6 @@ begin
 			ExtractObjWithSeparator("-",SWIr.NtryRef,true,pos,tstr);
 			if(stringtoint(tstr)>1)then begin
 			
-				logtext(0,"Charges " & SWIr.NtryRef);
 				oldSWIr.NtryRef = tstr0 & "-1";
 				oldSWIr.OwnID = SWIr.OwnID;
 				oldSWIr.BankID = SWIr.BankID;
@@ -535,7 +532,7 @@ begin
 			instr = BPI_ParseInvStr(SBIr.Ustrd);
 
 			BankFillIProws(IPr,k,SBIr.RecName,SBIr.CurncyCode,remsum,cucode,cufnd,instr);
-			
+			IPr.PayMode = BISb.DefPayModeSEB;
 			if(recordstore(IPr,true))begin
 				SBIr.IPNr = IPr.SerNr;
 			end;
@@ -568,7 +565,6 @@ begin
 			ExtractObjWithSeparator("-",SBIr.NtryRef,true,pos,tstr);
 			if(stringtoint(tstr)>1)then begin
 			
-				logtext(0,"Charges " & SBIr.NtryRef);
 				oldSBIr.NtryRef = tstr0 & "-1";
 				oldSBIr.OwnID = SBIr.OwnID;
 				oldSBIr.BankID = SBIr.BankID;
@@ -689,7 +685,7 @@ begin
 			instr = BPI_ParseInvStr(LRIr.Ustrd);
 
 			BankFillIProws(IPr,k,LRIr.RecName,LRIr.CurncyCode,remsum,cucode,cufnd,instr);
-			
+			IPr.PayMode = BISb.DefPayModeLUM;
 			if(recordstore(IPr,true))begin
 				LRIr.IPNr = IPr.SerNr;
 			end;
@@ -722,7 +718,6 @@ begin
 			ExtractObjWithSeparator("-",LRIr.NtryRef,true,pos,tstr);
 			if(stringtoint(tstr)>1)then begin
 			
-				logtext(0,"Charges " & LRIr.NtryRef);
 				oldLRIr.NtryRef = tstr0 & "-1";
 				oldLRIr.OwnID = LRIr.OwnID;
 				oldLRIr.BankID = LRIr.BankID;
@@ -842,7 +837,7 @@ begin
 			instr = BPI_ParseInvStr(SUIr.Ustrd);
 
 			BankFillIProws(IPr,k,SUIr.RecName,SUIr.CurncyCode,remsum,cucode,cufnd,instr);
-			
+			IPr.PayMode = BISb.DefPayModeSIA;
 			if(recordstore(IPr,true))begin
 				SUIr.IPNr = IPr.SerNr;
 			end;
@@ -875,7 +870,6 @@ begin
 			ExtractObjWithSeparator("-",SUIr.NtryRef,true,pos,tstr);
 			if(stringtoint(tstr)>1)then begin
 			
-				logtext(0,"Charges " & SUIr.NtryRef);
 				oldSUIr.NtryRef = tstr0 & "-1";
 				oldSUIr.OwnID = SUIr.OwnID;
 				oldSUIr.BankID = SUIr.BankID;

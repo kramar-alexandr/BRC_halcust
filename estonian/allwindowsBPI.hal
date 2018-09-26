@@ -11,7 +11,11 @@ begin
   StaticText(h,v+=vs,"Import: SwedBank Bank To Customer Statement",false);
   StaticText(h,v+=vs,"File format: XML",false);
   StaticText(h,v+=vs,"Based on: Bank To Customer Statement V02 camt.053.001.02",false);
-
+	v = v + vs;
+	EditField(h=100,v+=vs,50,"Swedbank Payment mode",ViewOnly,DefPayModeSW,false,PMSClass);
+	EditField(h=100,v+=vs,50,"SEB Bank Payment mode",ViewOnly,DefPayModeSEB,false,PMSClass);
+	EditField(h=100,v+=vs,50,"Luminor bank Payment mode",ViewOnly,DefPayModeLUM,false,PMSClass);
+	EditField(h=100,v+=vs,50,"Siauliu Bank Payment mode",ViewOnly,DefPayModeSIA,false,PMSClass);
   EndWindow;
   return;
 end;
@@ -307,6 +311,12 @@ begin
   	CheckBox(h,v+=20,0,"Import payments",ImpPaym);
   	CheckBox(h,v+=20,0,"Import payment orders",ImpPaymOrd);
   	CheckBox(h,v+=20,0,"Import charges",ImpCharges);
-  EndWindow;
+  	v = v + vs;
+  	h=h+150;
+		EditField(h,v+=vs,50,"Swedbank Mok. bðdas",Normal,DefPayModeSW,false,PMSClass);
+		EditField(h,v+=vs,50,"SEB Bank Mok. bðdas",Normal,DefPayModeSEB,false,PMSClass);
+		EditField(h,v+=vs,50,"Luminor bank Mok. bðdas",Normal,DefPayModeLUM,false,PMSClass);
+		EditField(h,v+=vs,50,"Siauliu Bank Mok. bðdas",Normal,DefPayModeSIA,false,PMSClass); 
+		EndWindow;
 
 end;

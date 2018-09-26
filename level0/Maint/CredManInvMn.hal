@@ -82,6 +82,7 @@ begin
   LongInt i,rwcnt;
   Integer res;
   Boolean foundissuedint;
+  date prev_td;
 
   res = 0;
   foundissuedint = false;
@@ -89,16 +90,28 @@ begin
   // rwcnt = MatRowCnt(CredManPayPlanr);
   // for (i=0;i<rwcnt;i=i+1) begin
   //   MatRowGet(CredManPayPlanr,i,CredManPayPlanrw);
-  //   LogText(0,"CredManPayPlan td=" & CredManPayPlanrw.TransDate & " type=" & CredManPayPlanrw.PlanType & " sum=" & ValToString(CredManPayPlanrw.Sum,M4Rate,"",".",0) & " bal=" & CredManPayPlanrw.Bal & " accint=" & CredManPayPlanrw.AcumulatedInt & " todat=" & todat);
+  //   LogText(0,">>>> CredManPayPlan td=" & CredManPayPlanrw.TransDate & " type=" & CredManPayPlanrw.PlanType & " sum=" & ValToString(CredManPayPlanrw.Sum,M4Rate,"",".",0) & " bal=" & CredManPayPlanrw.Bal & " accint=" & CredManPayPlanrw.AcumulatedInt & " todat=" & todat);
   // end;
-
+    
   rwcnt = MatRowCnt(CredManPayPlanr);
   for (i=0;i<rwcnt;i=i+1) begin
     MatRowGet(CredManPayPlanr,i,CredManPayPlanrw);
+    
+    // This block is for the last invoice, because without this it will not be generated
+    if i!=0 then begin
+        if prev_td > CredManPayPlanrw.TransDate then begin
+            if (foundissuedint) then begin
+              firstdat = AddDay(prev_td,-1);
+              res = 1;
+            end;
+            goto LFindNextToInvoice;
+        end;
+    end;
+    prev_td = CredManPayPlanrw.TransDate;
+    
     if (CredManPayPlanrw.TransDate>todat) then begin
       goto LFindNextToInvoice;
     end else begin
-    	logtext(0,CredManPayPlanrw.PlanType);
       switch (CredManPayPlanrw.PlanType) begin
         case 1: foundissuedint = true;
         case 9: foundissuedint = false;
@@ -157,10 +170,9 @@ begin
   AddInvCommentLines(CredManr,IVp,newcomment);
   BlockLoad(CredManSetb);
   RecordNew(CredManPayPlanr);
-  LogText(0,"156" & " makedepinvf=" & makedepinvf & " todat=" & todat & " firstdat=" & firstdat);
   BuildCredManPayPlan(CredManr,CredManPayPlanr,CredManSetb,true,false);
   makedepinvf = FindNextToInvoice(CredManPayPlanr,todat,firstdat);
-  LogText(0,"156" & " makedepinvf=" & makedepinvf & " todat=" & todat & " firstdat=" & firstdat);
+  // LogText(0,">>>>>>>> firstdat=" & firstdat & " makedepinvf=" & makedepinvf);
   // StopAlert("156" & " makedepinvf=" & makedepinvf & " todat=" & todat & " firstdat=" & firstdat);
   if (makedepinvf==0) then begin
     if (maintf==false) then begin
@@ -250,7 +262,7 @@ begin
   rwcnt = MatRowCnt(CredManPayPlanr);
   for (i=0;i<rwcnt;i=i+1) begin
     MatRowGet(CredManPayPlanr,i,CredManPayPlanrw);
-    // LogText(0,"CredManPayPlanrw.TransDate=" & CredManPayPlanrw.TransDate & " sdp=" & sdp & " edp=" & edp & " stop_d=" & stop_date & " art=" & CredManPayPlanrw.ArtCode & " coef=" & coef);
+    // LogText(0,">>>> CredManPayPlanrw.TransDate=" & CredManPayPlanrw.TransDate & " sdp=" & sdp & " edp=" & edp & " stop_d=" & stop_date & " art=" & CredManPayPlanrw.ArtCode & " coef=" & coef & " CredManPayPlanrw.PlanType=" & CredManPayPlanrw.PlanType);
     if (CredManPayPlanrw.TransDate>todat or (CredManPayPlanrw.PlanType==0 and res==true)) then begin
       goto LBuildIVFromCredMan;
     end;

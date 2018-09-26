@@ -307,6 +307,12 @@ begin
   	CheckBox(h,v+=20,0,"Import payments",ImpPaym);
   	CheckBox(h,v+=20,0,"Import payment orders",ImpPaymOrd);
   	CheckBox(h,v+=20,0,"Import charges",ImpCharges);
+  	v = v + vs;
+  	h=h+150;
+		EditField(h,v+=vs,50,"Swedbank Payment mode",Normal,DefPayModeSW,false,PMSClass);
+		EditField(h,v+=vs,50,"SEB Bank Payment mode",Normal,DefPayModeSEB,false,PMSClass);
+		EditField(h,v+=vs,50,"Luminor bank Payment mode",Normal,DefPayModeLUM,false,PMSClass);
+		EditField(h,v+=vs,50,"Siauliu Bank Payment mode",Normal,DefPayModeSIA,false,PMSClass); 
   EndWindow;
 
 end;

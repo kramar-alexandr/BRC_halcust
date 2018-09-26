@@ -590,12 +590,12 @@ begin
       calcbal = totsum;
       instal = Round(totsum / months,SetRoundModeD(CredManSetb.InstalmentRoundOff));
   end;
-	logtext(0,"months " & months);
+
   for(i=0;i<=months;i=i+1) begin
     CalcCredManCurrentPeriod(CredManr,i-1,frdat,todat,invdat); //sets dates, frdat, todat and invdat
     therate = GetCredManRate(CredManr.RateType,CredManr.Type,CredManr.IntRate,invdat); //RateType always 0, so therate == CredManr.IntRate
     rate = therate / twelve / hundred;
-    // LogText(0,"frdat=" & frdat & " todat=" & todat & " invdat=" & invdat & " i=" & i);
+    // LogText(0,">>>> frdat=" & frdat & " todat=" & todat & " invdat=" & invdat & " i=" & i);
     if (i==0) then begin
       if (withactuals) then begin
         if (AddActualsForToday(CredManr,CredManSetb,CredManr.startDate,thedat,CredManPayPlanr,calcbal,acumint,realinstpaid,realintpaid,mfee,extrainttopay,printf)==false) then begin
@@ -615,7 +615,7 @@ begin
     end else begin
       // monthtot = (calcbal) * rate;
       interest = (bal_for_interest) * rate;
-      // LogText(0,"interest = " & interest & " calcbal=" & calcbal & " rate=" & rate & " bal_for_interest=" & bal_for_interest);
+      // LogText(0,">>>> interest = " & interest & " calcbal=" & calcbal & " rate=" & rate & " bal_for_interest=" & bal_for_interest);
       AddCalculatedInterest(CredManr,CredManSetb,invdat,CredManPayPlanr,interest,calcbal,acumint,printf);
       AddIssuedInterest(CredManr,CredManSetb,invdat,CredManPayPlanr,extrainttopay,calcbal,acumint,printf);
       if (invdat>lastactual) then begin
@@ -627,9 +627,15 @@ begin
       end;
 
       monthtot = FIN_PPMT(rate, CredManr.InstalmentMonths, (CredManr.InvSum4 - CredManr.VATSum - CredManr.RemBuyAmt - CredManr.DepositSum), i);
-      // LogText(0,"paymentnr=" & paymentnr & " monthtot=" & monthtot & " thedat=" & thedat);
+      // LogText(0,">>>> paymentnr=" & paymentnr & " monthtot=" & monthtot & " thedat=" & thedat);
       monthtot = Round(monthtot, SetRoundModeD(2));
-      monthtot = monthtot + mfee;
+      if (i)==CredManr.InstalmentMonths then begin
+        // bal_for_interest will have actual credit agreement remaining amount
+        // it could be different from normal monthly amount
+        monthtot = bal_for_interest;
+      end;
+      
+      monthtot = monthtot + mfee; //this does not seem very correct as monthly fee should not reduce balance on which interest is calculated
       // interest = acumint + extrainttopay;
       instalment = monthtot;
 
@@ -639,11 +645,11 @@ begin
       bal_for_interest = bal_for_interest - instalment;
 
       //Add all remaining balance in the last month installment
-      if (i)==CredManr.InstalmentMonths then begin
-        instalment = calcbal - CredManr.RemBuyAmt;
-      end;
+      // if (i)==CredManr.InstalmentMonths then begin
+      //  instalment = calcbal - CredManr.RemBuyAmt;
+      // end;
     end;
-    // LogText(0,"i=" & i & " instalment=" & instalment & " interest=" & interest & " invdat=" & invdat & " lastactual=" & lastactual & " monthtot=" & monthtot & " suggestedonsameday=" & suggestedonsameday);
+    // LogText(0,">>>> i=" & i & " instalment=" & instalment & " interest=" & interest & " invdat=" & invdat & " lastactual=" & lastactual & " monthtot=" & monthtot & " suggestedonsameday=" & suggestedonsameday);
     if ((invdat>lastactual and monthtot>0) or (invdat==lastactual and monthtot>0 and suggestedonsameday)) then begin
       AddSuggestedInstalment(CredManr,CredManSetb,invdat,CredManPayPlanr,instalment,calcbal,acumint,printf);
       AddSuggestedInterest(CredManr,CredManSetb,invdat,CredManPayPlanr,interest,calcbal,acumint,printf);
