@@ -204,8 +204,13 @@ begin
 	LongInt error;
 	record BaseCurBlock BCb;
 	vector boolean invused;
+	boolean primsearch;
+	record BankImportSetBlock BISb;
 	
 	blockload(BCb);
+	blockload(BISb);
+	
+	logtext(0,cucode);
 	
 	if(blank(CurncyCode))then begin
 		CurncyCode = BCb.BaseCur1;
@@ -219,7 +224,15 @@ begin
 									
 			if(TrHs)then begin
 				if(remsum>0)then begin
-					if(setinset(ARr.InvoiceNr,instr))then begin
+					
+					primsearch = false;
+					if(BISb.DefSearchInv==0)then begin
+						primsearch = setinset(ARr.InvoiceNr,instr);
+					end else begin
+						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
+					end;
+					
+					if(primsearch)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
 						matrowput(IPr,k,IPrw);
@@ -260,7 +273,25 @@ begin
 						end;
 						k=k+1;
 					end;
-					if(setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr))then begin
+				end;
+			end;
+		end;
+		resetloop(ARr);
+		
+		ARr.CustCode = cucode;
+		TrHs = true;
+		while(loopkey("CustCode",ARr,1,TrHs))begin
+			if(ARr.CustCode!=cucode)then begin TrHs = false; end;
+			if(TrHs)then begin
+				if(remsum>0)then begin
+					primsearch = false;
+					if(BISb.DefSearchInv==1)then begin
+						primsearch = setinset(ARr.InvoiceNr,instr);
+					end else begin
+						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
+					end;
+					
+					if(primsearch)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
 						matrowput(IPr,k,IPrw);
@@ -364,7 +395,14 @@ begin
 		while(loopkey("CustCode",ARr,1,TrHs))begin												
 			if(TrHs)then begin
 				if(remsum>0)then begin
-					if(setinset(ARr.InvoiceNr,instr))then begin
+					primsearch = false;
+					if(BISb.DefSearchInv==0)then begin
+						primsearch = setinset(ARr.InvoiceNr,instr);
+					end else begin
+						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
+					end;
+				
+					if(primsearch)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
 						matrowput(IPr,k,IPrw);
@@ -404,7 +442,23 @@ begin
 						end;
 						k=k+1;	
 					end;
-					if(setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr))then begin
+				end;
+			end;
+		end;
+		resetloop(ARr);
+		
+		TrHs = true;
+		ARr.CustCode = "";
+		while(loopkey("CustCode",ARr,1,TrHs))begin												
+			if(TrHs)then begin
+				if(remsum>0)then begin
+					primsearch = false;
+					if(BISb.DefSearchInv==1)then begin
+						primsearch = setinset(ARr.InvoiceNr,instr);
+					end else begin
+						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
+					end;
+					if(primsearch)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
 						matrowput(IPr,k,IPrw);

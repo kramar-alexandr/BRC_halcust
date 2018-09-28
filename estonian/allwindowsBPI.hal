@@ -317,6 +317,11 @@ begin
 		EditField(h,v+=vs,50,"SEB Bank Mok. bðdas",Normal,DefPayModeSEB,false,PMSClass);
 		EditField(h,v+=vs,50,"Luminor bank Mok. bðdas",Normal,DefPayModeLUM,false,PMSClass);
 		EditField(h,v+=vs,50,"Siauliu Bank Mok. bðdas",Normal,DefPayModeSIA,false,PMSClass); 
+		
+		ButtonFrame(h,v=vm+20,150,2,"Pirminis faktðr÷ paieäkos bðdas");
+		RadioButton(h,v,0,0,"Faktðros numeris",DefSearchInv);
+		RadioButton(h,v+=16,1,0,"Oficialus serijinis numeris",DefSearchInv);
+		
 		EndWindow;
 
 end;
