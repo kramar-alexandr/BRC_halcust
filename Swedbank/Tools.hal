@@ -27,6 +27,31 @@ begin
 return;
 end;
 
+global function string 255 BPI_ParseInvStrDelLetters(string Ustrd)
+begin
+	integer i;
+	string 255 instr,c;
+	
+	For(i=0;i<len(Ustrd);i=i+1) begin
+		c = mid(Ustrd,i,1);
+		if(c>="0" and c<="9")then begin
+			instr = instr & c;
+		end;
+	end;
+	if(len(instr)>1)then begin
+		For(i=0;i<len(instr)-1;i=i+1) begin
+			c = mid(instr,i,2);
+			if(c==",,")then begin
+				instr = left(instr,i) & right(instr,len(instr)-i-1);
+				i=i-1;
+			end;
+		end;
+	end;
+	
+	BPI_ParseInvStrDelLetters = instr;
+return;
+end;
+
 global function string 255 BPI_ParseInvStrDelMinus(string Ustrd)
 begin
 	integer i;
@@ -86,7 +111,7 @@ begin
 		instr = left(instr,len(instr)-1);
 	end;
 	
-	instr = instr & "," & BPI_ParseInvStrDelMinus(instr);
+	instr = instr & "," & BPI_ParseInvStrDelMinus(instr) & "," & BPI_ParseInvStrDelLetters(Ustrd);
 		
 	BPI_ParseInvStr = instr;
 return;
