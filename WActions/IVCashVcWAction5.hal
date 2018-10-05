@@ -1,0 +1,18 @@
+remote updating procedure CashupMn(record RcVc);
+
+global
+updating procedure IVCashDClassTouchScreenCloseSession()
+begin
+	record RcVc RepSpec;
+	
+	inner.IVCashDClassTouchScreenCloseSession
+	recordnew(RepSpec);
+	ReportDefaults(RepSpec,"CashupVClass");
+	RepSpec.flags[1] = 0;
+	RepSpec.flags[2] = 1;
+	RepSpec.flags[3] = 0;
+	RepSpec.flags[8] = 0;
+	CashupMn(RepSpec);
+	
+  return;
+end;

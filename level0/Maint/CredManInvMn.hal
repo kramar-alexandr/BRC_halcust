@@ -1,3 +1,4 @@
+//<halrule>server-only</halrule>
 external procedure AddWithholdingTaxesRows_IVVc(var record IVVc);
 external procedure AddPerceptionTaxesRows_IVVc(var record IVVc);
 external function roundmode SetRoundModeD(Integer);
@@ -736,4 +737,18 @@ begin
     end;
   end;
   return;
+end;
+
+global updating procedure CashupMn(record RcVc RepSpec)
+begin
+	logtext(0,"CashupMn");
+	logtext(0,RepSpec.d1);
+	logtext(0,RepSpec.sStartTime);
+	logtext(0,RepSpec.f1);
+	logtext(0,RepSpec.f4);
+	logtext(0,RepSpec.flags[1]);
+	logtext(0,RepSpec.flags[2]);
+	logtext(0,RepSpec.flags[3]);
+	logtext(0,RepSpec.flags[8]);
+return;
 end;
