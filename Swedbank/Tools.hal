@@ -234,9 +234,7 @@ begin
 	
 	blockload(BCb);
 	blockload(BISb);
-	
-	logtext(0,cucode);
-	
+		
 	if(blank(CurncyCode))then begin
 		CurncyCode = BCb.BaseCur1;
 	end;
