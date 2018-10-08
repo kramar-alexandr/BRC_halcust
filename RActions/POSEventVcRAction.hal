@@ -1,0 +1,62 @@
+//<halrule>server-only</halrule>
+external inner updating procedure CashupMn(record RcVc);
+
+global
+updating function LongInt POSEventVcRecordSaveAfter(var record POSEventVc POSEr,record POSEventVc POSE2r,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+	record RcVc RepSpec;
+	record CashierDefBlock CBb;
+	
+	blockload(CBb);
+	
+	recordnew(RepSpec);
+	ReportDefaults(RepSpec,"CashupVClass");
+	RepSpec.flags[1] = 0;
+	RepSpec.flags[2] = 1;
+	RepSpec.flags[3] = 0;
+	RepSpec.flags[8] = 0;
+	RepSpec.f1 = POSEr.MachineName;
+	RepSpec.f4 = POSEr.Drawer;
+	RepSpec.d1 = POSEr.TransDate;
+	RepSpec.sStartTime = POSEr.TransTime;
+  res = inner.POSEventVcRecordSaveAfter(POSEr,POSE2r,stat,long4);
+	
+	if(CBb.AutoCashUp==1)then begin
+		if(POSEr.Event==2)then begin
+			CashupMn(RepSpec);
+		end;
+  end;
+  
+  POSEventVcRecordSaveAfter = res;
+  return;
+end;
+
+global
+updating function LongInt POSEventVcRecordUpdateAfter(var record POSEventVc POSEr,record POSEventVc POSE2r,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+  record RcVc RepSpec;
+  record CashierDefBlock CBb;
+	
+	blockload(CBb);
+  ReportDefaults(RepSpec,"CashupVClass");
+	RepSpec.flags[1] = 0;
+	RepSpec.flags[2] = 1;
+	RepSpec.flags[3] = 0;
+	RepSpec.flags[8] = 0;
+	RepSpec.f1 = POSEr.MachineName;
+	RepSpec.f4 = POSEr.Drawer;
+	RepSpec.d1 = POSEr.TransDate;
+  RepSpec.sStartTime = POSEr.TransTime;
+  res = inner.POSEventVcRecordUpdateAfter(POSEr,POSE2r,stat,long4);
+  
+  if(CBb.AutoCashUp==1)then begin
+		if(POSEr.Event==2 and POSEr.Event!=2)then begin
+			CashupMn(RepSpec);
+		end;
+  end;
+  
+  POSEventVcRecordUpdateAfter = res;
+  return;
+end;
