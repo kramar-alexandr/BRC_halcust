@@ -213,12 +213,21 @@ begin
 			resetloop(CUr);
 		end;
 	end;
+	
+	/*if(cufnd==false)then begin
+		RecordClear(Letr);
+		AddToText(cuname,Letr);
+
+		CUr.Name = "";
+	
+	end;*/
+	
 return;
 end;
 
 
 
-global procedure BankFillIProws(var record IPVc IPr,var integer k,string RecName,var string CurncyCode,var val remsum,string cucode,boolean cufnd,string instr)
+global procedure BankFillIProws(var record IPVc IPr,var integer k,string RecName,var string CurncyCode,var val remsum,string cucode,boolean cufnd,string instr,string origcomm)
 begin
 	row IPVc IPrw;
 	boolean installmentf;
@@ -231,6 +240,7 @@ begin
 	vector boolean invused;
 	boolean primsearch;
 	record BankImportSetBlock BISb;
+	record LetVc Letr;
 	
 	blockload(BCb);
 	blockload(BISb);
@@ -254,6 +264,17 @@ begin
 					end else begin
 						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
 					end;
+					if(primsearch==false)then begin
+						RecordClear(Letr);
+						AddToText(origcomm,Letr);
+
+						if(BISb.DefSearchInv==1)then begin
+							primsearch = StringInText(ARr.InvoiceNr,Letr);
+						end else begin
+							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
+						end;
+					end;
+					
 					
 					if(primsearch)then begin
 						clearrow(IPr,IPrw,1);
@@ -312,6 +333,16 @@ begin
 						primsearch = setinset(ARr.InvoiceNr,instr);
 					end else begin
 						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
+					end;
+					if(primsearch==false)then begin
+						RecordClear(Letr);
+						AddToText(origcomm,Letr);
+
+						if(BISb.DefSearchInv==1)then begin
+							primsearch = StringInText(ARr.InvoiceNr,Letr);
+						end else begin
+							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
+						end;
 					end;
 					
 					if(primsearch)then begin
@@ -424,7 +455,16 @@ begin
 					end else begin
 						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
 					end;
-				
+					if(primsearch==false)then begin
+						RecordClear(Letr);
+						AddToText(origcomm,Letr);
+
+						if(BISb.DefSearchInv==1)then begin
+							primsearch = StringInText(ARr.InvoiceNr,Letr);
+						end else begin
+							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
+						end;
+					end;
 					if(primsearch)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
@@ -480,6 +520,16 @@ begin
 						primsearch = setinset(ARr.InvoiceNr,instr);
 					end else begin
 						primsearch = setinset(ARr.OfficialSerNr,instr) and nonblank(ARr.OfficialSerNr);
+					end;
+					if(primsearch==false)then begin
+						RecordClear(Letr);
+						AddToText(origcomm,Letr);
+
+						if(BISb.DefSearchInv==1)then begin
+							primsearch = StringInText(ARr.InvoiceNr,Letr);
+						end else begin
+							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
+						end;
 					end;
 					if(primsearch)then begin
 						clearrow(IPr,IPrw,1);
