@@ -1,3 +1,4 @@
+//<halrule>server-only</halrule>
 external inner function Boolean IPVc_PasteCustCode(var record IPVc,Integer,var LongInt);
 external inner procedure ExtractObj(string,var Integer,var string);
 external inner function Boolean PasteInvIn2IPr(var record IPVc,Integer,Date,var val,Boolean,var Boolean);
