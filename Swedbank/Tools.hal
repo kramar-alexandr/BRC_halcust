@@ -241,6 +241,7 @@ begin
 	boolean primsearch;
 	record BankImportSetBlock BISb;
 	record LetVc Letr;
+	string 50 keyname;
 	
 	blockload(BCb);
 	blockload(BISb);
@@ -391,10 +392,19 @@ begin
 		end;
 		resetloop(ARr);
 		
-		if(remsum>0)then begin
-			ARr.CustCode = cucode;
+		if(remsum>0)then begin// Edit ************************** BPI Ukraine - KramarAlexandr - Tuesday, 9 October 2018 11:45:58
+			
 			TrHs = true;
-			while(loopkey("CustCode",ARr,1,TrHs))begin
+			if(BISb.InvFIFO==0)then begin
+				ARr.CustCode = cucode;
+				keyname = "CustInv";
+			end;
+			if(BISb.InvFIFO==1)then begin
+				ARr.CustCode = cucode;
+				keyname = "CustDue";
+			end;
+			
+			while(loopkey(keyname,ARr,1,TrHs))begin
 				testf = true;
 				if(ARr.CustCode!=cucode)then begin TrHs = false; testf = false; end;
 				if(invused[ARr.InvoiceNr]==true)then begin testf = false; end;

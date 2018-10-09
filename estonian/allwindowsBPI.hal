@@ -304,7 +304,7 @@ begin
   v = 6; vs = 20; h = 90;
 
   WindowBegin("Amoralle - Banking Statement Import settings",BankImportSetTClass,CGSbl,-);
-  SetWRect(20,80,400,480);
+  SetWRect(20,80,450,480);
   SetBlid(BankImportSetBlock);
   Sizeable(-1,-1,0,0);
   	h = 50;
@@ -322,6 +322,10 @@ begin
 		RadioButton(h,v,0,0,"Faktðros numeris",DefSearchInv);
 		RadioButton(h,v+=16,1,0,"Oficialus serijinis numeris",DefSearchInv);
 		
+		v=v+20;
+		ButtonFrame(h,v=v+20,210,2,"Importas vykdomas sujungiant");
+		RadioButton(h,v,0,0,"Seniausias faktðras (FIFO metodas)",InvFIFO);
+		RadioButton(h,v+=16,1,0,"Seniausias apmok˜jimo iki datas",InvFIFO);
 		EndWindow;
 
 end;

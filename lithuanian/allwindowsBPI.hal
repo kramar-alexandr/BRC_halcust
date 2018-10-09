@@ -300,7 +300,7 @@ begin
   v = 6; vs = 20; h = 90;
 
   WindowBegin("Amoralle - Banking Statement Import settings",BankImportSetTClass,CGSbl,-);
-  SetWRect(20,80,400,480);
+  SetWRect(20,80,450,480);
   SetBlid(BankImportSetBlock);
   Sizeable(-1,-1,0,0);
   	h = 50;
@@ -313,6 +313,14 @@ begin
 		EditField(h,v+=vs,50,"SEB Bank Payment mode",Normal,DefPayModeSEB,false,PMSClass);
 		EditField(h,v+=vs,50,"Luminor bank Payment mode",Normal,DefPayModeLUM,false,PMSClass);
 		EditField(h,v+=vs,50,"Siauliu Bank Payment mode",Normal,DefPayModeSIA,false,PMSClass); 
+		
+		ButtonFrame(h,v=vm+20,150,2,"Primary invoice search method");
+		RadioButton(h,v,0,0,"Invoice no.",DefSearchInv);
+		RadioButton(h,v+=16,1,0,"Offcial ser. No",DefSearchInv);
+		v=v+20;
+		ButtonFrame(h,v=v+20,210,2,"Import is done by connecting");
+		RadioButton(h,v,0,0,"The oldest invoices (FIFO method)",InvFIFO);
+		RadioButton(h,v+=16,1,0,"The oldest due dates",InvFIFO);
   EndWindow;
 
 end;
