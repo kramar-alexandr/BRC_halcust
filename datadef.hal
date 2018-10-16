@@ -296,6 +296,10 @@ begin
 		RecordField(DefPayModeSIA,M4Code,5,0);
 		RecordField(DefSearchInv,M4Int,0,0);
 		RecordField(InvFIFO,M4Int,0,0);
+		RecordField(DefVEPayModeSW,M4Code,5,0);
+		RecordField(DefVEPayModeSEB,M4Code,5,0);
+		RecordField(DefVEPayModeLUM,M4Code,5,0);
+		RecordField(DefVEPayModeSIA,M4Code,5,0);
 	EndBlock;
 	
 	RecordBegin(SwedbankImportVc,-,"");// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:43:18

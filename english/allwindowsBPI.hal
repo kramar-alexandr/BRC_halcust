@@ -314,6 +314,13 @@ begin
 		EditField(h,v+=vs,50,"Luminor bank Payment mode",Normal,DefPayModeLUM,false,PMSClass);
 		EditField(h,v+=vs,50,"Siauliu Bank Payment mode",Normal,DefPayModeSIA,false,PMSClass);  
 		
+		v=v-vs*4;
+	  StaticText(h+80,v+vs-5,"Purchase PM",false);
+		EditField(h+80,v+=vs,50,"",Normal,DefVEPayModeSW,false,PMSClass);
+		EditField(h+80,v+=vs,50,"",Normal,DefVEPayModeSEB,false,PMSClass);
+		EditField(h+80,v+=vs,50,"",Normal,DefVEPayModeLUM,false,PMSClass);
+		EditField(h+80,v+=vs,50,"",Normal,DefVEPayModeSIA,false,PMSClass); 
+		
 		ButtonFrame(h,v=vm+20,150,2,"Primary invoice search method");
 		RadioButton(h,v,0,0,"Invoice no.",DefSearchInv);
 		RadioButton(h,v+=16,1,0,"Offcial ser. No",DefSearchInv);
