@@ -1,3 +1,5 @@
+SetLangMode(LangLithuanian,"LIT",2);
+
 window SwedBankImportSTIClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:53
   wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
@@ -299,7 +301,7 @@ begin
   real h,v,vm,vs;
   v = 6; vs = 20; h = 90;
 
-  WindowBegin("Amoralle - Banking Statement Import settings",BankImportSetTClass,CGSbl,-);
+  WindowBegin("BRC - Banking Statement Import settings",BankImportSetTClass,CGSbl,-);
   SetWRect(20,80,450,480);
   SetBlid(BankImportSetBlock);
   Sizeable(-1,-1,0,0);

@@ -1,3 +1,5 @@
+SetLangMode(LangEstonian,"EST",0);
+
 window SwedBankImportSTIClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:53
   wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin

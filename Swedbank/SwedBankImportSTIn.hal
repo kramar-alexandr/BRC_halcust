@@ -791,7 +791,7 @@ begin
 	
 	
 	while (TestEOF==false) begin
-    tstr = ImportField;
+   // tstr = ImportField;
     if (NextImportLine(true)) then begin
     end;
   end;
@@ -876,7 +876,7 @@ begin
 	
 	
 	while (TestEOF==false) begin
-    tstr = ImportField;
+    //tstr = ImportField;
     if (NextImportLine(true)) then begin
     end;
   end;
@@ -959,7 +959,7 @@ begin
 	end; 
 	
 	while (TestEOF==false) begin
-    tstr = ImportField;
+    //tstr = ImportField;
     if (NextImportLine(true)) then begin
     end;
   end;
@@ -1043,7 +1043,7 @@ begin
 	
 	
 	while (TestEOF==false) begin
-    tstr = ImportField;
+    //tstr = ImportField;
     if (NextImportLine(true)) then begin
     end;
   end;
