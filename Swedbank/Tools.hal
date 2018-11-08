@@ -9,6 +9,7 @@ external inner function Boolean PasteInvIn2OPr(var record OPVc,Integer,Date,Inte
 external inner procedure OPVc_PasteBankCurncy(var record OPVc,Integer);
 external inner procedure OPVc_PasteRecVal(var record OPVc,Integer);
 external inner procedure OPVc_PasteVECode(var record OPVc,Integer);
+external updating procedure AsyncSwedBankImportSTIn(area);
 
 global function string 255 ConvertNameToSet(string name)
 begin
@@ -827,6 +828,38 @@ begin
 			OPVc_PasteRecVal(OPr,k);
 		end;
 	end;
+	
+return;
+end;
+
+
+
+global updating procedure SwedBankImportSTIn()
+begin
+	area axml;
+	xml xdata;
+	string 255 xkey,crncy,tstr,OwnID,BankID,NtryRef,AmtCcy,CurCode,CdtDbtInd,bookdate,impfilename;
+	record SwedbankImportVc SWIr;
+	longint cntchld,i,dcf;
+	date ndat;
+	area afile;
+	
+	logtext(0,"SwedBankImportSTIn " & GetImportFileName);
+	
+	//xdata = ParseXMLFile(GetImportFileName);
+	addfiletoarea(GetImportFileName,afile,0);
+	
+	
+	
+	while (TestEOF==false) begin
+   // tstr = ImportField;
+    if (NextImportLine(true)) then begin
+    end;
+  end;
+  
+  queued.AsyncSwedBankImportSTIn(afile);
+	
+	//DelAllDsm;
 	
 return;
 end;
