@@ -64,9 +64,7 @@ begin
   EditField(h=100,v+=vs,150,"Ammount",ViewOnly,AmtCcy,false,0);
   EditField(h=100,v+=vs,150,"Curncy",ViewOnly,CurncyCode,false,0); 
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
-  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0); 
-  
-  SearchField("Search");
+  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);   
   EndWindow;
   
 end; 
@@ -137,9 +135,7 @@ begin
   EditField(h=100,v+=vs,150,"Ammount",ViewOnly,AmtCcy,false,0);
   EditField(h=100,v+=vs,150,"Curncy",ViewOnly,CurncyCode,false,0); 
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
-  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);
-  
-  SearchField("Search");
+  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);  
   EndWindow;
 end;  
   
@@ -210,9 +206,7 @@ begin
   EditField(h=100,v+=vs,150,"Ammount",ViewOnly,AmtCcy,false,0);
   EditField(h=100,v+=vs,150,"Curncy",ViewOnly,CurncyCode,false,0); 
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
-  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);
-  
-  SearchField("Search");
+  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);  
   EndWindow;
   
 end;  
@@ -285,9 +279,7 @@ begin
   EditField(h=100,v+=vs,150,"Ammount",ViewOnly,AmtCcy,false,0);
   EditField(h=100,v+=vs,150,"Curncy",ViewOnly,CurncyCode,false,0); 
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
-  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);
-  
-  SearchField("Search");
+  EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);  
   EndWindow;
   
 end;  
