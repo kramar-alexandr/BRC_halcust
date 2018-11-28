@@ -33,3 +33,10 @@ begin
   IVDClassCalcProfitVATButtonAfter = res;
   return;
 end;
+
+
+
+global function integer EmailValidationStatusWithStdID()
+begin		
+	EmailValidationStatusWithStdID = 2;
+end;
