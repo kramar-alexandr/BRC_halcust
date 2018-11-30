@@ -17,148 +17,6 @@ external inner procedure ExtractObjWithSeparator(string,string,Boolean,var Integ
 
 
 global
-updating function LongInt SwedbankImportSave(var record SwedbankImportVc SWIr)
-begin
-	LongInt res;
-	record IPVc IPr;
-	row IPVc IPrw;
-	record OPVc OPr;
-	row OPVc OPrw,oldOPrw;
-	record CUVc CUr;
-	boolean TrHs,testf,cufnd,installmentf;
-	LongInt error;
-	string 255 cucode,instr,ostr,warning,tstr,tstr0;
-	record LetVc Letr;// Edit ************************** Tuesday, 12 July 2016 15:52:10
-	integer i,pos,k;
-	string 1 c;
-	longint sernr;
-	val remsum;
-	record ARVc ARr;
-	record APVc APr;
-	val chk;
-	record BankImportSetBlock BISb;
-	record SwedbankImportVc oldSWIr;
-	record RLinkVc RLr;
-  Integer notenr;
-	
-	if(SWIr.OPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(SWIr,notenr,OPr,RLr)==false)then begin
-			SWIr.OPNr = -1;
-		end;
-	end;
-	if(SWIr.IPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(SWIr,notenr,IPr,RLr)==false)then begin
-			SWIr.IPNr = -1;
-		end;
-	end;
-	
-	blockload(BISb);
-	
-	remsum = SWIr.AmtCcy;
-	
-	if(SWIr.IPNr<0)then begin
-		if(SWIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
-			recordnew(IPr);
-			IPr.Comment = "SWEDBANK: " & SWIr.Ustrd;
-			IPr.TransDate = SWIr.BookgDt;	 
-			IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
-			CUr.Code = "";
-			FindCustomerByIBAN(SWIr.IBAN,SWIr.OrgId,cucode,cufnd,SWIr.RecName);
-			instr = BPI_ParseInvStr(SWIr.Ustrd);
-
-			BankFillIProws(IPr,k,SWIr.RecName,SWIr.CurncyCode,remsum,cucode,cufnd,instr,SWIr.Ustrd);
-			IPr.PayMode = BISb.DefPayModeSW;
-			if(recordstore(IPr,true))begin
-			end;
-			SWIr.IPNr = IPr.SerNr;
-		end;
-	end;
-	if(SWIr.OPNr<0)then begin
-		if(SWIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(SWIr.PayType))then begin
-			
-			recordnew(OPr);
-			OPr.BankName = "SWEDBANK: " & SWIr.Ustrd;
-		
-			OPr.TransDate = SWIr.BookgDt;	 
-			OPr.PayDate = SWIr.BookgDt;	 
-			OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
-		
-			CUr.Code = "";
-			FindCustomerByIBAN(SWIr.IBAN,SWIr.OrgId,cucode,cufnd,SWIr.RecName);
-			instr = BPI_ParseInvStr(SWIr.Ustrd);
-		
-			BankFillOProws(OPr,k,SWIr.RecName,SWIr.CurncyCode,remsum,cucode,cufnd,instr,SWIr.Ustrd);
-			OPr.PayMode = BISb.DefVEPayModeSW;
-			if(recordstore(OPr,true))begin
-			end;
-			SWIr.OPNr = OPr.SerNr;
-		end else begin
-			if(SWIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(SWIr.PayType))then begin
-				pos = 0;
-				tstr = "";
-				tstr0 = "";
-				ExtractObjWithSeparator("-",SWIr.NtryRef,true,pos,tstr0);
-				ExtractObjWithSeparator("-",SWIr.NtryRef,true,pos,tstr);
-				if(stringtoint(tstr)>1)then begin
-			
-					oldSWIr.NtryRef = tstr0 & "-1";
-					oldSWIr.OwnID = SWIr.OwnID;
-					oldSWIr.BankID = SWIr.BankID;
-					if(readfirstmain(oldSWIr,3,true))then begin
-						OPr.SerNr = oldSWIr.OPNr;
-						if(readfirstmain(OPr,1,true))then begin
-							if(OPr.DoneFlag==0)then begin
-							
-								k = matrowcnt(OPr);
-								if(k>0)then begin
-									matrowget(OPr,0,oldOPrw);
-								end;
-								clearrow(OPr,OPrw,7);
-								OPrw.VISerNr = oldOPrw.VISerNr;
-								OPrw.Comment = SWIr.RecName;
-								OPrw.RecCurncy = SWIr.CurncyCode;
-								OPrw.BankCurncy = SWIr.CurncyCode;
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteBankCurncy(OPr,k);
-								matrowget(OPr,k,OPrw);
-								OPrw.BankVal = remsum;
-								OPrw.RecVal = remsum;							
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteRecVal(OPr,k);
-							
-								k=k+1;
-								if(recordstore(OPr,true))begin
-								end;
-								SWIr.OPNr = OPr.SerNr;
-							end;
-						end;
-					end;
-				end else begin
-					OPr.BankName = "SWEDBANK: " & SWIr.Ustrd;
-		
-					OPr.TransDate = SWIr.BookgDt;	 
-					OPr.PayDate = SWIr.BookgDt;	 
-					OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
-		
-					CUr.Code = "";
-					FindCustomerByIBAN(SWIr.IBAN,SWIr.OrgId,cucode,cufnd,SWIr.RecName);
-					instr = BPI_ParseInvStr(SWIr.Ustrd);
-					BankFillOProws(OPr,k,SWIr.RecName,SWIr.CurncyCode,remsum,cucode,cufnd,instr,SWIr.Ustrd);
-					OPr.PayMode = BISb.DefVEPayModeSW;
-					if(recordstore(OPr,true))begin
-					end;
-					SWIr.OPNr = OPr.SerNr;
-				end;
-			end;
-		end;
-	end;
-	SwedbankImportSave = res;
-return;
-end;
-
-global
 updating function LongInt SwedbankImportSaveAfter(var record SwedbankImportVc SWIr)
 begin
 	LongInt res;
@@ -181,6 +39,175 @@ begin
 	end;
 	
 	SwedbankImportSaveAfter = res;
+return;
+end;
+
+global
+updating procedure SwedbankImportSave(string params)
+begin
+	LongInt res;
+	record IPVc IPr;
+	row IPVc IPrw;
+	record OPVc OPr;
+	row OPVc OPrw,oldOPrw;
+	record CUVc CUr;
+	boolean TrHs,testf,cufnd,installmentf;
+	LongInt error;
+	string 255 cucode,instr,ostr,warning,tstr,tstr0;
+	record LetVc Letr;// Edit ************************** Tuesday, 12 July 2016 15:52:10
+	integer i,pos,k;
+	string 1 c;
+	longint sernr;
+	val remsum;
+	record ARVc ARr;
+	record APVc APr;
+	val chk;
+	record BankImportSetBlock BISb;
+	record SwedbankImportVc oldSWIr;
+	record RLinkVc RLr;
+  Integer notenr;
+  record SwedbankImportVc SWIr;
+  
+  logtext(0,"SwedbankImportSaveSwedbankImportSaveSwedbankImportSave");
+  logtext(0,"params " & params);
+  logtext(0,"currentcompany " & currentcompany);
+  pos = 0;
+  ExtractObj(params,pos,tstr);
+  setcompany(stringtoint(tstr),false);
+
+  ExtractObj(params,pos,tstr);
+  SWIr.NtryRef = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  SWIr.BankID = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  SWIr.OwnID = tstr;
+  logtext(0,"SWIr.NtryRef " & SWIr.NtryRef);
+  logtext(0,"SWIr.BankID " & SWIr.BankID);
+  logtext(0,"SWIr.OwnID " & SWIr.OwnID);
+	if(readfirstmain(SWIr,3,true))then begin
+		logtext(0,"SWIrSWIrSWIrSWIrSWIrSWIrSWIrSWIr");
+
+		if(SWIr.OPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(SWIr,notenr,OPr,RLr)==false)then begin
+				SWIr.OPNr = -1;
+			end;
+		end;
+		if(SWIr.IPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(SWIr,notenr,IPr,RLr)==false)then begin
+				SWIr.IPNr = -1;
+			end;
+		end;
+	
+		blockload(BISb);
+	
+		remsum = SWIr.AmtCcy;
+	
+		if(SWIr.IPNr<0)then begin
+			if(SWIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
+				recordnew(IPr);
+				IPr.Comment = "SWEDBANK: " & SWIr.Ustrd;
+				IPr.TransDate = SWIr.BookgDt;	 
+				IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
+				CUr.Code = "";
+				FindCustomerByIBAN(SWIr.IBAN,SWIr.OrgId,cucode,cufnd,SWIr.RecName);
+				instr = BPI_ParseInvStr(SWIr.Ustrd);
+
+				BankFillIProws(IPr,k,SWIr.RecName,SWIr.CurncyCode,remsum,cucode,cufnd,instr,SWIr.Ustrd);
+				IPr.PayMode = BISb.DefPayModeSW;
+				if(recordstore(IPr,true))begin
+				end;
+				SWIr.IPNr = IPr.SerNr;
+			end;
+		end;
+		if(SWIr.OPNr<0)then begin
+			if(SWIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(SWIr.PayType))then begin
+			
+				recordnew(OPr);
+				OPr.BankName = "SWEDBANK: " & SWIr.Ustrd;
+		
+				OPr.TransDate = SWIr.BookgDt;	 
+				OPr.PayDate = SWIr.BookgDt;	 
+				OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+		
+				CUr.Code = "";
+				FindCustomerByIBAN(SWIr.IBAN,SWIr.OrgId,cucode,cufnd,SWIr.RecName);
+				instr = BPI_ParseInvStr(SWIr.Ustrd);
+		
+				BankFillOProws(OPr,k,SWIr.RecName,SWIr.CurncyCode,remsum,cucode,cufnd,instr,SWIr.Ustrd);
+				OPr.PayMode = BISb.DefVEPayModeSW;
+				if(recordstore(OPr,true))begin
+				end;
+				SWIr.OPNr = OPr.SerNr;
+			end else begin
+				if(SWIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(SWIr.PayType))then begin
+					pos = 0;
+					tstr = "";
+					tstr0 = "";
+					ExtractObjWithSeparator("-",SWIr.NtryRef,true,pos,tstr0);
+					ExtractObjWithSeparator("-",SWIr.NtryRef,true,pos,tstr);
+					if(stringtoint(tstr)>1)then begin
+			
+						oldSWIr.NtryRef = tstr0 & "-1";
+						oldSWIr.OwnID = SWIr.OwnID;
+						oldSWIr.BankID = SWIr.BankID;
+						if(readfirstmain(oldSWIr,3,true))then begin
+							OPr.SerNr = oldSWIr.OPNr;
+							if(readfirstmain(OPr,1,true))then begin
+								if(OPr.DoneFlag==0)then begin
+							
+									k = matrowcnt(OPr);
+									if(k>0)then begin
+										matrowget(OPr,0,oldOPrw);
+									end;
+									clearrow(OPr,OPrw,7);
+									OPrw.VISerNr = oldOPrw.VISerNr;
+									OPrw.Comment = SWIr.RecName;
+									OPrw.RecCurncy = SWIr.CurncyCode;
+									OPrw.BankCurncy = SWIr.CurncyCode;
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteBankCurncy(OPr,k);
+									matrowget(OPr,k,OPrw);
+									OPrw.BankVal = remsum;
+									OPrw.RecVal = remsum;							
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteRecVal(OPr,k);
+							
+									k=k+1;
+									if(recordstore(OPr,true))begin
+									end;
+									SWIr.OPNr = OPr.SerNr;
+								end;
+							end;
+						end;
+					end else begin
+						OPr.BankName = "SWEDBANK: " & SWIr.Ustrd;
+		
+						OPr.TransDate = SWIr.BookgDt;	 
+						OPr.PayDate = SWIr.BookgDt;	 
+						OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+		
+						CUr.Code = "";
+						FindCustomerByIBAN(SWIr.IBAN,SWIr.OrgId,cucode,cufnd,SWIr.RecName);
+						instr = BPI_ParseInvStr(SWIr.Ustrd);
+						BankFillOProws(OPr,k,SWIr.RecName,SWIr.CurncyCode,remsum,cucode,cufnd,instr,SWIr.Ustrd);
+						OPr.PayMode = BISb.DefVEPayModeSW;
+						if(recordstore(OPr,true))begin
+						end;
+						SWIr.OPNr = OPr.SerNr;
+					end;
+				end;
+			end;
+		end;
+	
+		SwedbankImportSaveAfter(SWIr);
+		recordstore(SWIr,true);
+	end;
+	
+	//SwedbankImportSave = res;
 return;
 end;
 
@@ -725,7 +752,7 @@ begin
 	
 	xdata = parsexmlarea(afile);
 	
-	logtext(0,"AsyncSwedBankImportSTIn " & GetImportFileName);
+	logtext(0,"AsyncSwedBankImportSTIn111111 " & GetImportFileName);
 	
 	OwnID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Ownr/Id/OrgId/Othr/Id"); 
 	BankID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Svcr/FinInstnId/Othr/Id"); 
@@ -774,9 +801,11 @@ begin
 			SWIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			SWIr.CurncyCode = CurCode;
 			recordstore(SWIr,true);
-			SwedbankImportSave(SWIr);
-			SwedbankImportSaveAfter(SWIr);
-			recordstore(SWIr,true);
+			logtext(0,"Idletask " & SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID);
+			logtext(0,"time " & CurrentDate & " " & addminutes(currenttime,1));
+			//NewTimedTask2("SwedbankImportSave","SwedbankImportSave","SwedbankImportSave",SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID,CurrentDate,addminutes(currenttime,1),"","");  
+      NewTimedTask("SwedbankImportSave" & GetCurTick,"SwedbankImportSave" & GetCurTick,"SwedbankImportSave",currentcompany & "," & SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+			//SwedbankImportSave(SWIr);
 		end;
 	end; 
 	
