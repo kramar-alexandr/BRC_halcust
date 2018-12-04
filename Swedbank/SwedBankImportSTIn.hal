@@ -68,9 +68,6 @@ begin
   Integer notenr;
   record SwedbankImportVc SWIr;
   
-  logtext(0,"SwedbankImportSaveSwedbankImportSaveSwedbankImportSave");
-  logtext(0,"params " & params);
-  logtext(0,"currentcompany " & currentcompany);
   pos = 0;
   ExtractObj(params,pos,tstr);
   setcompany(stringtoint(tstr),false);
@@ -83,11 +80,7 @@ begin
   
   ExtractObj(params,pos,tstr);
   SWIr.OwnID = tstr;
-  logtext(0,"SWIr.NtryRef " & SWIr.NtryRef);
-  logtext(0,"SWIr.BankID " & SWIr.BankID);
-  logtext(0,"SWIr.OwnID " & SWIr.OwnID);
 	if(readfirstmain(SWIr,3,true))then begin
-		logtext(0,"SWIrSWIrSWIrSWIrSWIrSWIrSWIrSWIr");
 
 		if(SWIr.OPNr>0)then begin
 			notenr = 1;
@@ -207,153 +200,10 @@ begin
 		recordstore(SWIr,true);
 	end;
 	
-	//SwedbankImportSave = res;
 return;
 end;
 
-global
-updating function LongInt SEBbankImportSave(var record SEBbankImportVc SBIr)
-begin
-	LongInt res;
-	record IPVc IPr;
-	row IPVc IPrw;
-	record OPVc OPr;
-	row OPVc OPrw,oldOPrw;
-	record CUVc CUr;
-	boolean TrHs,testf,cufnd,installmentf;
-	LongInt error;
-	string 255 cucode,instr,ostr,warning,tstr,tstr0;
-	record LetVc Letr;// Edit ************************** Tuesday, 12 July 2016 15:52:10
-	integer i,pos,k;
-	string 1 c;
-	longint sernr;
-	val remsum;
-	record ARVc ARr;
-	record APVc APr;
-	val chk;
-	record BankImportSetBlock BISb;
-	record SEBbankImportVc oldSBIr;
-	record RLinkVc RLr;
-  Integer notenr;
-	
-	if(SBIr.OPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(SBIr,notenr,OPr,RLr)==false)then begin
-			SBIr.OPNr = -1;
-		end;
-	end;
-	if(SBIr.IPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(SBIr,notenr,IPr,RLr)==false)then begin
-			SBIr.IPNr = -1;
-		end;
-	end;
-	
-	blockload(BISb);
-	
-	remsum = SBIr.AmtCcy;
-	
-	if(SBIr.IPNr<0)then begin
-		if(SBIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
-			recordnew(IPr);
-			IPr.Comment = "SEBbank: " & SBIr.Ustrd;
-			IPr.TransDate = SBIr.BookgDt;	 
-			IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
-			CUr.Code = "";
-			FindCustomerByIBAN(SBIr.IBAN,SBIr.OrgId,cucode,cufnd,SBIr.RecName);
-			instr = BPI_ParseInvStr(SBIr.Ustrd);
 
-			BankFillIProws(IPr,k,SBIr.RecName,SBIr.CurncyCode,remsum,cucode,cufnd,instr,SBIr.Ustrd);
-			IPr.PayMode = BISb.DefPayModeSEB;
-			if(recordstore(IPr,true))begin
-				SBIr.IPNr = IPr.SerNr;
-			end;
-		end;
-	end;
-	if(SBIr.OPNr<0)then begin
-		if(SBIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(SBIr.PayType))then begin
-			
-			recordnew(OPr);
-			OPr.BankName = "SEBbank: " & SBIr.Ustrd;
-		
-			OPr.TransDate = SBIr.BookgDt;	 
-			OPr.PayDate = SBIr.BookgDt;	 
-			OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
-		
-			CUr.Code = "";
-			FindCustomerByIBAN(SBIr.IBAN,SBIr.OrgId,cucode,cufnd,SBIr.RecName);
-			instr = BPI_ParseInvStr(SBIr.Ustrd);
-		
-			BankFillOProws(OPr,k,SBIr.RecName,SBIr.CurncyCode,remsum,cucode,cufnd,instr,SBIr.Ustrd);
-			OPr.PayMode = BISb.DefVEPayModeSEB;
-			if(recordstore(OPr,true))begin
-				SBIr.OPNr = OPr.SerNr;
-			end;
-		end else begin
-			if(SBIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(SBIr.PayType))then begin
-				pos = 0;
-				tstr = "";
-				tstr0 = "";
-				ExtractObjWithSeparator("-",SBIr.NtryRef,true,pos,tstr0);
-				ExtractObjWithSeparator("-",SBIr.NtryRef,true,pos,tstr);
-				if(stringtoint(tstr)>1)then begin
-			
-					oldSBIr.NtryRef = tstr0 & "-1";
-					oldSBIr.OwnID = SBIr.OwnID;
-					oldSBIr.BankID = SBIr.BankID;
-					if(readfirstmain(oldSBIr,3,true))then begin
-						OPr.SerNr = oldSBIr.OPNr;
-						if(readfirstmain(OPr,1,true))then begin
-							if(OPr.DoneFlag==0)then begin
-							
-								k = matrowcnt(OPr);
-								if(k>0)then begin
-									matrowget(OPr,0,oldOPrw);
-								end;
-								clearrow(OPr,OPrw,7);
-								OPrw.VISerNr = oldOPrw.VISerNr;
-								OPrw.Comment = SBIr.RecName;
-								OPrw.RecCurncy = SBIr.CurncyCode;
-								OPrw.BankCurncy = SBIr.CurncyCode;
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteBankCurncy(OPr,k);
-								matrowget(OPr,k,OPrw);
-								OPrw.BankVal = remsum;
-								OPrw.RecVal = remsum;							
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteRecVal(OPr,k);
-							
-								k=k+1;
-								OPr.PayMode = BISb.DefVEPayModeSEB;
-								if(recordstore(OPr,true))begin
-									SBIr.OPNr = OPr.SerNr;
-								end;
-							end;
-						end;
-					end;
-				end else begin
-					OPr.BankName = "SEBbank: " & SBIr.Ustrd;
-		
-					OPr.TransDate = SBIr.BookgDt;	 
-					OPr.PayDate = SBIr.BookgDt;	 
-					OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
-		
-					CUr.Code = "";
-					FindCustomerByIBAN(SBIr.IBAN,SBIr.OrgId,cucode,cufnd,SBIr.RecName);
-					instr = BPI_ParseInvStr(SBIr.Ustrd);
-					BankFillOProws(OPr,k,SBIr.RecName,SBIr.CurncyCode,remsum,cucode,cufnd,instr,SBIr.Ustrd);
-					OPr.PayMode = BISb.DefVEPayModeSEB;
-					if(recordstore(OPr,true))begin
-						SBIr.OPNr = OPr.SerNr;
-					end;
-				end;
-			end;
-		end;
-	end;
-	
-	SEBbankImportSave = res;
-return;
-end;
 
 global
 updating function LongInt SEBbankImportSaveAfter(var record SEBbankImportVc SBIr)
@@ -382,8 +232,9 @@ return;
 end;
 
 
+
 global
-updating function LongInt LuminorImportSave(var record LuminorImportVc LRIr)
+updating procedure SEBbankImportSave(string params)
 begin
 	LongInt res;
 	record IPVc IPr;
@@ -403,125 +254,145 @@ begin
 	record APVc APr;
 	val chk;
 	record BankImportSetBlock BISb;
-	record LuminorImportVc oldLRIr;
+	record SEBbankImportVc oldSBIr;
 	record RLinkVc RLr;
   Integer notenr;
+	record SEBbankImportVc SBIr;
 	
-	if(LRIr.OPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(LRIr,notenr,OPr,RLr)==false)then begin
-			LRIr.OPNr = -1;
-		end;
-	end;
-	if(LRIr.IPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(LRIr,notenr,IPr,RLr)==false)then begin
-			LRIr.IPNr = -1;
-		end;
-	end;
-	
-	blockload(BISb);
-	
-	remsum = LRIr.AmtCcy;
-	
-	if(LRIr.IPNr<0)then begin
-		if(LRIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
-			recordnew(IPr);
-			IPr.Comment = "Luminor: " & LRIr.Ustrd;
-			IPr.TransDate = LRIr.BookgDt;	 
-			IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
-			CUr.Code = "";
-			FindCustomerByIBAN(LRIr.IBAN,LRIr.OrgId,cucode,cufnd,LRIr.RecName);
-			instr = BPI_ParseInvStr(LRIr.Ustrd);
+	pos = 0;
+  ExtractObj(params,pos,tstr);
+  setcompany(stringtoint(tstr),false);
 
-			BankFillIProws(IPr,k,LRIr.RecName,LRIr.CurncyCode,remsum,cucode,cufnd,instr,LRIr.Ustrd);
-			IPr.PayMode = BISb.DefPayModeLUM;
-			if(recordstore(IPr,true))begin
-				LRIr.IPNr = IPr.SerNr;
+  ExtractObj(params,pos,tstr);
+  SBIr.NtryRef = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  SBIr.BankID = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  SBIr.OwnID = tstr;
+	if(readfirstmain(SBIr,3,true))then begin
+	
+		if(SBIr.OPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(SBIr,notenr,OPr,RLr)==false)then begin
+				SBIr.OPNr = -1;
 			end;
 		end;
-	end;
-	if(LRIr.OPNr<0)then begin
-		if(LRIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(LRIr.PayType))then begin
-			
-			recordnew(OPr);
-			OPr.BankName = "Luminor: " & LRIr.Ustrd;
-		
-			OPr.TransDate = LRIr.BookgDt;	 
-			OPr.PayDate = LRIr.BookgDt;	 
-			OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
-		
-			CUr.Code = "";
-			FindCustomerByIBAN(LRIr.IBAN,LRIr.OrgId,cucode,cufnd,LRIr.RecName);
-			instr = BPI_ParseInvStr(LRIr.Ustrd);
-		
-			BankFillOProws(OPr,k,LRIr.RecName,LRIr.CurncyCode,remsum,cucode,cufnd,instr,LRIr.Ustrd);
-			OPr.PayMode = BISb.DefVEPayModeLUM;
-			if(recordstore(OPr,true))begin
-				LRIr.OPNr = OPr.SerNr;
+		if(SBIr.IPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(SBIr,notenr,IPr,RLr)==false)then begin
+				SBIr.IPNr = -1;
 			end;
-		end else begin
-			if(LRIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(LRIr.PayType))then begin
-				pos = 0;
-				tstr = "";
-				tstr0 = "";
-				ExtractObjWithSeparator("-",LRIr.NtryRef,true,pos,tstr0);
-				ExtractObjWithSeparator("-",LRIr.NtryRef,true,pos,tstr);
-				if(stringtoint(tstr)>1)then begin
+		end;
+	
+		blockload(BISb);
+	
+		remsum = SBIr.AmtCcy;
+	
+		if(SBIr.IPNr<0)then begin
+			if(SBIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
+				recordnew(IPr);
+				IPr.Comment = "SEBbank: " & SBIr.Ustrd;
+				IPr.TransDate = SBIr.BookgDt;	 
+				IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
+				CUr.Code = "";
+				FindCustomerByIBAN(SBIr.IBAN,SBIr.OrgId,cucode,cufnd,SBIr.RecName);
+				instr = BPI_ParseInvStr(SBIr.Ustrd);
+
+				BankFillIProws(IPr,k,SBIr.RecName,SBIr.CurncyCode,remsum,cucode,cufnd,instr,SBIr.Ustrd);
+				IPr.PayMode = BISb.DefPayModeSEB;
+				if(recordstore(IPr,true))begin
+					SBIr.IPNr = IPr.SerNr;
+				end;
+			end;
+		end;
+		if(SBIr.OPNr<0)then begin
+			if(SBIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(SBIr.PayType))then begin
 			
-					oldLRIr.NtryRef = tstr0 & "-1";
-					oldLRIr.OwnID = LRIr.OwnID;
-					oldLRIr.BankID = LRIr.BankID;
-					if(readfirstmain(oldLRIr,3,true))then begin
-						OPr.SerNr = oldLRIr.OPNr;
-						if(readfirstmain(OPr,1,true))then begin
-							if(OPr.DoneFlag==0)then begin
+				recordnew(OPr);
+				OPr.BankName = "SEBbank: " & SBIr.Ustrd;
+		
+				OPr.TransDate = SBIr.BookgDt;	 
+				OPr.PayDate = SBIr.BookgDt;	 
+				OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+		
+				CUr.Code = "";
+				FindCustomerByIBAN(SBIr.IBAN,SBIr.OrgId,cucode,cufnd,SBIr.RecName);
+				instr = BPI_ParseInvStr(SBIr.Ustrd);
+		
+				BankFillOProws(OPr,k,SBIr.RecName,SBIr.CurncyCode,remsum,cucode,cufnd,instr,SBIr.Ustrd);
+				OPr.PayMode = BISb.DefVEPayModeSEB;
+				if(recordstore(OPr,true))begin
+					SBIr.OPNr = OPr.SerNr;
+				end;
+			end else begin
+				if(SBIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(SBIr.PayType))then begin
+					pos = 0;
+					tstr = "";
+					tstr0 = "";
+					ExtractObjWithSeparator("-",SBIr.NtryRef,true,pos,tstr0);
+					ExtractObjWithSeparator("-",SBIr.NtryRef,true,pos,tstr);
+					if(stringtoint(tstr)>1)then begin
+			
+						oldSBIr.NtryRef = tstr0 & "-1";
+						oldSBIr.OwnID = SBIr.OwnID;
+						oldSBIr.BankID = SBIr.BankID;
+						if(readfirstmain(oldSBIr,3,true))then begin
+							OPr.SerNr = oldSBIr.OPNr;
+							if(readfirstmain(OPr,1,true))then begin
+								if(OPr.DoneFlag==0)then begin
 							
-								k = matrowcnt(OPr);
-								if(k>0)then begin
-									matrowget(OPr,0,oldOPrw);
-								end;
-								clearrow(OPr,OPrw,7);
-								OPrw.VISerNr = oldOPrw.VISerNr;
-								OPrw.Comment = LRIr.RecName;
-								OPrw.RecCurncy = LRIr.CurncyCode;
-								OPrw.BankCurncy = LRIr.CurncyCode;
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteBankCurncy(OPr,k);
-								matrowget(OPr,k,OPrw);
-								OPrw.BankVal = remsum;
-								OPrw.RecVal = remsum;							
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteRecVal(OPr,k);
+									k = matrowcnt(OPr);
+									if(k>0)then begin
+										matrowget(OPr,0,oldOPrw);
+									end;
+									clearrow(OPr,OPrw,7);
+									OPrw.VISerNr = oldOPrw.VISerNr;
+									OPrw.Comment = SBIr.RecName;
+									OPrw.RecCurncy = SBIr.CurncyCode;
+									OPrw.BankCurncy = SBIr.CurncyCode;
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteBankCurncy(OPr,k);
+									matrowget(OPr,k,OPrw);
+									OPrw.BankVal = remsum;
+									OPrw.RecVal = remsum;							
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteRecVal(OPr,k);
 							
-								k=k+1;
-								OPr.PayMode = BISb.DefVEPayModeLUM;
-								if(recordstore(OPr,true))begin
-									LRIr.OPNr = OPr.SerNr;
+									k=k+1;
+									OPr.PayMode = BISb.DefVEPayModeSEB;
+									if(recordstore(OPr,true))begin
+										SBIr.OPNr = OPr.SerNr;
+									end;
 								end;
 							end;
 						end;
-					end;
-				end else begin
-					OPr.BankName = "Luminor: " & LRIr.Ustrd;
+					end else begin
+						OPr.BankName = "SEBbank: " & SBIr.Ustrd;
 		
-					OPr.TransDate = LRIr.BookgDt;	 
-					OPr.PayDate = LRIr.BookgDt;	 
-					OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+						OPr.TransDate = SBIr.BookgDt;	 
+						OPr.PayDate = SBIr.BookgDt;	 
+						OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
 		
-					CUr.Code = "";
-					FindCustomerByIBAN(LRIr.IBAN,LRIr.OrgId,cucode,cufnd,LRIr.RecName);
-					instr = BPI_ParseInvStr(LRIr.Ustrd);
-					BankFillOProws(OPr,k,LRIr.RecName,LRIr.CurncyCode,remsum,cucode,cufnd,instr,LRIr.Ustrd);
-					OPr.PayMode = BISb.DefVEPayModeLUM;
-					if(recordstore(OPr,true))begin
-						LRIr.OPNr = OPr.SerNr;
+						CUr.Code = "";
+						FindCustomerByIBAN(SBIr.IBAN,SBIr.OrgId,cucode,cufnd,SBIr.RecName);
+						instr = BPI_ParseInvStr(SBIr.Ustrd);
+						BankFillOProws(OPr,k,SBIr.RecName,SBIr.CurncyCode,remsum,cucode,cufnd,instr,SBIr.Ustrd);
+						OPr.PayMode = BISb.DefVEPayModeSEB;
+						if(recordstore(OPr,true))begin
+							SBIr.OPNr = OPr.SerNr;
+						end;
 					end;
 				end;
 			end;
 		end;
+	
+		SEBbankImportSaveAfter(SBIr);
+		recordstore(SBIr,true);
+	
 	end;
-	LuminorImportSave = res;
+
 return;
 end;
 
@@ -552,7 +423,7 @@ return;
 end;
 
 global
-updating function LongInt SiauliuImportSave(var record SiauliuImportVc SUIr)
+updating procedure LuminorImportSave(string params)
 begin
 	LongInt res;
 	record IPVc IPr;
@@ -572,127 +443,148 @@ begin
 	record APVc APr;
 	val chk;
 	record BankImportSetBlock BISb;
-	record SiauliuImportVc oldSUIr;
+	record LuminorImportVc oldLRIr;
 	record RLinkVc RLr;
   Integer notenr;
+  record LuminorImportVc LRIr;
 	
-	if(SUIr.OPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(SUIr,notenr,OPr,RLr)==false)then begin
-			SUIr.OPNr = -1;
-		end;
-	end;
-	if(SUIr.IPNr>0)then begin
-		notenr = 1;
-		if(ReadRecordLink(SUIr,notenr,IPr,RLr)==false)then begin
-			SUIr.IPNr = -1;
-		end;
-	end;
 	
-	blockload(BISb);
-	
-	remsum = SUIr.AmtCcy;
-	
-	if(SUIr.IPNr<0)then begin
-		if(SUIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
-			recordnew(IPr);
-			IPr.Comment = "Siauliu: " & SUIr.Ustrd;
-			IPr.TransDate = SUIr.BookgDt;	 
-			IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
-			CUr.Code = "";
-			FindCustomerByIBAN(SUIr.IBAN,SUIr.OrgId,cucode,cufnd,SUIr.RecName);
-			instr = BPI_ParseInvStr(SUIr.Ustrd);
+	pos = 0;
+  ExtractObj(params,pos,tstr);
+  setcompany(stringtoint(tstr),false);
 
-			BankFillIProws(IPr,k,SUIr.RecName,SUIr.CurncyCode,remsum,cucode,cufnd,instr,SUIr.Ustrd);
-			IPr.PayMode = BISb.DefPayModeSIA;
-			if(recordstore(IPr,true))begin
-				SUIr.IPNr = IPr.SerNr;
+  ExtractObj(params,pos,tstr);
+  LRIr.NtryRef = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  LRIr.BankID = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  LRIr.OwnID = tstr;
+	if(readfirstmain(LRIr,3,true))then begin
+	
+		if(LRIr.OPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(LRIr,notenr,OPr,RLr)==false)then begin
+				LRIr.OPNr = -1;
 			end;
 		end;
-	end;
-	if(SUIr.OPNr<0)then begin
-		if(SUIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(SUIr.PayType))then begin
-			
-			recordnew(OPr);
-			OPr.BankName = "Siauliu: " & SUIr.Ustrd;
-		
-			OPr.TransDate = SUIr.BookgDt;	 
-			OPr.PayDate = SUIr.BookgDt;	 
-			OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
-		
-			CUr.Code = "";
-			FindCustomerByIBAN(SUIr.IBAN,SUIr.OrgId,cucode,cufnd,SUIr.RecName);
-			instr = BPI_ParseInvStr(SUIr.Ustrd);
-		
-			BankFillOProws(OPr,k,SUIr.RecName,SUIr.CurncyCode,remsum,cucode,cufnd,instr,SUIr.Ustrd);
-			OPr.PayMode = BISb.DefVEPayModeSIA;
-			if(recordstore(OPr,true))begin
-				SUIr.OPNr = OPr.SerNr;
+		if(LRIr.IPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(LRIr,notenr,IPr,RLr)==false)then begin
+				LRIr.IPNr = -1;
 			end;
-		end else begin
-			if(SUIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(SUIr.PayType))then begin
-				pos = 0;
-				tstr = "";
-				tstr0 = "";
-				ExtractObjWithSeparator("-",SUIr.NtryRef,true,pos,tstr0);
-				ExtractObjWithSeparator("-",SUIr.NtryRef,true,pos,tstr);
-				if(stringtoint(tstr)>1)then begin
+		end;
+	
+		blockload(BISb);
+	
+		remsum = LRIr.AmtCcy;
+	
+		if(LRIr.IPNr<0)then begin
+			if(LRIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
+				recordnew(IPr);
+				IPr.Comment = "Luminor: " & LRIr.Ustrd;
+				IPr.TransDate = LRIr.BookgDt;	 
+				IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
+				CUr.Code = "";
+				FindCustomerByIBAN(LRIr.IBAN,LRIr.OrgId,cucode,cufnd,LRIr.RecName);
+				instr = BPI_ParseInvStr(LRIr.Ustrd);
+
+				BankFillIProws(IPr,k,LRIr.RecName,LRIr.CurncyCode,remsum,cucode,cufnd,instr,LRIr.Ustrd);
+				IPr.PayMode = BISb.DefPayModeLUM;
+				if(recordstore(IPr,true))begin
+					LRIr.IPNr = IPr.SerNr;
+				end;
+			end;
+		end;
+		if(LRIr.OPNr<0)then begin
+			if(LRIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(LRIr.PayType))then begin
 			
-					oldSUIr.NtryRef = tstr0 & "-1";
-					oldSUIr.OwnID = SUIr.OwnID;
-					oldSUIr.BankID = SUIr.BankID;
-					if(readfirstmain(oldSUIr,3,true))then begin
-						OPr.SerNr = oldSUIr.OPNr;
-						if(readfirstmain(OPr,1,true))then begin
-							if(OPr.DoneFlag==0)then begin
+				recordnew(OPr);
+				OPr.BankName = "Luminor: " & LRIr.Ustrd;
+		
+				OPr.TransDate = LRIr.BookgDt;	 
+				OPr.PayDate = LRIr.BookgDt;	 
+				OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+		
+				CUr.Code = "";
+				FindCustomerByIBAN(LRIr.IBAN,LRIr.OrgId,cucode,cufnd,LRIr.RecName);
+				instr = BPI_ParseInvStr(LRIr.Ustrd);
+		
+				BankFillOProws(OPr,k,LRIr.RecName,LRIr.CurncyCode,remsum,cucode,cufnd,instr,LRIr.Ustrd);
+				OPr.PayMode = BISb.DefVEPayModeLUM;
+				if(recordstore(OPr,true))begin
+					LRIr.OPNr = OPr.SerNr;
+				end;
+			end else begin
+				if(LRIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(LRIr.PayType))then begin
+					pos = 0;
+					tstr = "";
+					tstr0 = "";
+					ExtractObjWithSeparator("-",LRIr.NtryRef,true,pos,tstr0);
+					ExtractObjWithSeparator("-",LRIr.NtryRef,true,pos,tstr);
+					if(stringtoint(tstr)>1)then begin
+			
+						oldLRIr.NtryRef = tstr0 & "-1";
+						oldLRIr.OwnID = LRIr.OwnID;
+						oldLRIr.BankID = LRIr.BankID;
+						if(readfirstmain(oldLRIr,3,true))then begin
+							OPr.SerNr = oldLRIr.OPNr;
+							if(readfirstmain(OPr,1,true))then begin
+								if(OPr.DoneFlag==0)then begin
 							
-								k = matrowcnt(OPr);
-								if(k>0)then begin
-									matrowget(OPr,0,oldOPrw);
-								end;
-								clearrow(OPr,OPrw,7);
-								OPrw.VISerNr = oldOPrw.VISerNr;
-								OPrw.Comment = SUIr.RecName;
-								OPrw.RecCurncy = SUIr.CurncyCode;
-								OPrw.BankCurncy = SUIr.CurncyCode;
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteBankCurncy(OPr,k);
-								matrowget(OPr,k,OPrw);
-								OPrw.BankVal = remsum;
-								OPrw.RecVal = remsum;							
-								matrowput(OPr,k,OPrw);
-								OPVc_PasteRecVal(OPr,k);
+									k = matrowcnt(OPr);
+									if(k>0)then begin
+										matrowget(OPr,0,oldOPrw);
+									end;
+									clearrow(OPr,OPrw,7);
+									OPrw.VISerNr = oldOPrw.VISerNr;
+									OPrw.Comment = LRIr.RecName;
+									OPrw.RecCurncy = LRIr.CurncyCode;
+									OPrw.BankCurncy = LRIr.CurncyCode;
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteBankCurncy(OPr,k);
+									matrowget(OPr,k,OPrw);
+									OPrw.BankVal = remsum;
+									OPrw.RecVal = remsum;							
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteRecVal(OPr,k);
 							
-								k=k+1;
-								OPr.PayMode = BISb.DefVEPayModeSIA;
-								if(recordstore(OPr,true))begin
-									SUIr.OPNr = OPr.SerNr;
+									k=k+1;
+									OPr.PayMode = BISb.DefVEPayModeLUM;
+									if(recordstore(OPr,true))begin
+										LRIr.OPNr = OPr.SerNr;
+									end;
 								end;
 							end;
 						end;
-					end;
-				end else begin
-					OPr.BankName = "Siauliu: " & SUIr.Ustrd;
+					end else begin
+						OPr.BankName = "Luminor: " & LRIr.Ustrd;
 		
-					OPr.TransDate = SUIr.BookgDt;	 
-					OPr.PayDate = SUIr.BookgDt;	 
-					OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+						OPr.TransDate = LRIr.BookgDt;	 
+						OPr.PayDate = LRIr.BookgDt;	 
+						OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
 		
-					CUr.Code = "";
-					FindCustomerByIBAN(SUIr.IBAN,SUIr.OrgId,cucode,cufnd,SUIr.RecName);
-					instr = BPI_ParseInvStr(SUIr.Ustrd);
-					BankFillOProws(OPr,k,SUIr.RecName,SUIr.CurncyCode,remsum,cucode,cufnd,instr,SUIr.Ustrd);
-					OPr.PayMode = BISb.DefVEPayModeSIA;
-					if(recordstore(OPr,true))begin
-						SUIr.OPNr = OPr.SerNr;
+						CUr.Code = "";
+						FindCustomerByIBAN(LRIr.IBAN,LRIr.OrgId,cucode,cufnd,LRIr.RecName);
+						instr = BPI_ParseInvStr(LRIr.Ustrd);
+						BankFillOProws(OPr,k,LRIr.RecName,LRIr.CurncyCode,remsum,cucode,cufnd,instr,LRIr.Ustrd);
+						OPr.PayMode = BISb.DefVEPayModeLUM;
+						if(recordstore(OPr,true))begin
+							LRIr.OPNr = OPr.SerNr;
+						end;
 					end;
 				end;
 			end;
 		end;
+	
+		LuminorImportSaveAfter(LRIr);
+		recordstore(LRIr,true);
 	end;
-	SiauliuImportSave = res;
+
 return;
 end;
+
 
 global
 updating function LongInt SiauliuImportSaveAfter(var record SiauliuImportVc SUIr)
@@ -740,6 +632,166 @@ begin
 return;
 end;
 
+global
+updating procedure SiauliuImportSave(string params)
+begin
+	LongInt res;
+	record IPVc IPr;
+	row IPVc IPrw;
+	record OPVc OPr;
+	row OPVc OPrw,oldOPrw;
+	record CUVc CUr;
+	boolean TrHs,testf,cufnd,installmentf;
+	LongInt error;
+	string 255 cucode,instr,ostr,warning,tstr,tstr0;
+	record LetVc Letr;// Edit ************************** Tuesday, 12 July 2016 15:52:10
+	integer i,pos,k;
+	string 1 c;
+	longint sernr;
+	val remsum;
+	record ARVc ARr;
+	record APVc APr;
+	val chk;
+	record BankImportSetBlock BISb;
+	record SiauliuImportVc oldSUIr;
+	record RLinkVc RLr;
+  Integer notenr;
+  record SiauliuImportVc SUIr;
+	
+	pos = 0;
+  ExtractObj(params,pos,tstr);
+  setcompany(stringtoint(tstr),false);
+
+  ExtractObj(params,pos,tstr);
+  SUIr.NtryRef = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  SUIr.BankID = tstr;
+  
+  ExtractObj(params,pos,tstr);
+  SUIr.OwnID = tstr;
+	if(readfirstmain(SUIr,3,true))then begin
+	
+		if(SUIr.OPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(SUIr,notenr,OPr,RLr)==false)then begin
+				SUIr.OPNr = -1;
+			end;
+		end;
+		if(SUIr.IPNr>0)then begin
+			notenr = 1;
+			if(ReadRecordLink(SUIr,notenr,IPr,RLr)==false)then begin
+				SUIr.IPNr = -1;
+			end;
+		end;
+	
+		blockload(BISb);
+	
+		remsum = SUIr.AmtCcy;
+	
+		if(SUIr.IPNr<0)then begin
+			if(SUIr.CdtDbtInd=="CRDT" and BISb.ImpPaym==1)then begin
+				recordnew(IPr);
+				IPr.Comment = "Siauliu: " & SUIr.Ustrd;
+				IPr.TransDate = SUIr.BookgDt;	 
+				IPr.SerNr = NextSerNr("IPVc",IPr.TransDate,-1,false,"");		
+				CUr.Code = "";
+				FindCustomerByIBAN(SUIr.IBAN,SUIr.OrgId,cucode,cufnd,SUIr.RecName);
+				instr = BPI_ParseInvStr(SUIr.Ustrd);
+
+				BankFillIProws(IPr,k,SUIr.RecName,SUIr.CurncyCode,remsum,cucode,cufnd,instr,SUIr.Ustrd);
+				IPr.PayMode = BISb.DefPayModeSIA;
+				if(recordstore(IPr,true))begin
+					SUIr.IPNr = IPr.SerNr;
+				end;
+			end;
+		end;
+		if(SUIr.OPNr<0)then begin
+			if(SUIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and blank(SUIr.PayType))then begin
+			
+				recordnew(OPr);
+				OPr.BankName = "Siauliu: " & SUIr.Ustrd;
+		
+				OPr.TransDate = SUIr.BookgDt;	 
+				OPr.PayDate = SUIr.BookgDt;	 
+				OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+		
+				CUr.Code = "";
+				FindCustomerByIBAN(SUIr.IBAN,SUIr.OrgId,cucode,cufnd,SUIr.RecName);
+				instr = BPI_ParseInvStr(SUIr.Ustrd);
+		
+				BankFillOProws(OPr,k,SUIr.RecName,SUIr.CurncyCode,remsum,cucode,cufnd,instr,SUIr.Ustrd);
+				OPr.PayMode = BISb.DefVEPayModeSIA;
+				if(recordstore(OPr,true))begin
+					SUIr.OPNr = OPr.SerNr;
+				end;
+			end else begin
+				if(SUIr.CdtDbtInd=="DBIT" and BISb.ImpPaymOrd==1 and BISb.ImpCharges==1 and nonblank(SUIr.PayType))then begin
+					pos = 0;
+					tstr = "";
+					tstr0 = "";
+					ExtractObjWithSeparator("-",SUIr.NtryRef,true,pos,tstr0);
+					ExtractObjWithSeparator("-",SUIr.NtryRef,true,pos,tstr);
+					if(stringtoint(tstr)>1)then begin
+			
+						oldSUIr.NtryRef = tstr0 & "-1";
+						oldSUIr.OwnID = SUIr.OwnID;
+						oldSUIr.BankID = SUIr.BankID;
+						if(readfirstmain(oldSUIr,3,true))then begin
+							OPr.SerNr = oldSUIr.OPNr;
+							if(readfirstmain(OPr,1,true))then begin
+								if(OPr.DoneFlag==0)then begin
+							
+									k = matrowcnt(OPr);
+									if(k>0)then begin
+										matrowget(OPr,0,oldOPrw);
+									end;
+									clearrow(OPr,OPrw,7);
+									OPrw.VISerNr = oldOPrw.VISerNr;
+									OPrw.Comment = SUIr.RecName;
+									OPrw.RecCurncy = SUIr.CurncyCode;
+									OPrw.BankCurncy = SUIr.CurncyCode;
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteBankCurncy(OPr,k);
+									matrowget(OPr,k,OPrw);
+									OPrw.BankVal = remsum;
+									OPrw.RecVal = remsum;							
+									matrowput(OPr,k,OPrw);
+									OPVc_PasteRecVal(OPr,k);
+							
+									k=k+1;
+									OPr.PayMode = BISb.DefVEPayModeSIA;
+									if(recordstore(OPr,true))begin
+										SUIr.OPNr = OPr.SerNr;
+									end;
+								end;
+							end;
+						end;
+					end else begin
+						OPr.BankName = "Siauliu: " & SUIr.Ustrd;
+		
+						OPr.TransDate = SUIr.BookgDt;	 
+						OPr.PayDate = SUIr.BookgDt;	 
+						OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");		
+		
+						CUr.Code = "";
+						FindCustomerByIBAN(SUIr.IBAN,SUIr.OrgId,cucode,cufnd,SUIr.RecName);
+						instr = BPI_ParseInvStr(SUIr.Ustrd);
+						BankFillOProws(OPr,k,SUIr.RecName,SUIr.CurncyCode,remsum,cucode,cufnd,instr,SUIr.Ustrd);
+						OPr.PayMode = BISb.DefVEPayModeSIA;
+						if(recordstore(OPr,true))begin
+							SUIr.OPNr = OPr.SerNr;
+						end;
+					end;
+				end;
+			end;
+		end;
+		SiauliuImportSaveAfter(SUIr);
+		recordstore(SUIr,true);
+	end;
+return;
+end;
+
 
 global updating procedure AsyncSwedBankImportSTIn(area afile)
 begin
@@ -751,9 +803,7 @@ begin
 	xml xdata;
 	
 	xdata = parsexmlarea(afile);
-	
-	logtext(0,"AsyncSwedBankImportSTIn111111 " & GetImportFileName);
-	
+		
 	OwnID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Ownr/Id/OrgId/Othr/Id"); 
 	BankID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Svcr/FinInstnId/Othr/Id"); 
 	
@@ -801,22 +851,17 @@ begin
 			SWIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			SWIr.CurncyCode = CurCode;
 			recordstore(SWIr,true);
-			logtext(0,"Idletask " & SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID);
-			logtext(0,"time " & CurrentDate & " " & addminutes(currenttime,1));
-			//NewTimedTask2("SwedbankImportSave","SwedbankImportSave","SwedbankImportSave",SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID,CurrentDate,addminutes(currenttime,1),"","");  
       NewTimedTask("SwedbankImportSave" & GetCurTick,"SwedbankImportSave" & GetCurTick,"SwedbankImportSave",currentcompany & "," & SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
 			//SwedbankImportSave(SWIr);
 		end;
 	end; 
-	
-	//DelAllDsm;
 			
 return;
 end;
 
 
 
-global updating procedure SEBBankImportSTIn()
+global updating procedure AsyncSEBBankImportSTIn(area afile)
 begin
 	area axml;
 	xml xdata;
@@ -824,18 +869,12 @@ begin
 	record SEBbankImportVc SBIr;
 	longint cntchld,i,dcf;
 	date ndat;
-	area afile;
 	
-	logtext(0,"SEBBankImportSTIn " & GetImportFileName);
-	
-	xdata = ParseXMLFile(GetImportFileName);
-	impfilename = "SwedBankImports.scv";
-	addfiletoarea(GetImportFileName,afile,0);
+	xdata = parsexmlarea(afile);
+
 	if(DirExists("SwedBankImports")==false)then begin
 		CreateFolder("SwedBankImports");
 	end;
-	impfilename = impfilename & currentdate & "-" & currenttime;
-	//writeareatofile(afile,"SwedBankImports/" & impfilename,0);
 	
 	OwnID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Ownr/Id/OrgId/Othr/Id"); 
 	BankID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Svcr/FinInstnId/Othr/Id"); 
@@ -884,24 +923,17 @@ begin
 			SBIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			SBIr.CurncyCode = CurCode;
 			recordstore(SBIr,true);
-			SEBbankImportSave(SBIr);
-			SEBbankImportSaveAfter(SBIr);
-			recordstore(SBIr,true);
+      NewTimedTask("SEBbankImportSave" & GetCurTick,"SEBbankImportSave" & GetCurTick,"SEBbankImportSave",currentcompany & "," & SBIr.NtryRef & "," & SBIr.BankID & "," & SBIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+			//SEBbankImportSave(SBIr);
+			//SEBbankImportSaveAfter(SBIr);
+			//recordstore(SBIr,true);
 		end;
 	end; 
-	
-	
-	
-	while (TestEOF==false) begin
-    //tstr = ImportField;
-    if (NextImportLine(true)) then begin
-    end;
-  end;
 	
 return;
 end;
 
-global updating procedure LuminorImportSTIn()
+global updating procedure AsyncLuminorImportSTIn(area afile)
 begin
 	area axml;
 	xml xdata;
@@ -909,18 +941,8 @@ begin
 	record LuminorImportVc LRIr;
 	longint cntchld,i,dcf;
 	date ndat;
-	area afile;
 	
-	logtext(0,"LuminorImportSTIn " & GetImportFileName);
-	
-	xdata = ParseXMLFile(GetImportFileName);
-	impfilename = "LuminorImports.scv";
-	addfiletoarea(GetImportFileName,afile,0);
-	if(DirExists("LuminorImports")==false)then begin
-		CreateFolder("LuminorImports");
-	end;
-	impfilename = impfilename & currentdate & "-" & currenttime;
-	//writeareatofile(afile,"LuminorImports/" & impfilename,0);
+	xdata = parsexmlarea(afile);
 	
 	OwnID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Ownr/Id/OrgId/Othr/Id"); 
 	BankID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Svcr/FinInstnId/Othr/Id"); 
@@ -969,22 +991,17 @@ begin
 			LRIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			LRIr.CurncyCode = CurCode;
 			recordstore(LRIr,true);
-			LuminorImportSave(LRIr);
-			LuminorImportSaveAfter(LRIr);
-			recordstore(LRIr,true);
+			NewTimedTask("LuminorImportSave" & GetCurTick,"LuminorImportSave" & GetCurTick,"LuminorImportSave",currentcompany & "," & LRIr.NtryRef & "," & LRIr.BankID & "," & LRIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+			//LuminorImportSave(LRIr);
+			//LuminorImportSaveAfter(LRIr);
+			//recordstore(LRIr,true);
 		end;
 	end; 
-	
-	while (TestEOF==false) begin
-    //tstr = ImportField;
-    if (NextImportLine(true)) then begin
-    end;
-  end;
 	
 return;
 end;
 
-global updating procedure SiauliuImportSTIn()
+global updating procedure AsyncSiauliuImportSTIn(area afile)
 begin
 	area axml;
 	xml xdata;
@@ -992,18 +1009,8 @@ begin
 	record SiauliuImportVc LRIr;
 	longint cntchld,i,dcf;
 	date ndat;
-	area afile;
 	
-	logtext(0,"SiauliuImportSTIn " & GetImportFileName);
-	
-	xdata = ParseXMLFile(GetImportFileName);
-	impfilename = "SiauliuImports.scv";
-	addfiletoarea(GetImportFileName,afile,0);
-	if(DirExists("SiauliuImports")==false)then begin
-		CreateFolder("SiauliuImports");
-	end;
-	impfilename = impfilename & currentdate & "-" & currenttime;
-	//writeareatofile(afile,"SiauliuImports/" & impfilename,0);
+	xdata = parsexmlarea(afile);
 	
 	OwnID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Ownr/Id/OrgId/Othr/Id"); 
 	BankID = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Acct/Svcr/FinInstnId/Othr/Id"); 
@@ -1051,19 +1058,12 @@ begin
 			LRIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			LRIr.CurncyCode = CurCode;
 			recordstore(LRIr,true);
-			SiauliuImportSave(LRIr);
-			SiauliuImportSaveAfter(LRIr);
-			recordstore(LRIr,true);
+			NewTimedTask("SiauliuImportSave" & GetCurTick,"SiauliuImportSave" & GetCurTick,"SiauliuImportSave",currentcompany & "," & LRIr.NtryRef & "," & LRIr.BankID & "," & LRIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+			//SiauliuImportSave(LRIr);
+			//SiauliuImportSaveAfter(LRIr);
+			//recordstore(LRIr,true);
 		end;
 	end; 
-	
-	
-	
-	while (TestEOF==false) begin
-    //tstr = ImportField;
-    if (NextImportLine(true)) then begin
-    end;
-  end;
 	
 return;
 end;

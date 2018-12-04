@@ -10,6 +10,9 @@ external inner procedure OPVc_PasteBankCurncy(var record OPVc,Integer);
 external inner procedure OPVc_PasteRecVal(var record OPVc,Integer);
 external inner procedure OPVc_PasteVECode(var record OPVc,Integer);
 external updating procedure AsyncSwedBankImportSTIn(area);
+external updating procedure AsyncSEBBankImportSTIn(area);
+external updating procedure AsyncLuminorImportSTIn(area);
+external updating procedure AsyncSiauliuImportSTIn(area);
 
 global function string 255 ConvertNameToSet(string name)
 begin
@@ -832,6 +835,10 @@ begin
 return;
 end;
 
+external updating procedure AsyncSEBBankImportSTIn(area);
+external updating procedure AsyncLuminorImportSTIn(area);
+external updating procedure AsyncSiauliuImportSTIn(area);
+
 
 
 global updating procedure SwedBankImportSTIn()
@@ -839,7 +846,6 @@ begin
 	area axml;
 	xml xdata;
 	string 255 xkey,crncy,tstr,OwnID,BankID,NtryRef,AmtCcy,CurCode,CdtDbtInd,bookdate,impfilename;
-	record SwedbankImportVc SWIr;
 	longint cntchld,i,dcf;
 	date ndat;
 	area afile;
@@ -848,18 +854,81 @@ begin
 	
 	//xdata = ParseXMLFile(GetImportFileName);
 	addfiletoarea(GetImportFileName,afile,0);
-	
-	
-	
+		
 	while (TestEOF==false) begin
-   // tstr = ImportField;
     if (NextImportLine(true)) then begin
     end;
   end;
-  
   queued.AsyncSwedBankImportSTIn(afile);
+		
+return;
+end;
+
+global updating procedure SEBBankImportSTIn()
+begin
+	area axml;
+	xml xdata;
+	string 255 xkey,crncy,tstr,OwnID,BankID,NtryRef,AmtCcy,CurCode,CdtDbtInd,bookdate,impfilename;
+	longint cntchld,i,dcf;
+	date ndat;
+	area afile;
 	
-	//DelAllDsm;
+	logtext(0,"SEBBankImportSTIn " & GetImportFileName);
 	
+	//xdata = ParseXMLFile(GetImportFileName);
+	addfiletoarea(GetImportFileName,afile,0);
+		
+	while (TestEOF==false) begin
+    if (NextImportLine(true)) then begin
+    end;
+  end;
+  queued.AsyncSEBBankImportSTIn(afile);
+		
+return;
+end;
+
+global updating procedure LuminorImportSTIn()
+begin
+	area axml;
+	xml xdata;
+	string 255 xkey,crncy,tstr,OwnID,BankID,NtryRef,AmtCcy,CurCode,CdtDbtInd,bookdate,impfilename;
+	longint cntchld,i,dcf;
+	date ndat;
+	area afile;
+	
+	logtext(0,"LuminorImportSTIn " & GetImportFileName);
+	
+	//xdata = ParseXMLFile(GetImportFileName);
+	addfiletoarea(GetImportFileName,afile,0);
+		
+	while (TestEOF==false) begin
+    if (NextImportLine(true)) then begin
+    end;
+  end;
+  queued.AsyncLuminorImportSTIn(afile);
+		
+return;
+end;
+
+global updating procedure SiauliuImportSTIn()
+begin
+	area axml;
+	xml xdata;
+	string 255 xkey,crncy,tstr,OwnID,BankID,NtryRef,AmtCcy,CurCode,CdtDbtInd,bookdate,impfilename;
+	longint cntchld,i,dcf;
+	date ndat;
+	area afile;
+	
+	logtext(0,"SiauliuImportSTIn " & GetImportFileName);
+	
+	//xdata = ParseXMLFile(GetImportFileName);
+	addfiletoarea(GetImportFileName,afile,0);
+		
+	while (TestEOF==false) begin
+    if (NextImportLine(true)) then begin
+    end;
+  end;
+  queued.AsyncSiauliuImportSTIn(afile);
+		
 return;
 end;
