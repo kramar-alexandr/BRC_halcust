@@ -1,6 +1,6 @@
 //<halrule>server-only</halrule>
 external inner function Boolean IPVc_PasteCustCode(var record IPVc,Integer,var LongInt);
-external inner procedure ExtractObj(string,var Integer,var string);
+//external inner procedure ExtractObj(string,var Integer,var string);
 external inner function Boolean PasteInvIn2IPr(var record IPVc,Integer,Date,var val,Boolean,var Boolean);
 external inner procedure IPVc_PasteRecCurncy(var record IPVc,Integer);
 external inner procedure IPVc_PasteRecVal(var record IPVc,Integer);
@@ -15,6 +15,35 @@ external procedure BankFillIProws(var record IPVc,var integer,string,string,var 
 external procedure BankFillOProws(var record OPVc,var integer,string,string,var val,string,boolean,string,string);
 external inner procedure ExtractObjWithSeparator(string,string,Boolean,var Integer,var string);
 
+global
+procedure ExtractObj(string ostr,var Integer pos,var string rstr)
+BEGIN
+  string 1 c1;
+
+  rstr = "";
+L47:;
+  if (pos>=len(ostr)) then begin goto L999; end;
+  c1 = Mid(ostr,pos,1); 
+  pos = pos + 1;
+  if ((c1==",") or (c1==".") or (c1==";")) then begin
+    if (len(rstr)==0) then begin 
+      goto L47; 
+    end;
+    goto L888;
+  end;
+  if ((len(rstr)<50)) then begin 
+    rstr = rstr & c1;
+  end;
+  goto L47;
+L888:;
+  if (pos>len(ostr)) then begin goto L999; end;
+  c1 = Mid(ostr,pos,1);  
+  pos = pos + 1;
+  if ((c1==",") or (c1==".") or (c1==";")) then begin goto L888; end;
+  pos = pos - 1;
+L999:;
+  RETURN;
+END;
 
 global
 updating function LongInt SwedbankImportSaveAfter(var record SwedbankImportVc SWIr)
@@ -258,11 +287,11 @@ begin
 	record RLinkVc RLr;
   Integer notenr;
 	record SEBbankImportVc SBIr;
-	
+		
 	pos = 0;
   ExtractObj(params,pos,tstr);
   setcompany(stringtoint(tstr),false);
-
+	
   ExtractObj(params,pos,tstr);
   SBIr.NtryRef = tstr;
   
@@ -272,7 +301,6 @@ begin
   ExtractObj(params,pos,tstr);
   SBIr.OwnID = tstr;
 	if(readfirstmain(SBIr,3,true))then begin
-	
 		if(SBIr.OPNr>0)then begin
 			notenr = 1;
 			if(ReadRecordLink(SBIr,notenr,OPr,RLr)==false)then begin
@@ -851,7 +879,7 @@ begin
 			SWIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			SWIr.CurncyCode = CurCode;
 			recordstore(SWIr,true);
-      NewTimedTask("SwedbankImportSave" & GetCurTick,"SwedbankImportSave" & GetCurTick,"SwedbankImportSave",currentcompany & "," & SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+      NewTimedTask("SwedbankImportSave" & GetCurTick + i,"SwedbankImportSave" & GetCurTick,"SwedbankImportSave",currentcompany & "," & SWIr.NtryRef & "," & SWIr.BankID & "," & SWIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
 			//SwedbankImportSave(SWIr);
 		end;
 	end; 
@@ -923,7 +951,7 @@ begin
 			SBIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			SBIr.CurncyCode = CurCode;
 			recordstore(SBIr,true);
-      NewTimedTask("SEBbankImportSave" & GetCurTick,"SEBbankImportSave" & GetCurTick,"SEBbankImportSave",currentcompany & "," & SBIr.NtryRef & "," & SBIr.BankID & "," & SBIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+      NewTimedTask("SEBbankImportSave" & GetCurTick + i,"SEBbankImportSave" & GetCurTick,"SEBbankImportSave",currentcompany & "," & SBIr.NtryRef & "," & SBIr.BankID & "," & SBIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
 			//SEBbankImportSave(SBIr);
 			//SEBbankImportSaveAfter(SBIr);
 			//recordstore(SBIr,true);
@@ -991,7 +1019,7 @@ begin
 			LRIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			LRIr.CurncyCode = CurCode;
 			recordstore(LRIr,true);
-			NewTimedTask("LuminorImportSave" & GetCurTick,"LuminorImportSave" & GetCurTick,"LuminorImportSave",currentcompany & "," & LRIr.NtryRef & "," & LRIr.BankID & "," & LRIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+			NewTimedTask("LuminorImportSave" & GetCurTick + i,"LuminorImportSave" & GetCurTick,"LuminorImportSave",currentcompany & "," & LRIr.NtryRef & "," & LRIr.BankID & "," & LRIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
 			//LuminorImportSave(LRIr);
 			//LuminorImportSaveAfter(LRIr);
 			//recordstore(LRIr,true);
@@ -1058,7 +1086,7 @@ begin
 			LRIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			LRIr.CurncyCode = CurCode;
 			recordstore(LRIr,true);
-			NewTimedTask("SiauliuImportSave" & GetCurTick,"SiauliuImportSave" & GetCurTick,"SiauliuImportSave",currentcompany & "," & LRIr.NtryRef & "," & LRIr.BankID & "," & LRIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
+			NewTimedTask("SiauliuImportSave" & GetCurTick + i,"SiauliuImportSave" & GetCurTick,"SiauliuImportSave",currentcompany & "," & LRIr.NtryRef & "," & LRIr.BankID & "," & LRIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
 			//SiauliuImportSave(LRIr);
 			//SiauliuImportSaveAfter(LRIr);
 			//recordstore(LRIr,true);
