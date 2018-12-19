@@ -1034,9 +1034,10 @@ begin
 	area axml;
 	xml xdata;
 	string 255 xkey,crncy,tstr,OwnID,BankID,NtryRef,AmtCcy,CurCode,CdtDbtInd,bookdate,impfilename;
-	record SiauliuImportVc LRIr;
+	record SiauliuImportVc LRIr,oldLRIr;
 	longint cntchld,i,dcf;
 	date ndat;
+	integer k;
 	
 	xdata = parsexmlarea(afile);
 	
@@ -1073,7 +1074,7 @@ begin
 				LRIr.RecName = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Ntry[" & i & "]/NtryDtls/TxDtls/RltdPties/Cdtr/Nm");
 				LRIr.IBAN = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Ntry[" & i & "]/NtryDtls/TxDtls/RltdPties/CdtrAcct/Id/IBAN");
 				LRIr.OrgId = XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Ntry[" & i & "]/NtryDtls/TxDtls/RltdPties/Cdtr/Id/OrgId/Othr/Id");
-				if(blank(LRIr.RecName) and blank(LRIr.IBAN))then begin
+				if(XmlGet(xdata,"Document/BkToCstmrStmt/Stmt/Ntry[" & i & "]/BkTxCd/Domn/Fmly/SubFmlyCd")=="FEES")then begin
 					LRIr.PayType = "BFIS";
 				end;
 			end else begin
@@ -1085,6 +1086,20 @@ begin
 			end;
 			LRIr.AmtCcy = evaltoval(AmtCcy)*dcf;
 			LRIr.CurncyCode = CurCode;
+			
+			if(mid(LRIr.NtryRef,len(LRIr.NtryRef)-2,2)!="-")then begin
+				k = 1;
+lAsyncSiauliuImportSTInNext:;
+				oldLRIr.NtryRef = LRIr.NtryRef & "-" & k;
+				oldLRIr.BankID = LRIr.BankID;
+				oldLRIr.OwnID = LRIr.OwnID;
+				if(readfirstmain(oldLRIr,3,true))begin
+					k = k + 1;
+					goto lAsyncSiauliuImportSTInNext;
+				end else begin
+					LRIr.NtryRef = LRIr.NtryRef & "-" & k;
+				end;
+			end;
 			recordstore(LRIr,true);
 			NewTimedTask("SiauliuImportSave" & GetCurTick + i,"SiauliuImportSave" & GetCurTick,"SiauliuImportSave",currentcompany & "," & LRIr.NtryRef & "," & LRIr.BankID & "," & LRIr.OwnID,CurrentDate,addminutes(currenttime,1),addminutes(currenttime,1),"");
 			//SiauliuImportSave(LRIr);
