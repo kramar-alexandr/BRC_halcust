@@ -324,3 +324,17 @@ begin
 	EndWindow;
 
 end;
+
+
+window BRCFR0471EClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+
+  WindowBegin("BRC - FR0471 ismokos gyventojams",BRCFR0471EClass,CGECW,RcType);
+  SetWRect(20,80,420,250);
+  UseView(RcVc);
+  PeriodField(150,25,"Periodas");
+  EndWindow;
+
+  return;
+end;

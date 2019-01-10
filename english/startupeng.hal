@@ -18,6 +18,7 @@ begin
 	Setting("BRC - Siauliu import Statement",SiauliuImportLClass,modSL);// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:46:01
 
 	Setting("BRC - Banking Statement Import settings",BankImportSetTClass,modSL);// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:45:59
-	
+	Export("BRC - FR0471 imokos gyventojams",BRCFR0471EClass,BRCFR0471En,modPL); // EVS: HAL-225
+
   return;
 end;

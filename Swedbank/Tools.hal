@@ -280,11 +280,13 @@ begin
 							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
 						end;
 					end;
+					testf = primsearch;
+					if(invused[ARr.InvoiceNr]==true)then begin testf = false; end;
 					
-					
-					if(primsearch)then begin
+					if(testf)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
+						invused[IPrw.InvoiceNr] = true;
 						matrowput(IPr,k,IPrw);
 						PasteInvIn2IPr(IPr,k,IPr.TransDate,chk,false,installmentf);
 						matrowget(IPr,k,IPrw);
@@ -350,10 +352,13 @@ begin
 							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
 						end;
 					end;
+					testf = primsearch;
+					if(invused[ARr.InvoiceNr]==true)then begin testf = false; end;
 					
-					if(primsearch)then begin
+					if(testf)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
+						invused[IPrw.InvoiceNr] = true;
 						matrowput(IPr,k,IPrw);
 						PasteInvIn2IPr(IPr,k,IPr.TransDate,chk,false,installmentf);
 						matrowget(IPr,k,IPrw);
@@ -480,9 +485,14 @@ begin
 							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
 						end;
 					end;
-					if(primsearch)then begin
+					
+					testf = primsearch;
+					if(invused[ARr.InvoiceNr]==true)then begin testf = false; end;
+					
+					if(testf)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
+						invused[IPrw.InvoiceNr] = true;
 						matrowput(IPr,k,IPrw);
 						PasteInvIn2IPr(IPr,k,IPr.TransDate,chk,false,installmentf);
 						matrowget(IPr,k,IPrw);
@@ -546,7 +556,10 @@ begin
 							primsearch = StringInText(ARr.OfficialSerNr,Letr) and nonblank(ARr.OfficialSerNr);
 						end;
 					end;
-					if(primsearch)then begin
+					
+					testf = primsearch;
+					
+					if(testf)then begin
 						clearrow(IPr,IPrw,1);
 						IPrw.InvoiceNr = ARr.InvoiceNr;
 						matrowput(IPr,k,IPrw);
