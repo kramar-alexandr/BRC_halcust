@@ -5,6 +5,7 @@ begin
   Module("Credit management","",730,modCredMan);
   
   Export("BRC - FR0471 imokos gyventojams",BRCFR0471EClass,BRCFR0471En,modPL); // EVS: HAL-225
+  Export("BRC - GPM312 imokos gyventojams",BRCFR0471EClass,BRCGPM312En,modPL);// Edit ************************** BPI Ukraine - KramarAlexandr - 01, 14 01 2019 y. at 3:14:54 PM
   Setting("BRC - FR0471 eksportas",BRCFR0471SetTClass,modPL); // EVS: HAL-225
 
   Maintenance("Sukurti menesines fakturas",EBS_CreateCredManInvVClass,EBS_CreateCredManInvMn,modCredMan);
