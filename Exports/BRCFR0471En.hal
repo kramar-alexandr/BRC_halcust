@@ -299,6 +299,57 @@ begin
 return;
 end;
 
+
+procedure GetVEDataAndSize312(var vector integer v_data, var longint p, var longint pu,
+                           var array string a_pvelist, var array string a_puvelist,
+                           var vector val v_vesum,record RcVc RepSpec)
+begin
+  record CUVc VEr;
+  boolean trhs;
+  val pval;
+  val puval;
+
+  p = 0;
+  pu = 0;
+
+  VEr.Code = "";
+  VEr.VEType = 1;
+  trhs = true;
+  while (LoopKey("VEActCode",VEr,1,trhs)) begin
+    if (VEr.VEType == 0) then begin
+      trhs = false;
+    end else begin
+      if (v_data[VEr.VECat] == 1) then begin
+        v_vesum[VEr.Code] = GetPaymentsForVE(RepSpec,VEr.Code);
+        if (v_vesum[VEr.Code] > 0) then begin
+          switch (v_data[VEr.VECat & "|yesno"]) begin
+            case 0:
+              pval = pval + 1;
+              a_pvelist[a_pvelist.length] = VEr.Code;
+              v_vesum["$ptotal"] = v_vesum["$ptotal"] + v_vesum[VEr.Code];
+            case 1:
+              puval = puval + 1;
+              a_puvelist[a_puvelist.length] = VEr.Code;
+              v_vesum["$putotal"] = v_vesum["$putotal"] + v_vesum[VEr.Code];
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  pval = (pval - 2);
+  if (pval < 0) then begin
+    pval = 0;
+  end;
+  pval = pval / 10;
+  p = RoundUp(pval) + 1;
+
+  puval = puval / 5;
+  pu = RoundUp(puval);
+
+return;
+end;
+
 procedure FirstPage(record CYBlock cybl,record RcVc RepSpec, var longint ve_counter,
                     longint p, longint pu, vector val v_vesum, array string a_pvelist, vector integer v_data)
 begin
@@ -356,7 +407,7 @@ begin
 return;
 end;
 
-procedure FirstPagegmp312(record CYBlock cybl,record RcVc RepSpec, var longint ve_counter,
+procedure FirstPageGPM312(record CYBlock cybl,record RcVc RepSpec, var longint ve_counter,
                     longint p, longint pu, vector val v_vesum, array string a_pvelist, vector integer v_data)
 begin
   record CUVc VEr;
@@ -370,46 +421,17 @@ begin
   ConcatStrWithCommaSpace(cybl.Addr3,full_addr);
   ConcatStrWithCommaSpace(cybl.Addr4,full_addr);
 
-  ExportXmlTagOpen("<Page PageDefName=""GMP312"" PageNumber=""1"">");
+  ExportXmlTagOpen("<Page PageDefName=""GPM312"" PageNumber=""1"">");
   ExportXmlTagOpen("<Fields Count=""9"">");
   ExportXmlFieldValue("<Field Name=""B_MM_ID"">",cybl.OrgNr,"</Field>");
   ExportXmlFieldValue("<Field Name=""B_MM_Pavad"">",UpperCase(cybl.CompName),"</Field>");
   ExportXmlFieldValue("<Field Name=""B_ML_Metai"">",GetYear(RepSpec.sStartDate),"</Field>");
-	ExportXmlFieldValue("<Field Name=""G4"">",0.00,"</Field>");
+	ExportXmlFieldValue("<Field Name=""G4"">",ValToStringXml(v_vesum["$ptotal"] + v_vesum["$putotal"]),"</Field>");
 	ExportXmlFieldValue("<Field Name=""G5"">",0.00,"</Field>");
 	ExportXmlFieldValue("<Field Name=""G6"">",0.00,"</Field>");
 	ExportXmlFieldValue("<Field Name=""G7"">",0.00,"</Field>");
 	ExportXmlFieldValue("<Field Name=""B_FormNr"">","","</Field>");
 	ExportXmlFieldValue("<Field Name=""B_FormVerNr"">","","</Field>");
-	
-  x = 2;
-  if (a_pvelist.length <= 2) then begin
-    x = a_pvelist.length;
-  end;
-
-  for (i = 0; i < x; i = i + 1) begin
-    ve_counter = ve_counter + 1; // todo
-    VEr.Code = a_pvelist[i];
-    ReadFirstMain(VEr,1,true);
-    ExportXmlFieldValue("<Field Name=""E11-" & ve_counter & """>",ve_counter,"</Field>");
-    ExportXmlFieldValue("<Field Name=""E12-" & ve_counter & """>",VEr.RegNr1,"</Field>");
-    ExportXmlFieldValue("<Field Name=""E12_1-" & ve_counter & """>",v_data[VEr.VECat & "|12.1"],"</Field>");
-    ExportXmlFieldValue("<Field Name=""E30-" & ve_counter & """>","","</Field>");
-    ExportXmlFieldValue("<Field Name=""E13-" & ve_counter & """>",UpperCase(VEr.Name),"</Field>");
-    ExportXmlFieldValue("<Field Name=""E14-" & ve_counter & """>",v_data[VEr.VECat & "|14"],"</Field>");
-    ExportXmlFieldValue("<Field Name=""E15-" & ve_counter & """>",ValToStringXml(v_vesum[VEr.Code]),"</Field>");
-    ExportXmlFieldValue("<Field Name=""E16-" & ve_counter & """>","","</Field>");
-    ExportXmlFieldValue("<Field Name=""E25-" & ve_counter & """>","","</Field>");
-    ExportXmlFieldValue("<Field Name=""E26-" & ve_counter & """>","","</Field>");
-    esum = esum + v_vesum[VEr.Code];
-  end;
-
-  ExportXmlFieldValue("<Field Name=""E17"">",p,"</Field>");
-  ExportXmlFieldValue("<Field Name=""E19"">",ValToStringXml(esum),"</Field>");
-  ExportXmlFieldValue("<Field Name=""E20"">",ValToStringXml(v_vesum["$ptotal"] + v_vesum["$putotal"]),"</Field>");
-  ExportXmlFieldValue("<Field Name=""E18"">",pu,"</Field>");
-  ExportXmlFieldValue("<Field Name=""B_FormNr"">","","</Field>");
-  ExportXmlFieldValue("<Field Name=""B_FormVerNr"">","","</Field>");
   ExportXmlTagClose("</Fields>");
   ExportXmlTagClose("</Page>");
 
@@ -429,6 +451,28 @@ begin
   ExportXmlFieldValue("<Field Name=""P16-" & inpage_counter & """>","","</Field>");
   ExportXmlFieldValue("<Field Name=""P25-" & inpage_counter & """>","","</Field>");
   ExportXmlFieldValue("<Field Name=""P26-" & inpage_counter & """>","","</Field>");
+
+return;
+end;
+
+procedure PPage312(record CUVc VEr,integer inpage_counter,integer vendor_counter,vector integer v_data, val sum,integer cnt)
+begin
+
+  //ExportXmlFieldValue("<Field Name=""P11-" & inpage_counter & """>",vendor_counter + 1,"</Field>");
+  ExportXmlFieldValue("<Field Name=""L1-" & inpage_counter & """>",VEr.RegNr1,"</Field>");
+  ExportXmlFieldValue("<Field Name=""L2-" & inpage_counter & """>",v_data[VEr.VECat & "|12.1"],"</Field>");
+  ExportXmlFieldValue("<Field Name=""L3-" & inpage_counter & """>",UpperCase(VEr.Name),"</Field>");
+  ExportXmlFieldValue("<Field Name=""L4-" & inpage_counter & """>","B","</Field>");
+  ExportXmlFieldValue("<Field Name=""L5-" & inpage_counter & """>",v_data[VEr.VECat & "|14"],"</Field>");
+  ExportXmlFieldValue("<Field Name=""L6-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""L7-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""L8-" & inpage_counter & """>",ValToStringXml(sum),"</Field>");
+  ExportXmlFieldValue("<Field Name=""L9-" & inpage_counter & """>","0,00","</Field>");
+  ExportXmlFieldValue("<Field Name=""L10-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""L11-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""L12-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""L13-" & inpage_counter & """>","","</Field>");
+
 
 return;
 end;
@@ -476,6 +520,38 @@ begin
 return;
 end;
 
+procedure PUPage312(record CYBlock cybl,record CUVc VEr,integer inpage_counter,integer vendor_counter,
+                 vector integer v_data, val sum,date now, longint pg_counter)
+begin
+  string 255 full_addr;
+
+  full_addr = VEr.InvAddr0;
+  ConcatStrWithCommaSpace(VEr.InvAddr1,full_addr);
+  ConcatStrWithCommaSpace(VEr.InvAddr2,full_addr);
+  ConcatStrWithCommaSpace(VEr.InvAddr3,full_addr);
+  ConcatStrWithCommaSpace(VEr.InvAddr4,full_addr);
+	
+	
+	
+  ExportXmlFieldValue("<Field Name=""U1-" & inpage_counter & """>",VEr.RegNr1,"</Field>");
+  ExportXmlFieldValue("<Field Name=""U2-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""U3-" & inpage_counter & """>",UpperCase(VEr.Name),"</Field>");
+  ExportXmlFieldValue("<Field Name=""U4-" & inpage_counter & """>",v_data[VEr.VECat & "|12.1"],"</Field>");
+  ExportXmlFieldValue("<Field Name=""U5-" & inpage_counter & """>",v_data[VEr.VECat & "|14"],"</Field>");
+  ExportXmlFieldValue("<Field Name=""U6-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""U7-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""U8-" & inpage_counter & """>",sum,"</Field>");
+  ExportXmlFieldValue("<Field Name=""U9-" & inpage_counter & """>","","</Field>");
+	ExportXmlFieldValue("<Field Name=""U10-" & inpage_counter & """>","","</Field>");
+	ExportXmlFieldValue("<Field Name=""U11-" & inpage_counter & """>","","</Field>");
+	ExportXmlFieldValue("<Field Name=""U12-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""U13-" & inpage_counter & """>","","</Field>");
+  ExportXmlFieldValue("<Field Name=""U14-" & inpage_counter & """>",VEr.CountryCode,"</Field>");
+  ExportXmlFieldValue("<Field Name=""U15-" & inpage_counter & """>",UpperCase(full_addr),"</Field>");
+
+return;
+end;
+
 procedure StartPage(string id, string counter, string fields)
 begin
 
@@ -501,6 +577,33 @@ begin
 
   if (type == "PU") then begin
     ExportXmlFieldValue("<Field Name=""PU19"">",ValToStringXml(pg_val),"</Field>");
+    ExportXmlTagClose("</Fields>");
+    ExportXmlTagClose("</Page>");
+  end;
+
+return;
+end;
+
+procedure EndPage312(string type, integer counter, date now, string orgnr, val pg_val)
+begin
+
+  if (type == "P") then begin
+    ExportXmlFieldValue("<Field Name=""B_MM_ID"">",orgnr,"</Field>");
+    ExportXmlFieldValue("<Field Name=""B_FormNr"">","","</Field>");
+    ExportXmlFieldValue("<Field Name=""B_FormVerNr"">","","</Field>");
+    ExportXmlFieldValue("<Field Name=""LapoNr"">",counter,"</Field>");
+    ExportXmlFieldValue("<Field Name=""B_ML_Metai"">",now.year,"</Field>");
+    ExportXmlTagClose("</Fields>");
+    ExportXmlTagClose("</Page>");
+  end;
+
+  if (type == "PU") then begin
+  	ExportXmlFieldValue("<Field Name=""B_MM_ID"">",orgnr,"</Field>");
+    ExportXmlFieldValue("<Field Name=""B_FormNr"">","","</Field>");
+    ExportXmlFieldValue("<Field Name=""B_FormVerNr"">","","</Field>");
+    ExportXmlFieldValue("<Field Name=""LapoNr"">",counter,"</Field>");
+    ExportXmlFieldValue("<Field Name=""B_ML_Metai"">",now.year,"</Field>");
+
     ExportXmlTagClose("</Fields>");
     ExportXmlTagClose("</Page>");
   end;
@@ -538,6 +641,31 @@ begin
   end;
 
   GetPageFieldCount = res;
+return;
+end;
+
+function string 3 GetPageFieldCount312(string type,integer ln,integer i)
+begin
+  integer diff;
+  string 3 res;
+
+  diff = ln - i;
+  if (type == "P") then begin
+    if (diff >= 10) then begin
+      res = "135";
+    end else begin
+    	res = diff * 13 + 5; 
+    end;
+  end;
+  if (type == "PU") then begin
+    if (diff >= 5) then begin
+      res = "80";
+    end else begin
+      res = diff * 15 + 5;
+    end;
+  end;
+
+  GetPageFieldCount312 = res;
 return;
 end;
 
@@ -684,7 +812,8 @@ begin
   vector integer v_data;
   vector val v_vesum;
   array string 255 a_vecats,a_pvelist,a_puvelist;
-
+	integer ppcnt;
+	
   SetExportCodePage("UTF-8");
 
   BlockLoad(cybl);
@@ -695,7 +824,7 @@ begin
   pug_counter = 0;
 
   LoadSettings(v_data,a_vecats);
-  GetVEDataAndSize(v_data,p,pu,a_pvelist,a_puvelist,v_vesum,RepSpec);
+  GetVEDataAndSize312(v_data,p,pu,a_pvelist,a_puvelist,v_vesum,RepSpec);
 
   ExportXmlNL("<?xml version=""1.0"" encoding=""UTF-8""?>");
 
@@ -743,7 +872,7 @@ begin
   
   
   
-  ExportXmlTagOpen("<FormErrors Count=""5"">");
+  /*ExportXmlTagOpen("<FormErrors Count=""5"">");
 	ExportXmlTagOpen("<FormError ErrMessage=""Pašalinkite neužpildytą GPM312L priedo lapą arba jį užpildykite"" ErrLevel=""Error"">");
 	ExportXmlTagOpen("<FieldOnPageRefs Count=""1"">");
 	ExportXmlNL("<FieldOnPageRef PageDefName=""GPM312L"" PageNumber=""2"" FieldName=""LapoNr""/>");
@@ -769,40 +898,46 @@ begin
 	ExportXmlNL("<FieldOnPageRef PageDefName=""GPM312"" PageNumber=""1"" FieldName=""B_MM_Pavad""/>");
 	ExportXmlTagClose("</FieldOnPageRefs>");
 	ExportXmlTagClose("</FormError>");
-	ExportXmlTagClose("</FormErrors>");
+	ExportXmlTagClose("</FormErrors>");*/
   
 
   // <FromErrors> ?
-  ExportXmlTagOpen("<Pages Count=""" & (p + pu) & """>");
-  FirstPage(cybl,RepSpec,ve_counter,p,pu,v_vesum,a_pvelist,v_data);
+  ExportXmlTagOpen("<Pages Count=""" & (p + pu + 1) & """>");
+  FirstPageGPM312(cybl,RepSpec,ve_counter,p,pu,v_vesum,a_pvelist,v_data);
 
   pg_counter = 0;
   if (a_pvelist.length > 2) then begin
     pg_counter = pg_counter + 1;
-    StartPage("FR0471P",pg_counter + 1,GetPageFieldCount("P",a_pvelist.length,2));
+    StartPage("GPM312L",pg_counter + 1,GetPageFieldCount312("P",a_pvelist.length,2));
   end;
-  for (i = 2; i < a_pvelist.length; i = i + 1) begin
+  
+  ppcnt = 1;
+  
+  for (i = 0; i < a_pvelist.length; i = i + 1) begin
     VEr.Code = a_pvelist[i];
     ReadFirstMain(VEr,1,true);
 
     j = j + 1;
     pg_val = pg_val + v_vesum[VEr.Code];
 
-    PPage(VEr,j,i,v_data,v_vesum[VEr.Code]);
-
-    if (j == 5) then begin
-      EndPage("P",pg_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
+    PPage312(VEr,j,i,v_data,v_vesum[VEr.Code],ppcnt);
+    ppcnt = ppcnt + 1;
+		if(ppcnt==11)then begin
+			ppcnt = 1;
+		end;
+    if (j == 10) then begin
+      EndPage312("P",pg_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
 
       if (i < (a_pvelist.length - 1)) then begin
         pg_counter = pg_counter + 1;
-        StartPage("FR0471P",pg_counter + 1,GetPageFieldCount("P",a_pvelist.length,i + 1));
+        StartPage("GPM312L",pg_counter + 1,GetPageFieldCount312("P",a_pvelist.length,i + 1));
       end;
       j = 0;
       pg_val = 0;
     end;
   end;
   if (j > 0) then begin
-    EndPage("P",pg_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
+    EndPage312("P",pg_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
   end;
 
   pg_val = 0;
@@ -811,7 +946,7 @@ begin
   pug_counter = 0;
   if (a_puvelist.length > 0) then begin
     pug_counter = pug_counter + 1;
-    StartPage("FR0471PU",pug_counter + pg_counter + 1,GetPageFieldCount("PU",a_puvelist.length,0));
+    StartPage("GPM312U",pug_counter + pg_counter + 1,GetPageFieldCount312("PU",a_puvelist.length,0));
   end;
   for (i = 0; i < a_puvelist.length; i = i + 1) begin
     VEr.Code = a_puvelist[i];
@@ -820,21 +955,21 @@ begin
     j = j + 1;
     pg_val = pg_val + v_vesum[VEr.Code];
 
-    PUPage(cybl,VEr,j,i,v_data,v_vesum[VEr.Code],RepSpec.sStartDate,pug_counter);
+    PUPage312(cybl,VEr,j,i,v_data,v_vesum[VEr.Code],RepSpec.sStartDate,pug_counter);
 
-    if (j == 3) then begin
-      EndPage("PU",pug_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
+    if (j == 5) then begin
+      EndPage312("PU",pug_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
 
       if (i < (a_puvelist.length - 1)) then begin
         pug_counter = pug_counter + 1;
-        StartPage("FR0471PU",pug_counter + pg_counter + 1,GetPageFieldCount("PU",a_puvelist.length,i + 1));
+        StartPage("GPM312U",pug_counter + pg_counter + 1,GetPageFieldCount312("PU",a_puvelist.length,i + 1));
       end;
       j = 0;
       pg_val = 0;
     end;
   end;
   if (j > 0) then begin
-    EndPage("PU",pug_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
+    EndPage312("PU",pug_counter,RepSpec.sStartDate,cybl.OrgNr,pg_val);
   end;
 
   ExportXmlTagClose("</Pages>");
