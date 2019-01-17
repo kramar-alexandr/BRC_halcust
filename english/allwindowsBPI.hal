@@ -326,11 +326,11 @@ begin
 end;
 
 
-window BRCFR0471EClass:1
+window BRCGPM312EClass:1
   wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
 
-  WindowBegin("BRC - FR0471 ismokos gyventojams",BRCFR0471EClass,CGECW,RcType);
+  WindowBegin("BRC - GPM312 ismokos gyventojams",BRCGPM312EClass,CGECW,RcType);
   SetWRect(20,80,420,250);
   UseView(RcVc);
   PeriodField(150,25,"Periodas");

@@ -8,7 +8,7 @@ begin
   // SString(1000003,"Monthly invoice could not be created");
   // SString(1000004,"Monthly invoice already has credit note");
   
-	Export("BRC - GPM312 imokos gyventojams",BRCFR0471EClass,BRCGPM312En,modPL);// Edit ************************** BPI Ukraine - KramarAlexandr - 01, 14 01 2019 y. at 3:14:54 PM
+	Export("BRC - GPM312 imokos gyventojams",BRCGPM312EClass,BRCGPM312En,modPL);// Edit ************************** BPI Ukraine - KramarAlexandr - 01, 14 01 2019 y. at 3:14:54 PM
 
   
   SString(1001000,"Special notes: Export, PVN lik. 43.pants (1)."); //OBS

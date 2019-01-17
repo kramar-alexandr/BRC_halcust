@@ -14,6 +14,19 @@ begin
   return;
 end;
 
+window BRCGPM312EClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+
+  WindowBegin("BRC - FR0471 išmokos gyventojams",BRCGPM312EClass,CGECW,RcType);
+  SetWRect(20,80,420,250);
+  UseView(RcVc);
+  PeriodField(150,25,"Periodas");
+  EndWindow;
+
+  return;
+end;
+
 window BRCFR0471SetTClass:1
   wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
