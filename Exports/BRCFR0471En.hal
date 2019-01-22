@@ -342,7 +342,7 @@ begin
     pval = 0;
   end;
   pval = pval / 10;
-  p = RoundUp(pval) + 1;
+  p = RoundUp(pval);
 
   puval = puval / 5;
   pu = RoundUp(puval);
