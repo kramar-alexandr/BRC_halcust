@@ -341,7 +341,7 @@ begin
   if (pval < 0) then begin
     pval = 0;
   end;
-  pval = pval / 10;
+  pval = pval / 10 + 1;
   p = RoundUp(pval);
 
   puval = puval / 5;
