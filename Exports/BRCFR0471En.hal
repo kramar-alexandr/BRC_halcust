@@ -337,31 +337,16 @@ begin
     end;
   end;
 
-  pval = (pval - 2);
   if (pval < 0) then begin
     pval = 0;
   end;
+  
   pval = pval / 10;
-  p = RoundUp(pval) + 1;
-	
-	if(pval<10)then begin
-		p = 1;
-	end;
-	if(pval==0)then begin
-		p = 0;
-	end;
-	
+  p = RoundUp(pval);
 	
   puval = puval / 5;
   pu = RoundUp(puval);
   
-  if(puval<5)then begin
-		pu = 1;
-	end;
-	if(puval==0)then begin
-		pu = 0;
-	end;
-
 return;
 end;
 
@@ -860,7 +845,7 @@ begin
     ExportXmlTagClose("</ListPages>");
     ExportXmlTagClose("</Group>");
   end;
-	if(p==0)then begin
+	if(p>1)then begin
 		ExportXmlTagOpen("<Group Name=""Priedas_GPM312L"">");
     ExportXmlTagOpen("<ListPages>");
     ExportXmlNL("<ListPage>GPM312L</ListPage>");
@@ -874,7 +859,7 @@ begin
     ExportXmlTagClose("</ListPages>");
     ExportXmlTagClose("</Group>");
   end;
-  if(pu==0)then begin
+  if(pu>1)then begin
   	ExportXmlTagOpen("<Group Name=""Priedas_GPM312U"">");
     ExportXmlTagOpen("<ListPages>");
     ExportXmlNL("<ListPage>GPM312U</ListPage>");
@@ -921,9 +906,9 @@ begin
   FirstPageGPM312(cybl,RepSpec,ve_counter,p,pu,v_vesum,a_pvelist,v_data);
 
   pg_counter = 0;
-  if (a_pvelist.length > 2) then begin
+  if (a_pvelist.length > 1) then begin
     pg_counter = pg_counter + 1;
-    StartPage("GPM312L",pg_counter + 1,GetPageFieldCount312("P",a_pvelist.length,2));
+    StartPage("GPM312L",pg_counter + 1,GetPageFieldCount312("P",a_pvelist.length,0));
   end;
   
   ppcnt = 1;
