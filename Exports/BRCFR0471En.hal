@@ -341,11 +341,26 @@ begin
   if (pval < 0) then begin
     pval = 0;
   end;
-  pval = pval / 10 + 1;
-  p = RoundUp(pval);
-
+  pval = pval / 10;
+  p = RoundUp(pval) + 1;
+	
+	if(pval<10)then begin
+		p = 1;
+	end;
+	if(pval==0)then begin
+		p = 0;
+	end;
+	
+	
   puval = puval / 5;
   pu = RoundUp(puval);
+  
+  if(puval<5)then begin
+		pu = 1;
+	end;
+	if(puval==0)then begin
+		pu = 0;
+	end;
 
 return;
 end;
