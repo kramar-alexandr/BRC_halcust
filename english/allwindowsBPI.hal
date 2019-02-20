@@ -338,21 +338,3 @@ begin
 
   return;
 end;
-
-window CreditAgreementsRClass:1
-  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
-begin
-  real h,v;
-  WindowBegin("Specify Credit Agreements report",CreditAgreementsRClass,CGRcW,RcType);
-  SetWRect(20,80,440,150);
-  PeriodField(h=140,v=6,"Period");
-  EditFieldTL(h,v+=20,150,"Client",M4UStr,Normal,40,f1,false,CUSClass);
-  EditFieldTL(h,v+=20,150,"Type",M4UStr,Normal,40,f2,false,CredManTypeSClass);
-  CheckBox(h,v+=30,0,"Include suspended",flags[1]);
-  CheckBox(h,v+=30,0,"Include interrupted",flags[2]);
-  CheckBox(h,v+=30,0,"Include unapproved",flags[3]);
-  CheckBox(h,v+=30,0,"Not OK'ed",flags[4]);
-  CheckBox(h,v+=30,0,"Include Completed",flags[5]);
-  
-  EndWindow;
-end;

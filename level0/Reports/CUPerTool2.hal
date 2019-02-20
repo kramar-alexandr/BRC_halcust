@@ -1,5 +1,3 @@
-external function Boolean SetInSet2(string,string);
-external function string 255 GetSupplierOnAccountAC(string);
 external function string 60 AddObjectToObjectList(string,string);
 external function Boolean IsEnterprise();
 external function Boolean IsPrepaymentOpen(Date,LongInt,var val);
@@ -9,7 +7,6 @@ external procedure GetFullCurncyRate(var string,Date,var val,var val,var val,var
 external procedure BeginCurncyTotals(var Integer);
 external procedure AddCurncyTotals(var array string,var array val,var Integer,string,val);
 external procedure PrintCurncyTotals(array string,array val,array val,array val,Integer,Integer,Integer,Integer,Integer,Boolean,Integer);
-external function string 255 GetCustomerDebtorsAC(string);
 external function string 255 GetCustomerOnAccountAC(string);
 external procedure CurValToOtherCur(Date,string,val,string,var val,roundmode);
 external procedure IVVc_GetPrePaidAmount(record IVVc,var val);
@@ -42,8 +39,8 @@ begin
     for (tcnt=0;tcnt<trwcnt;tcnt=tcnt+1) begin
       MatRowGet(CLInr,tcnt,CLInrw);
       if (nonblank(RepSpec.ObjStr)) then begin
-        if (SetInSet2(RepSpec.ObjStr,CLInr.Objects)==false) then begin goto L11; end;
-      end;        
+        if (SetInSet(RepSpec.ObjStr,CLInr.Objects)==false) then begin goto L11; end;
+      end;
       if ((CLInrw.Type==1) and (CLInrw.TransNr!=-1)) then begin
         IVr.SerNr = CLInrw.TransNr;
         ReadFirstMain(IVr,1,true);
@@ -217,8 +214,8 @@ begin
     for (tcnt=0;tcnt<trwcnt;tcnt=tcnt+1) begin
       MatRowGet(CLOutr,tcnt,CLOutrw);
       if (nonblank(RepSpec.ObjStr)) then begin
-        if (SetInSet2(RepSpec.ObjStr,CLOutr.Objects)==false) then begin goto L12; end;
-      end;        
+        if (SetInSet(RepSpec.ObjStr,CLOutr.Objects)==false) then begin goto L12; end;
+      end;
       if ((CLOutrw.Type==1) and (CLOutrw.TransNr!=-1)) then begin
         v = blankval;
         if (CLOutrw.Sum!=0)then begin
@@ -328,7 +325,7 @@ begin
   if (ReadFirstMain(CredManr,1,true)) then begin
     if (CredManr.Invalid!=0) then begin goto L44; end;
     if (nonblank(RepSpec.ObjStr)) then begin
-      if (SetInSet2(RepSpec.ObjStr,CredManr.Objects)==false) then begin goto L44; end;
+      if (SetInSet(RepSpec.ObjStr,CredManr.Objects)==false) then begin goto L44; end;
     end;
     v = blankval;
     if (CredManr.InvSum4!=0) then begin
@@ -648,12 +645,8 @@ CURRENCIES-TODO
             if (IPrw.CustCode==CUp.Code) then begin
               aracc = IPrw.ARAcc;
               if (blank(aracc)) then begin
-                if (IPrw.InvoiceNr<0 and IPrw.CUPNr>0) then begin
-                  aracc = GetCustomerOnAccountAC(IPrw.CustCode);
-                end else begin
-                  aracc = GetCustomerDebtorsAC(IPrw.CustCode);
-                end;
-              end;              
+                aracc = GetCustomerOnAccountAC(IPrw.CustCode);
+              end;
               if (nonblank(RepSpec.FirstAcc)) then begin
                 if (aracc!=RepSpec.FirstAcc) then begin
                   goto L11IP;
@@ -705,13 +698,6 @@ CURRENCIES-TODO
 //                    if (RepSpec.flags[2]==0) then begin
                       basecurval = IPrw.BankVal; //must show same as on prepayment account, and BankVal does not have amount posted to On Acc Acc
 //                    end;
-                    if (basecurval==0 and IPrw.RecVal!=0) then begin
-                      if ((bascur.BaseCur1==IPrw.InvCurncy) or blank(IPrw.InvCurncy)) then begin
-                        basecurval = IPrw.InvVal;
-                      end else begin
-                        basecurval = MulWithRateToBase1(IPrw.InvCurncy,IPr.TransDate,IPrw.InvVal,DefaultCurRoundOff);
-                      end;
-                    end;
                   end else begin
                     basecurval = MulWithRateToBase1(IPrw.InvCurncy,IPr.TransDate,IPrw.InvVal,DefaultCurRoundOff);
                   end;

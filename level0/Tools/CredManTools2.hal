@@ -333,7 +333,7 @@ begin
 
   v = round(installment,SetRoundModeD(CredManSetb.InstalmentRoundOff));
   if (v!=0) then begin
-    CredManPayPlanrw.ArtCode = installitem;//EBS
+    CredManPayPlanrw.ArtCode = installitem;
     CredManPayPlanrw.TransDate = transdate;
     CredManPayPlanrw.PlanType = 6;
     CredManPayPlanrw.Sum = v;

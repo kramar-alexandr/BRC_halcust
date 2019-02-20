@@ -73,7 +73,6 @@ external procedure IVUpdateFIFO(record IVVc,Boolean);
 external function Integer GetCreditedInvoiceType(record IVVc);
 external function Boolean IsSessionOpen(string,string,Date,Time);
 external function boolean ShouldSendArgEinvoice(record IVVc);
-external function boolean ShouldSendMexEinvoice();
 external function boolean ArgEInvoiceBeingSentRemote(longint,string,Boolean);
 external function boolean RoyaltyRecordExistsForCN(record IVVc);
 external function Boolean HasSLIntegratedWithNL();
@@ -1391,38 +1390,20 @@ L12:;
     end;
     if (nonblankdate(IVp.PlanSendDate) or nonblanktime(IVp.PlanSendTime)) then begin
       if (IVp.PlanSendDate<IVp.InvDate) then begin
-        RecordCheckError(1142,"",-1,"PlanSendDate");      
-        res = -1; 
-        goto L99;
-      end;
-      if (IVp.PlanSendDate==IVp.TransDate) then begin
-        if (IVp.PlanSendTime<CurrentTime) then begin
-          RecordCheckError(20866,"",-1,"PlanSendTime");            
-          res = -1; 
-          goto L99;
-        end;
-      end;
-      if (IVp.PlanSendDate>IVp.PlanArrDate and nonblankdate(IVp.PlanArrDate)) then begin
-        RecordCheckError(20866,"",-1,"PlanArrDate");
-        res = -1; 
-        goto L99;
-      end;
-      if (nonblankdate(IVp.PlanArrDate) and blanktime(IVp.PlanArrTime)) then begin
-        RecordCheckError(20866,"",-1,"PlanArrTime");        
-        res = -1; 
+        RecordCheckError(1142,"",-1,"PlanSendDate");
+        res = -1;
         goto L99;
       end;
       if (blanktime(IVp.PlanSendTime)) then begin
         RecordCheckError(20866,"",-1,"PlanSendTime");
         res = -1;
         goto L99;
-      end else begin
-        if (IVp.PlanSendTime>IVp.PlanArrTime and nonblanktime(IVp.PlanArrTime)) then begin
-          if (IVp.PlanSendDate>=IVp.PlanArrDate) then begin
-            RecordCheckError(20866,"",-1,"PlanArrTime");        
-            res = -1; 
-            goto L99;
-          end;
+      end;
+      if (IVp.PlanSendDate==IVp.InvDate) then begin
+        if (IVp.PlanSendTime<CurrentTime) then begin
+          RecordCheckError(20866,"",-1,"PlanSendTime");
+          res = -1;
+          goto L99;
         end;
       end;
     end;

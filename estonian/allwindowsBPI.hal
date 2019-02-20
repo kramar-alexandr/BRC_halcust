@@ -1,7 +1,7 @@
-SetLangMode(LangLithuanian,"LIT",2);
+SetLangMode(LangEstonian,"EST",0);
 
 window SwedBankImportSTIClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:53
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 
@@ -13,14 +13,18 @@ begin
   StaticText(h,v+=vs,"Import: SwedBank Bank To Customer Statement",false);
   StaticText(h,v+=vs,"File format: XML",false);
   StaticText(h,v+=vs,"Based on: Bank To Customer Statement V02 camt.053.001.02",false);
-
+	v = v + vs;
+	EditField(h=100,v+=vs,50,"Swedbank Payment mode",ViewOnly,DefPayModeSW,false,PMSClass);
+	EditField(h=100,v+=vs,50,"SEB Bank Payment mode",ViewOnly,DefPayModeSEB,false,PMSClass);
+	EditField(h=100,v+=vs,50,"Luminor bank Payment mode",ViewOnly,DefPayModeLUM,false,PMSClass);
+	EditField(h=100,v+=vs,50,"Siauliu Bank Payment mode",ViewOnly,DefPayModeSIA,false,PMSClass);
   EndWindow;
   return;
 end;
 
 
 window SwedbankImportLClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:48
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   WindowBegin("Swedbank Imports",SwedbankImportLClass,CGmlist,-);
   SetWRect(20,80,1200,355);
@@ -45,7 +49,7 @@ begin
 end;
 
 window SwedbankImportDClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:45
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 	
@@ -67,12 +71,14 @@ begin
   EditField(h=100,v+=vs,150,"Curncy",ViewOnly,CurncyCode,false,0); 
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
   EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0); 
+  
+  SearchField("Search");
   EndWindow;
   
 end; 
 
 window SEBBankImportSTIClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:40
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 
@@ -91,7 +97,7 @@ end;
 
 
 window SEBbankImportLClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:37
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   WindowBegin("SEB Bank Imports",SEBbankImportLClass,CGmlist,-);
   SetWRect(20,80,1200,355);
@@ -116,7 +122,7 @@ begin
 end;
 
 window SEBbankImportDClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:34
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 	
@@ -139,12 +145,13 @@ begin
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
   EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);
   
+  SearchField("Search");
   EndWindow;
 end;  
   
   
 window LuminorImportSTIClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:31
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 
@@ -163,7 +170,7 @@ end;
 
 
 window LuminorImportLClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:29
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   WindowBegin("Luminor Imports",LuminorImportLClass,CGmlist,-);
   SetWRect(20,80,1200,355);
@@ -188,7 +195,7 @@ begin
 end;
 
 window LuminorImportDClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:26
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 	
@@ -211,6 +218,7 @@ begin
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
   EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);
   
+  SearchField("Search");
   EndWindow;
   
 end;  
@@ -218,7 +226,7 @@ end;
 
 
 window SiauliuImportSTIClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:31
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 
@@ -237,7 +245,7 @@ end;
 
 
 window SiauliuImportLClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:29
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   WindowBegin("Siauliu Imports",SiauliuImportLClass,CGmlist,-);
   SetWRect(20,80,1200,355);
@@ -262,7 +270,7 @@ begin
 end;
 
 window SiauliuImportDClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:26
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real f,h,v,vm,vs;
 	
@@ -285,18 +293,19 @@ begin
   EditField(h=100,v+=vs,150,"OrgId",ViewOnly,OrgId,false,0); 
   EditField(h=100,v+=vs,150,"PrvtId",ViewOnly,PrvtId,false,0);
   
+  SearchField("Search");
   EndWindow;
   
 end;  
 
 
 window BankImportSetTClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:50:21
-  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+  wtag("language","EST"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real h,v,vm,vs;
   v = 6; vs = 20; h = 90;
 
-  WindowBegin("BRC - Banking Statement Import settings",BankImportSetTClass,CGSbl,-);
+  WindowBegin("Amoralle - Banking Statement Import settings",BankImportSetTClass,CGSbl,-);
   SetWRect(20,80,450,480);
   SetBlid(BankImportSetBlock);
   Sizeable(-1,-1,0,0);
@@ -304,12 +313,12 @@ begin
   	CheckBox(h,v+=20,0,"Import payments",ImpPaym);
   	CheckBox(h,v+=20,0,"Import payment orders",ImpPaymOrd);
   	CheckBox(h,v+=20,0,"Import charges",ImpCharges);
-  	v = v + 3*vs;
+  	v = v + vs;
   	h=h+150;
-		EditField(h,v+=vs,50,"Swedbank Payment mode",Normal,DefPayModeSW,false,PMSClass);
-		EditField(h,v+=vs,50,"SEB Bank Payment mode",Normal,DefPayModeSEB,false,PMSClass);
-		EditField(h,v+=vs,50,"Luminor bank Payment mode",Normal,DefPayModeLUM,false,PMSClass);
-		EditField(h,v+=vs,50,"Siauliu Bank Payment mode",Normal,DefPayModeSIA,false,PMSClass); 
+		EditField(h,v+=vs,50,"Swedbank Mok. bðdas",Normal,DefPayModeSW,false,PMSClass);
+		EditField(h,v+=vs,50,"SEB Bank Mok. bðdas",Normal,DefPayModeSEB,false,PMSClass);
+		EditField(h,v+=vs,50,"Luminor bank Mok. bðdas",Normal,DefPayModeLUM,false,PMSClass);
+		EditField(h,v+=vs,50,"Siauliu Bank Mok. bðdas",Normal,DefPayModeSIA,false,PMSClass); 
 		
 		v=v-vs*4;
 	  StaticText(h+80,v+vs-5,"Purchase PM",false);
@@ -318,13 +327,15 @@ begin
 		EditField(h+80,v+=vs,50,"",Normal,DefVEPayModeLUM,false,PMSClass);
 		EditField(h+80,v+=vs,50,"",Normal,DefVEPayModeSIA,false,PMSClass); 
 		
-		ButtonFrame(h,v=vm+20,150,2,"Primary invoice search method");
-		RadioButton(h,v,0,0,"Invoice no.",DefSearchInv);
-		RadioButton(h,v+=16,1,0,"Offcial ser. No",DefSearchInv);
+		
+		ButtonFrame(h,v=vm+20,150,2,"Pirminis faktðr÷ paieäkos bðdas");
+		RadioButton(h,v,0,0,"Faktðros numeris",DefSearchInv);
+		RadioButton(h,v+=16,1,0,"Oficialus serijinis numeris",DefSearchInv);
+		
 		v=v+20;
-		ButtonFrame(h,v=v+20,210,2,"Import is done by connecting");
-		RadioButton(h,v,0,0,"The oldest invoices (FIFO method)",InvFIFO);
-		RadioButton(h,v+=16,1,0,"The oldest due dates",InvFIFO);
-  EndWindow;
+		ButtonFrame(h,v=v+20,210,2,"Importas vykdomas sujungiant");
+		RadioButton(h,v,0,0,"Seniausias faktðras (FIFO metodas)",InvFIFO);
+		RadioButton(h,v+=16,1,0,"Seniausias apmok˜jimo iki datas",InvFIFO);
+		EndWindow;
 
 end;

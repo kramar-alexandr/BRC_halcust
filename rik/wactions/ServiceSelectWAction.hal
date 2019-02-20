@@ -1,0 +1,34 @@
+external updating procedure EInvoiceRegisterTsm;
+remote procedure RegisterForEstEInvoicing(string);
+
+global
+updating procedure ServiceSelectWClassSend()
+begin
+  Boolean res;
+  Integer wn,mwn;
+  record RcVc RepSpec;
+  string 20 partner;
+  
+  wn = CurWindow;
+  mwn = MotherWindow(wn);
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  switch (RepSpec.flags[0]) begin
+    case 1:
+      CloseWindow(wn);
+      EInvoiceRegisterTsm;
+    case 2: partner = "EARVEKESKUS";
+    case 3: partner = "EARVEKESKUS2"; 
+    case 4: partner = "ESTADRLOOKUP"; 
+    otherwise
+      MessageBox(33490,"");
+      WindowFieldGoto(wn,RepSpec,-1,"flags[0]",true);
+  end;
+  if (nonblank(partner)) then begin
+    RegisterForEstEInvoicing(partner);
+    CloseWindow(wn);
+    CloseWindow(mwn);
+    MessageBox(33491,"");
+  end;
+  return;
+end;

@@ -1,0 +1,259 @@
+external function Integer VATType(string);
+external procedure GetMonthText(string,Date,var string);
+external procedure HT2Per(Date, Date , var string);
+external procedure GetLATSalesVATCLIn(record TRVc,record RcVc,record BaseCurBlock,integer,val,var string, var string,var string,var string,var string,var val,var val,var string);
+external procedure GetLATSalesVATTransactions(record TRVc,record RcVc, record BaseCurBlock ,record VATCodeBlock ,record VATBlock,integer,var string ,var string ,var string ,var string ,var val ,var val,var val,var string);
+external procedure OBS_GetLATSalesVATInvoices(record TRVc,record RcVc, record BaseCurBlock,record VATCodeBlock,integer,var string ,var string ,var string ,var string,integer,var val,var val,var val,var val,var val,var string,var string,boolean,var string,var string,var boolean); //OBS edit
+
+external procedure GetLatSalesVATReceipts(record TRVc,string,record RcVc, record BaseCurBlock,string ,integer ,Integer,var val ,var val , var val, var val, var val, var val,var integer,Boolean,
+                               array string,array string,array val,array val,array longint,array string,
+                               array string,array string,array date,array val,array string,array string,array string,array string, array string,var integer/*,Integer,Integer*/,vector val,array string);
+//external procedure GetInvoices(record TRVc ,record RcVc, record BaseCurBlock ,record VATCodeBLock,integer,var string,var string,var string ,var string ,var val ,var val,var boolean);
+external procedure getcurrentrate(record RcVc,record BaseCurBlock,string,val,val,val,string,var val,var val);
+external function val AbsoluteVal(val);
+external function boolean IsDocNumPPR(string);
+external procedure SeperateSerAndNr(string,var string,var string);
+external procedure FillArrWithReversedVat(record RcVc,boolean,
+                        array string,array string,array val,array val,array longint,array string,
+                        array string,array string,array date,array val,array string,array string,
+                        array string,array string,var integer,
+                        var val,var val,var val,var val,var val,var val,array string,vector val,array string);
+external function boolean ExcludeTrType(string);
+external procedure RemoveCharacterFromString(var string,string);  //OBS
+
+function boolean IVIsImport(longint sernr)
+begin
+  record IVVc IVr;
+  boolean res;
+  Ivr.SerNr = sernr;
+  if ReadFirstMain(IVr,1,true) then begin
+    res = IVr.ExportFlag==2;
+  end;
+
+  IVIsImport = res;
+return;
+end;
+
+global
+procedure GetLatVATSalesRows(record RcVc RepSpec,boolean customsf,
+                        array string asupp,array string arcode,array val apaysum,array val apayvat,array longint ainvoicenr,array string adocname,
+                        array string adocnr,array string adocnr2,array date atransdate,array val acurpaysum,array string acurcode,array string adoctype,
+                        array string addwincode,array string addsernr,var integer size,
+                        var val total,var val totvat,var val mintot,var val minvat,var val excltot,var val exclvat,array string TransType2,vector val vsuppval,array string asuppcode)//KZS
+begin
+  record TRVc TRr;
+  row TRVc TRrw;
+  boolean foundf,showf,testf,payf,TrHs;
+  integer rw,rwc;
+  integer i,rwcnt;
+  integer num;
+  record APAccBlock APAccbl;
+  record AccBlock Accbl;
+  record VATBlock VATBl;
+  record VATCodeBlock VATCodebl;
+  row VATCodeBlock VATCoderw;
+  record TaxRulesVc TaxRr;
+  Record BaseCurBlock BCb;
+  record ExpVc Expr;
+  record CLOutVc CLOutr;
+  record CUVc CUr;
+  boolean exclf,VatImportf,CalcProfitVATf;  //OBS added CalcProfitVATf
+  val vatproc;
+  Val total2,totvat2;
+  Val paysum,payvat,curpaysum;
+  val mintot2,minvat2;
+  val excltot2,exclvat2,t1,t2;
+  val temp,t;
+  string 255 tstr;
+  string 100 supp;
+  string 50 rcode;
+  string 50 trdate;
+  string 100 docnr,docnr2;
+  string 50 docdate;
+  string 50 invoicenr;
+  string 10 vatcode;
+  string 20 lastacc;
+  string 10 docname;
+  string 5 curcode;
+  string 20 ddwincode;
+  string 2 TransType;
+  string 25 ddsernr;
+  string 30 suppcode;
+  val torate,fromrate;
+  integer doctype;
+  val oldtot;
+  
+  blockload(APAccBl);
+  blockload(AccBl);
+  blockLoad(BCb);
+  blockLoad(VATBl);
+  blockload(VATCodeBl);
+
+  totvat = 0;
+  total = 0;
+  mintot = 0;
+  minvat = 0;
+  exclvat = 0;
+  excltot = 0;
+  size = 0;
+  num = 1;
+
+  
+    TRr.TransDate = RepSpec.sStartDate;
+    TrHs = true;
+    While(loopkey("TransDate",TRr,1,TrHs)) begin 
+      if (TRr.TransDate > RepSpec.sEndDate) then begin
+        TrHs = false;
+      end else begin
+        testf = true;
+        if TRr.IntYc == OPYc and RepSpec.flags[9]<>1 then begin
+          testf = false;
+        end;
+        if TRr.IntYc == 203 and RepSpec.flags[10]<>1 then begin
+          testf = false;
+        end;
+        if testf then begin
+          foundf = false;
+          rwc = MatRowCnt(TRr);
+          lastacc = " ";
+          VatImportF = false;
+          if TRr.IntYc == IVYc then begin
+            VatImportF = IVIsImport(Trr.Number);
+          end;
+          for (rw = 0;rw <rwc;rw = rw+1) begin
+            doctype = 0;
+            docnr = "";
+            docnr2 = "";
+            payvat = 0;
+            paysum = 0;
+            MatRowGet(TRr,rw,TRrw);
+            rwcnt = matrowcnt(VATCodeBl);
+            showf = false;
+            if (Trrw.stp <> 1) then begin
+              rwcnt = 0;
+              showf = false;
+            end;
+            if (RepSpec.f1 <> "" and SetInSet(TRrw.VATCode,RepSPec.f1)) then begin
+              rwcnt = 0;
+              showf = false;
+            end;
+            for (i = 0;i < rwcnt; i = i + 1) begin
+              Matrowget(VATCodebl,i,VATCoderw);
+              showf = false;
+              TaxRr.Code = VatCoderw.TaxRules;
+              if (ReadFirstMain(TaxRr,1,true)) then begin end;
+              if TRrw.VATCode==VATCoderw.VATCode then begin
+                if  ((TRrw.AccNumber == VATCoderw.SalesVATAcc and blank(VATCoderw.PaySalesVATAcc) or TRrw.AccNumber == VATCoderw.PaySalesVATAcc) or 
+                  (Trr.IntYc == VIYc and Trrw.AccNumber == VATCoderw.SalesVATAcc) or
+                  (Trr.IntYc == IPYc and AccBl.VATBAcc == Trrw.AccNumber) or 
+                  (Trr.IntYc == IVYc and VATImportf)) and 
+                  ((TRrw.CredVal > 0 or TRrw.DebVal < 0)) then begin
+        
+                  showf = true;
+                  i = rwcnt;
+                  vatproc = VATCoderw.ExVatpr;
+                end;
+              end;
+            end;
+            if (showf and TRrw.ovst==0) then begin
+              if (TRr.IntYc==IVYc and RepSpec.flags[7]==0) then begin//ienakoshie rekini    (preces)--------------------                             
+                OBS_GetLatSalesVATInvoices(TRr,RepSpec,bcb,VATCodeBl,rw,supp,rcode,docnr,docdate,-1,payvat,paysum,exclvat,excltot,t1,tstr,docname,VatImportf,TransType,suppcode,CalcProfitVATf);//KZS //OBS add CalcProfitVATf
+                TransType2[size] = TransType;
+                doctype = 1;
+                ddwincode = "DblIVVc";
+                ddsernr = Trr.Number;
+                if paysum <> 0 or payvat <> 0 then begin            
+                  foundf = true;
+                end; 
+                rw = rwc;
+//OBS-->                
+                if foundf and CalcProfitVATf and RepSpec.flags[25]==0 then begin
+                  exclvat = exclvat + payvat;
+                  excltot = excltot + paysum;
+                  foundf = false;
+                end;
+//OBS<--
+              end; 
+              if (TRr.IntYc==IPYc and RepSpec.flags[1]==0) then begin//maksaajumi
+                GetLATSalesVATReceipts(TRr,TRrw.AccNumber,RepSpec,bcb,TRrw.VATCode,rw,-1,payvat,paysum,excltot2,exclvat2,mintot2,minvat2,num,false,
+                  asupp,arcode,apaysum,apayvat,ainvoicenr,adocname,
+                  adocnr,adocnr2,atransdate,acurpaysum,acurcode,adoctype,TransType2,addwincode,addsernr,size,vsuppval,asuppcode);
+                oldtot = total;
+                totvat = totvat + payvat + exclvat2 + minvat2;
+                total = total + paysum + excltot2 + mintot2;
+                excltot = excltot + excltot2;
+                exclvat = exclvat + exclvat2;
+                mintot = mintot + mintot2;
+                minvat = minvat + minvat2;
+                foundf = false;
+                rw = rwc;
+              end; 
+              if (TRr.IntYc<180 and RepSpec.flags[8]==0 and nonblank(TRrw.VATCode)) then begin//gramatojumi
+                GetLATSalesVATTransactions(TRr,RepSpec,bcb,VATCodebl,VATBl,rw,supp,rcode,docnr,docdate,payvat,paysum,t1,tstr);
+                doctype = 1;
+                suppcode = tstr;
+                docname = "";
+                ddwincode = "DblTRVcID";
+                ddsernr = Trr.Number & ":" & Trr.IntYc;
+                rw = rwc;
+                foundf = true; 
+              end;
+              if (TRr.IntYc==CLInYc and RepSpec.flags[5]==0) then begin//kases ienenumu orderis ---------
+                GetLATSalesVATCLIn(TRr,RepSpec,bcb,rw,vatproc,supp,rcode,docnr,docdate,transtype,payvat,paysum,suppcode);
+                TransType2[size] = TransType;
+                docname = USetStr(16023);
+                doctype = 2;
+                ddwincode = "DblCLInID";
+                ddsernr = Trr.Number;
+                rw = rwc;
+                foundf = true;
+              end;
+              lastacc = TRrw.AccNumber;
+              if (foundf and (payvat<>0 or paysum <> 0)) then begin
+                showf = true;      
+                total = total + paysum;
+                totvat = totvat + payvat;
+                if (AbsoluteVal(paysum) < AbsoluteVal(RepSpec.vals0) and nonblank(RepSpec.vals0)) then begin
+                  if nonblank(suppcode)begin
+                    vsuppval[suppcode] = vsuppval[suppcode] + paysum;
+                  end else begin
+                    minvat = minvat + payvat;
+                    mintot = mintot + paysum;
+                    showf  = false;
+                  end;
+                end;
+
+                //
+                if (rcode=="" or StripNonDigits(left(rcode,2))<>"" and ExcludeTrType(TransType2[size])==false) then begin //OBS
+                  if (paysum >= RepSpec.vals1 and nonblank(RepSpec.vals1) or (RepSpec.flags[25]==0 and blank(rcode))) then begin //or RepSpec.vals1 <= 0 then begin
+                    exclvat = exclvat + payvat;
+                    excltot = excltot + paysum;
+                    showf = false;
+                  end;
+                end;
+                if (showf) then begin
+                  asupp[size] = supp;
+                  asuppcode[size] = suppcode;
+                  arcode[size] = rcode;
+                  apaysum[size] = paysum;
+                  apayvat[size] = payvat;
+                  ainvoicenr[size] = InvoiceNr;
+                  adocname[size] = docname;
+                  adocnr[size] = docnr;
+                  adocnr2[size] = docnr2;
+                  adoctype[size] = doctype;
+                  atransdate[size] = TRr.TransDate;
+                  addwincode[size] = ddwincode;
+                  addsernr[size] = ddsernr;
+                  size = size + 1;
+                end;        
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+    FillArrWithReversedVat(RepSpec,customsf,asupp,arcode,apaysum,apayvat,ainvoicenr,adocname,adocnr,adocnr2,atransdate,acurpaysum,acurcode,adoctype,
+                        addwincode,addsernr,size,total,totvat,mintot,minvat,excltot,exclvat,TransType2,vsuppval,asuppcode);
+return;
+end;

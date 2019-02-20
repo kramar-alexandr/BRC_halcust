@@ -7,9 +7,6 @@ begin
   Maintenance("Create monthly invoices",EBS_CreateCredManInvVClass,EBS_CreateCredManInvMn,modCredMan);
   Maintenance("Create credit agreement events",EBS_CreateCredManEvtVClass,EBS_CreateCredManEvtMn,modCredMan);
 	
-	Report("Credit agreements",CreditAgreementsRClass,CreditAgreementsRn,0,modCredMan);// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 19 02 2019 y. at 10:52:54 AM
-
-	
 	Import("BRC - SwedBank import Statement",SwedBankImportSTIClass,SwedBankImportSTIn,modSL);// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:46:14
   Import("BRC - SEB Bank import Statement",SEBBankImportSTIClass,SEBBankImportSTIn,modSL);// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:46:11
   Import("BRC - Luminor import Statement",LuminorImportSTIClass,LuminorImportSTIn,modSL);// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 10 September 2018 15:46:09

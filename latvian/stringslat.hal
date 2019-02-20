@@ -1,0 +1,19 @@
+
+event startup
+begin
+  SetLangMode(LangLatvian,"LAT",2);
+
+  // SString(1000001,"Credit agreement is stoped");
+  // SString(1000002,"Credit agreement is canceled");
+  // SString(1000003,"Monthly invoice could not be created");
+  // SString(1000004,"Monthly invoice already has credit note");
+  
+	Export("BRC - GPM312 imokos gyventojams",BRCGPM312EClass,BRCGPM312En,modPL);// Edit ************************** BPI Ukraine - KramarAlexandr - 01, 14 01 2019 y. at 3:14:54 PM
+
+  
+  SString(1001000,"Special notes: Export, PVN lik. 43.pants (1)."); //OBS
+  SString(1001001,"Special notes: PVN 0% lik. 43. panta (5) daļa. Preču piegāde Eiropas Savienības teritorijā. Intercommunity sale, supply of goods VAT 0%. COUNCIL DIRECTIVE 2006/112/EK."); //OBS
+  SString(1001002,"Lūdzu norādiet pašizmaksu"); //OBS
+  
+  return;
+end;

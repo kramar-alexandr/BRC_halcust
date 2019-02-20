@@ -2448,43 +2448,28 @@ begin
   SelectWindow(wn);
   return;
 end;
-/*
+
 global
-procedure CashupMaintDefaults(var record RcVc RepSpec)
-begin
-  record LocalMachineBlock LMb;
-  record CashierDefBlock CDb;
-  
-  BlockLoad(LMb);  
-  BlockLoad(CDb);  
+procedure CashupVClassReportDefaults(Integer wn)
+BEGIN
+  record RcVc RepSpec;
+  record LocalMachineBlock LocalMachineRec;
+
+  BlockLoad(LocalMachineRec);
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
   RepSpec.d1 = CurrentDate;
   RepSpec.sStartTime = CurrentTime;
   RepSpec.flags[1] = 1;
   RepSpec.flags[2] = 1;
   RepSpec.flags[3] = 1;
   RepSpec.flags[8] = 1;
-  RepSpec.flags[9] = CDb.PrintZReportatCashup;
-  RepSpec.f1 = LMb.LocalMachineCode;
-  RepSpec.f4 = CurDrawerCode(LMb.LocalMachineCode);
-  return;
-end;
-
-global
-procedure CashupVClassReportDefaults(Integer wn)
-BEGIN
-  record RcVc RepSpec;
-  record LocalMachineBlock LMb;
-  record CashierDefBlock CDb;
-  
-  BlockLoad(LMb);  
-  BlockLoad(CDb);  
-  DeselectWindow(wn,false);
-  GetWindowRecord(wn,RepSpec);
-  CashupMaintDefaults(RepSpec);
+  RepSpec.f1 = LocalMachineRec.LocalMachineCode;
+  RepSpec.f4 = CurDrawerCode(LocalMachineRec.LocalMachineCode);
   PutWindowRecord(wn,RepSpec);
   SelectWindow(wn);
   RETURN;
-END;*/
+END;
 
 global
 procedure TransGenRClassReportDefaults(Integer wn)

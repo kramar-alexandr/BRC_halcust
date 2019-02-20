@@ -224,31 +224,6 @@ BEGIN
     case "InvAddr3": res = HasLocalization("PRT")==false;
     case "InvAddr4": res = HasLocalization("PRT")==false;
     case "InvCountry": res = HasLocalization("PRT")==false;
-    case "GlobalTransportNr": 
-      if (wnst!=Rs_insert) then begin
-        res = HasLocalization("PRT")==false;
-        if (res==false) then begin
-          MessageBox(40884,"");
-        end;
-      end;
-    case "GlobalTransportDate": 
-      if (wnst!=Rs_insert) then begin
-        if (nonblank(IVr.GlobalTransportNr)) then begin
-          res = HasLocalization("PRT")==false;
-          if (res==false) then begin
-            MessageBox(40885,"");
-          end;
-        end;
-      end;
-    case "Location": 
-      if (wnst!=Rs_insert) then begin
-        if (nonblank(IVr.GlobalTransportNr)) then begin
-          res = HasLocalization("PRT")==false;
-          if (res==false) then begin
-            MessageBox(40886,"");
-          end;
-        end;
-      end;    
     case "CuAccCode":
       if (rownr>=0) then begin
         MatRowGet(IVr,rownr,IVrw);
@@ -655,17 +630,6 @@ BEGIN
         case "IntCode": res = true;
         case "BankCode": res = true;
         case "Status": res = true;
-        case "GlobalTransportNr" : res = HasLocalization("PRT")==false;  if (res==false) then begin MessageBox(40883,""); end;
-        case "GlobalTransportDate" : 
-          if (nonblank(IVr.GlobalTransportNr)) then begin
-            res = HasLocalization("PRT")==false; 
-            if (res==false) then begin MessageBox(40885,""); end;
-          end;
-        case "Location" : 
-          if (nonblank(IVr.GlobalTransportNr)) then begin
-            res = HasLocalization("PRT")==false; 
-            if (res==false) then begin MessageBox(40886,""); end;
-          end;
       end;
     end else begin
       GetWindowRecord(wn,IVr);
