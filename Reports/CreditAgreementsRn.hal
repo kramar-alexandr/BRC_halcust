@@ -26,13 +26,13 @@ begin
 	
 	startformat(15);
 		outstring(0,0,"Nr",false);
-		if(RepSpec.Media!=mtScreen)then begin
-			outstring(35,0,"Sustabdytos",false);
-			outstring(70,0,"Nutrauktos",false);
-			outstring(70,0,"Nepatvirtintos",false);
-			outstring(70,0,"Be OK",false);
-			outstring(70,0,"Baigtos",false);
-		end;
+		//if(RepSpec.Media!=mtScreen)then begin
+			outstring(11,0,"Sustabdytos",false);
+			outstring(15,0,"Nutrauktos",false);
+			outstring(20,0,"Nepatvirtintos",false);
+			outstring(25,0,"Be OK",false);
+			outstring(30,0,"Baigtos",false);
+		//end;
 		outstring(35,0,"Klientas",false);
 		outstring(70,0,"Pavadinimas",false);
 		outstring(105,0,"Prekė",false);
@@ -74,13 +74,13 @@ begin
 		if(testf)then begin
 			startformat(15);
 				outstring(0,"DblCredManVc",CredManr.SerNr,false);
-				if(RepSpec.Media!=mtScreen)then begin
-					outstring(35,0,Checkbocout(CredManr.StopFlag),false);
-					outstring(70,0,Checkbocout(CredManr.CancelFlag),false);
-					outstring(70,0,Checkbocout(CredManr.Approved),false);
-					outstring(70,0,Checkbocout(CredManr.OKFlag),false);
-					outstring(70,0,Checkbocout(curbal==0),false);
-				end;
+				//if(RepSpec.Media!=mtScreen)then begin
+					outstring(11,0,Checkbocout(CredManr.StopFlag),false);
+					outstring(15,0,Checkbocout(CredManr.CancelFlag),false);
+					outstring(20,0,Checkbocout(CredManr.Approved),false);
+					outstring(25,0,Checkbocout(CredManr.OKFlag),false);
+					outstring(30,0,Checkbocout(curbal==0),false);
+				//end;
 				outstring(35,"DblCUVc",CredManr.CustCode,false);
 				outstring(70,0,CredManr.Addr0,false);
 				outstring(105,"DblINVc",CredManr.ArtCode,false);
