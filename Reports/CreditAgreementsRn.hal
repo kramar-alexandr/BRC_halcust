@@ -26,24 +26,24 @@ begin
 	
 	startformat(15);
 		outstring(0,0,"Nr",false);
-		//if(RepSpec.Media!=mtScreen)then begin
-			outstring(11,0,"Sustabdytos",false);
-			outstring(22,0,"Nutrauktos",false);
-			outstring(33,0,"Nepatvirtintos",false);
-			outstring(44,0,"Be OK",false);
-			outstring(55,0,"Baigtos",false);
-		//end;
-		outstring(65,0,"Klientas",false);
-		outstring(100,0,"Pavadinimas",false);
-		outstring(135,0,"Prekė",false);
-		outstring(170,0,"Pradžios data",false);
-		outstring(205,0,"Pabaigos data",false);
-		outstring(240,0,"Viso suma",false);
-		outstring(275,0,"Užstato suma",false);
-		outstring(310,0,"Užstato %",false);
-		outstring(345,0,"Mėnesiai",false);
-		outstring(380,0,"Palūkanų %",false);
-		outstring(415,0,"Mėnesiniai įnašai",false);
+		if(RepSpec.Media==mtExcel)then begin
+			outstring(35,0,"Sustabdytos",false);
+			outstring(70,0,"Nutrauktos",false);
+			outstring(70,0,"Nepatvirtintos",false);
+			outstring(70,0,"Be OK",false);
+			outstring(70,0,"Baigtos",false);
+		end;
+		outstring(35,0,"Klientas",false);
+		outstring(70,0,"Pavadinimas",false);
+		outstring(105,0,"Prekė",false);
+		outstring(140,0,"Pradžios data",false);
+		outstring(175,0,"Pabaigos data",false);
+		outstring(210,0,"Viso suma",false);
+		outstring(245,0,"Užstato suma",false);
+		outstring(280,0,"Užstato %",false);
+		outstring(315,0,"Mėnesiai",false);
+		outstring(350,0,"Palūkanų %",false);
+		outstring(385,0,"Mėnesiniai įnašai",false);
 		outstring(1,0,"Balansų vertė",true);
 	endformat;
 	
@@ -74,24 +74,24 @@ begin
 		if(testf)then begin
 			startformat(15);
 				outstring(0,"DblCredManVc",CredManr.SerNr,false);
-				//if(RepSpec.Media!=mtScreen)then begin
-					outstring(11,0,Checkbocout(CredManr.StopFlag),false);
-					outstring(22,0,Checkbocout(CredManr.CancelFlag),false);
-					outstring(33,0,Checkbocout(CredManr.Approved),false);
-					outstring(44,0,Checkbocout(CredManr.OKFlag),false);
-					outstring(55,0,Checkbocout(curbal==0),false);
-				//end;
-				outstring(65,"DblCUVc",CredManr.CustCode,false);
-				outstring(100,0,CredManr.Addr0,false);
-				outstring(135,"DblINVc",CredManr.ArtCode,false);
-				outstring(170,0,CredManr.startDate,false);
-				outstring(205,0,CredManr.endDate,false);
-				outstring(240,0,CredManr.InvSum4,false);
-				outstring(275,0,CredManr.DepositSum,false);
-				outstring(310,0,CredManr.DepositPrc,false);
-				outstring(345,0,CredManr.InstalmentMonths,false);
-				outstring(380,0,CredManr.IntRate,false);
-				outstring(415,0,CredManr.MonthlySum,false);
+				if(RepSpec.Media==mtExcel)then begin
+					outstring(35,0,Checkbocout(CredManr.StopFlag),false);
+					outstring(70,0,Checkbocout(CredManr.CancelFlag),false);
+					outstring(70,0,Checkbocout(CredManr.Approved),false);
+					outstring(70,0,Checkbocout(CredManr.OKFlag),false);
+					outstring(70,0,Checkbocout(curbal==0),false);
+				end;
+				outstring(35,"DblCUVc",CredManr.CustCode,false);
+				outstring(70,0,CredManr.Addr0,false);
+				outstring(105,"DblINVc",CredManr.ArtCode,false);
+				outstring(140,0,CredManr.startDate,false);
+				outstring(175,0,CredManr.endDate,false);
+				outstring(210,0,CredManr.InvSum4,false);
+				outstring(245,0,CredManr.DepositSum,false);
+				outstring(280,0,CredManr.DepositPrc,false);
+				outstring(315,0,CredManr.InstalmentMonths,false);
+				outstring(350,0,CredManr.IntRate,false);
+				outstring(385,0,CredManr.MonthlySum,false);
 				outstring(1,0,curbal,true);
 			endformat;
 		end;
