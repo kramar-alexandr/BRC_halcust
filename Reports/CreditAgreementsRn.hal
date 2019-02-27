@@ -8,7 +8,7 @@ begin
 	if(in)then begin
 		res = "Taip";
 	end;
-	
+	Checkbocout = res;
 return;
 end;
 
