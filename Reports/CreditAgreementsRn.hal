@@ -77,8 +77,8 @@ begin
 				if(RepSpec.Media==mtExcel)then begin
 					outstring(35,0,Checkbocout(CredManr.StopFlag),false);
 					outstring(70,0,Checkbocout(CredManr.CancelFlag),false);
-					outstring(70,0,Checkbocout(CredManr.Approved),false);
-					outstring(70,0,Checkbocout(CredManr.OKFlag),false);
+					outstring(70,0,Checkbocout(CredManr.Approved==0),false);
+					outstring(70,0,Checkbocout(CredManr.OKFlag==0),false);
 					outstring(70,0,Checkbocout(curbal==0),false);
 				end;
 				outstring(35,"DblCUVc",CredManr.CustCode,false);
