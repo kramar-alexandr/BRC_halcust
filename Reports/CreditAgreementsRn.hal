@@ -1,5 +1,17 @@
 SetLangMode(LangLithuanian,"LIT",2);
 
+function string 10 Checkbocout(boolean in)
+begin
+	string 10 res;
+	res = "";
+	
+	if(in)then begin
+		res = "Taip";
+	end;
+	
+return;
+end;
+
 global procedure CreditAgreementsRn(record RcVc RepSpec)
 begin
 	record CredManVc CredManr;
@@ -14,6 +26,13 @@ begin
 	
 	startformat(15);
 		outstring(0,0,"Nr",false);
+		if(RepSpec.Media!=mtScreen)then begin
+			outstring(35,0,"Sustabdytos",false);
+			outstring(70,0,"Nutrauktos",false);
+			outstring(70,0,"Nepatvirtintos",false);
+			outstring(70,0,"Be OK",false);
+			outstring(70,0,"Baigtos",false);
+		end;
 		outstring(35,0,"Klientas",false);
 		outstring(70,0,"Pavadinimas",false);
 		outstring(105,0,"Prekė",false);
@@ -55,6 +74,13 @@ begin
 		if(testf)then begin
 			startformat(15);
 				outstring(0,"DblCredManVc",CredManr.SerNr,false);
+				if(RepSpec.Media!=mtScreen)then begin
+					outstring(35,0,Checkbocout(CredManr.StopFlag),false);
+					outstring(70,0,Checkbocout(CredManr.CancelFlag),false);
+					outstring(70,0,Checkbocout(CredManr.Approved),false);
+					outstring(70,0,Checkbocout(CredManr.OKFlag),false);
+					outstring(70,0,Checkbocout(curbal==0),false);
+				end;
 				outstring(35,"DblCUVc",CredManr.CustCode,false);
 				outstring(70,0,CredManr.Addr0,false);
 				outstring(105,"DblINVc",CredManr.ArtCode,false);
