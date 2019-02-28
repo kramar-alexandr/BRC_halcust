@@ -366,6 +366,7 @@ begin
   EditField(h1,v+=vs,82,"Due Date",Normal,PayDate,false,PasteCurDate);
   EditField(h1,v+=vs,82,"Trans. Date",Normal,TransDate,false,PasteCurDate);
   EditField(h1,v+=vs,82,"Service Del. Date",Normal,ServiceDelDate,false,PasteCurDate);
+  EditField(h1,v+=vs,82,"Exp. Clearing Date",Normal,ExpectedClearingDate,false,PasteCurDate);
   EditField(h2,v=vm,135,"Our Reference",Normal,OurContact,false,0);
   EditField(h2,v+=vs,135,"Attention",Normal,ClientContact,false,ContactSClass);
   EditField(h2,v+=vs,135,"Tags/Objects",Normal,Objects,false,ObjSClass);
@@ -381,14 +382,17 @@ begin
   if (HasLocalization("MEX")) then begin
     EditField(h3,v+=vs,80,"Payment Mode",Normal,PMCode,false,PMSClass);
   end;
-  if (HasLocalization("BRA")) then begin
-    EditField(h3,v+=vs,80,"Invoice Type",Normal,BrazilEInvType,false,BrazilEInvTypeSClass);
+  if (HasLocalization("BRA,MEX")) then begin
+    EditField(h3,v+=vs,80,"Invoice Type",Normal,EInvType,false,EInvTypeSClass);
   end;
   if (HasLocalization("ITA")) then begin
     EditField(h3,v+=vs,130,"PA Contract",Normal,PubAdmContract,false,0);
   end;
   if (HasLocalization("BOL,BRA,HRV,MEX")) then begin
     EditField(h3,v+=vs,130,"Tax Seal",ViewOnly,TaxAdminServSeal,false,0);
+  end;
+  if (HasLocalization("ITA")) then begin
+    EditField(h3,v+=vs,130,"Receipt No.",ViewOnly,TaxAdminReceiptNr,false,0);
   end;
   if (HasLocalization("MEX")) then begin
     EditField(h3,v+=vs,80,"No. Pay. Acc.",Normal,PayAccNo,false,0);
@@ -413,7 +417,7 @@ begin
         EditField(160,-41,70,"GP %",Normal,GPProc,true,0);
         EditField(160,-21,70,"Total GP",ViewOnly,TotGP,true,0);
       end;
-      if (HasLocalization("GBR,LTU,POL")) then begin
+      if (HasLocalization("GBR,LTU,POL,LVA")) then begin
         EditField(310,-41,50,"Reverse #VAT#",ViewOnly,RvrsVAT,true,0);
         EditField(290,-21,70,"Ext. Tax",ViewOnly,TAX1Sum,true,0);
       end else begin
@@ -480,7 +484,7 @@ begin
     MatCol(t,-54,"",0,TaxTemplateCode,false,TaxTemplateSClass);
   end else begin
     MatCol(t,-70,"",0,SalesAcc,false,AccSClass);
-    MatCol(t,-24,"",0,VATCode,false,VATCodeSClass);
+    MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   end;
   MatText(t=kInvoiceRowTypePrepayment,32,"Prepayment Number",true);
   MatCol(t,208,"",0,CUPNr,false,ARPay3SClass);
@@ -492,13 +496,13 @@ begin
   MatCol(t,-350,"",0,SalesAcc,true,AccSClass);
   MatCol(t,-230,"",0,Objects,false,0);
   MatCol(t,-110,"",0,Sum,true,0);
-  MatCol(t,-30,"",0,VATCode,false,VATCodeSClass);
+  MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   MatText(t=kInvoiceRowTypeLoanInterest,32,"Loan Int.",true);
   MatCol(t,98,"",0,CuAccCode,true,CuAccSClass);
   MatCol(t,-350,"",0,SalesAcc,true,AccSClass);
   MatCol(t,-230,"",0,Objects,false,0);
   MatCol(t,-110,"",0,Sum,true,0);
-  MatCol(t,-30,"",0,VATCode,false,VATCodeSClass);
+  MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   MatText(t=kInvoiceRowTypeUpdateMark,32,"Signature",false);
   MatColTL(t,94,"Sign",0,-1,ViewOnly,0,VoidedSign,false,0);
   MatCol(t,144,"Description",0,Spec,false,0);
@@ -527,18 +531,22 @@ begin
   MatCol(t,100,"",0,Spec,false,0);
   MatColTL(t,-210,"SalesAcc",0,-1,0,0,SalesAcc,false,AccSClass);
   MatColTL(t,-110,"Sum",0,-1,0,0,Sum,true,0);
-  MatCol(t,-30,"",0,VATCode,false,VATCodeSClass);
+  MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   MatText(t=kInvoiceRowTypeGiftVoucherSold,32,"GV",true);
   MatCol(t,58,"",0,GCNr,false,GCSClass);
   MatCol(t,-416,"",0,Spec,false,0);
   MatCol(t,-84,"Sum",0,Sum,true,0);
-  MatCol(t,-24,"",0,VATCode,false,VATCodeSClass);
+  MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   MatText(t=kInvoiceRowTypeGiftVoucherPayment,32,"GVR",true);
   MatCol(t,58,"",0,GCNr,false,GCSSClass);
   MatCol(t,-316,"",0,Spec,false,0);
   MatCol(t,-84,"Sum",0,Sum,true,0);
-  MatCol(t,-24,"",0,VATCode,false,VATCodeSClass);
+  MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   MatText(t=kInvoiceRowTypeCashPayment,32,"CASH",true);
+  MatCol(t,94,"Sum",0,Sum,true,0);
+  MatCol(t,198,"P. Mode",0,PayMode,true,PMSClass);
+  MatCol(t,250,"Spec",0,Spec,false,0);
+  MatText(t=kInvoiceRowTypeCashWithdrawal,32,"CW",true);
   MatCol(t,94,"Sum",0,Sum,true,0);
   MatCol(t,198,"P. Mode",0,PayMode,true,PMSClass);
   MatCol(t,250,"Spec",0,Spec,false,0);
@@ -557,6 +565,12 @@ begin
   MatCol(t,-280,"",0,CreditCard,false,CreditCardSClass);
   MatCol(t,-84,"Authorization",0,AuthorizationCode,false,0);
   MatText(t=kInvoiceRowTypeSwishPayment,32,"Swish",true);
+  MatCol(t,94,"Sum",0,Sum,true,0);
+  MatCol(t,198,"P. Mode",0,PayMode,true,PMSClass);
+  MatCol(t,250,"Spec",0,Spec,false,0);
+  MatCol(t,-280,"",0,CreditCard,false,CreditCardSClass);
+  MatCol(t,-84,"Authorization",0,AuthorizationCode,false,0);
+  MatText(t=kInvoiceRowTypeQRPayment,32,"QR",true);
   MatCol(t,94,"Sum",0,Sum,true,0);
   MatCol(t,198,"P. Mode",0,PayMode,true,PMSClass);
   MatCol(t,250,"Spec",0,Spec,false,0);
@@ -592,8 +606,8 @@ begin
   MatText(t=kInvoiceRowTypeDebtorsTransfer,32,"DBT TRSF",true);
   MatCol(t,94,"Spec",0,Spec,false,0);
   MatCol(t,-235,"Debtors A/C",0,SalesAcc,false,0);
-  MatCol(t,-135,"Sum",0,Sum,true,0);
-  MatCol(t,-30,"#V-Cd#",0,VATCode,false,0);
+  MatCol(t,-150,"Sum",0,Sum,true,0);
+  MatCol(t,-45,"#V-Cd#",0,VATCode,false,0);
   /*
   MatText(t=kInvoiceRowTypePreviousDownpayment,32,"Prev. Down Payment",true);
   MatColTL(t,152,"",0,-1,ViewOnly,0,CUPNr,true,0);
@@ -627,22 +641,22 @@ begin
   MatCol(t,-100,"Sum",0,Sum,true,0);
   Flip(2);
   MatCol(t=kInvoiceRowTypeNormal,144,"Description",0,Spec,false,0);
-  MatCol(t,-360,"A/C",0,SalesAcc,false,AccSClass);
+  MatCol(t,-380,"A/C",0,SalesAcc,false,AccSClass);
   if (StandardHansa==false) then begin
-    MatCol(t,-310,"Accrual",0,PeriodCode,false,AutSimPerSClass);
+    MatCol(t,-330,"Accrual",0,PeriodCode,false,AutSimPerSClass);
   end;
-  MatCol(t,-255,"Location",0,Location,false,LocationSClass);
-  MatCol(t,-180,"Position",0,PosCode,false,UsedPosSClass);
+  MatCol(t,-275,"Location",0,Location,false,LocationSClass);
+  MatCol(t,-210,"Position",0,PosCode,false,UsedPosSClass);
   if (UseTaxTemplatesforTaxCalc) then begin
     MatCol(t,-144,"Tags/Objects",0,Objects,false,ObjSClass);
     MatCol(t,-70,"T-Cd",0,TaxTemplateCode,false,TaxTemplateSClass);
   end else begin
-    MatCol(t,-124,"Tags/Objects",0,Objects,false,ObjSClass);
-    if (HasLocalization("GBR,LTU,POL") and IsEnterprise) then begin
-      MatCol(t,-60,"#V-Cd#",0,VATCode,false,VATCodeSClass);
-      MatCol(t,-30,"Rvrs",0,RvrsVATCode,false,VATCodeSClass);
+    MatCol(t,-160,"Tags/Objects",0,Objects,false,ObjSClass);
+    if ((HasLocalization("GBR,LTU,POL") and IsEnterprise) or HasLocalization("LVA")) then begin
+      MatCol(t,-90,"#V-Cd#",0,VATCode,false,VATCodeSClass);
+      MatCol(t,-45,"R. #V-Cd#",0,RvrsVATCode,false,VATCodeSClass);
     end else begin
-      MatCol(t,-30,"#V-Cd#",0,VATCode,false,VATCodeSClass);
+      MatCol(t,-45,"#V-Cd#",0,VATCode,false,VATCodeSClass);
     end;
   end;
   MatCol(t=kInvoiceRowTypeStructuredItemComponent,144,"Description",0,Spec,false,0);
@@ -659,12 +673,12 @@ begin
     MatCol(t,-70,"T-Cd",0,TaxTemplateCode,false,TaxTemplateSClass);
   end else begin
     MatCol(t,-124,"Tags/Objects",0,Objects,false,ObjSClass);
-    MatCol(t,-30,"#V-Cd#",0,VATCode,false,VATCodeSClass);
+    MatCol(t,-45,"#V-Cd#",0,VATCode,false,VATCodeSClass);
   end;
   MatCol(t=kInvoiceRowTypeInterest,-70,"",0,SalesAcc,false,AccSClass);
-  MatCol(t,-24,"",0,VATCode,false,VATCodeSClass);
+  MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   //  MatCol(t=kInvoiceRowTypePrepayment,-224,"",0,SalesAcc,false,AccSClass);
-  //  MatCol(t,-24,"",0,VATCode,false,VATCodeSClass);
+  //  MatCol(t,-45,"",0,VATCode,false,VATCodeSClass);
   MatCol(t=kInvoiceRowTypeCorrection,144,"Description",0,Spec,false,0);
   MatCol(t,-250,"A/C",0,SalesAcc,false,AccSClass);
   if (StandardHansa==false) then begin
@@ -674,7 +688,7 @@ begin
   if (UseTaxTemplatesforTaxCalc) then begin
     MatCol(t,-35,"T-Cd",0,TaxTemplateCode,false,TaxTemplateSClass);
   end else begin
-    MatCol(t,-30,"#V-Cd#",0,VATCode,false,VATCodeSClass);
+    MatCol(t,-45,"#V-Cd#",0,VATCode,false,VATCodeSClass);
   end;
   Flip(3);
   t=kInvoiceRowTypeNormal;
@@ -865,7 +879,7 @@ begin
     CheckBox(h3,v=vm,0,"Update #Stock#",UpdStockFlag);
     EditField(h3,v+=2*vs,80,"Freight #V-Cd#",Normal,FrVATCode,true,VATCodeSClass);
     EditField(h3,v+=vs,80,"Intrastat Trans. Code",Normal,IntrastatTransCode,true,IntrastatTransCodeSClass);
-    EditField(h3,v+=vs,80,"Global Transport No.",Normal,GlobalTransportNr,false,0);
+    EditField(h3,v+=vs,110,"Global Transport No.",Normal,GlobalTransportNr,false,0);
     EditField(h3,v+=vs,80,"Global Transport Date",Normal,GlobalTransportDate,false,PasteCurDate);
   end;
   Tile(5,170,false,"5",OrderNr);
@@ -893,7 +907,7 @@ begin
   EditField(h2,v+=vs,80,"Trans. Time",Normal,TransTime,false,SetSClass);
   EditField(h2,v+=vs,80,"Print Date",ViewOnly,PrintDate,false,0);
   EditField(h2,v+=vs,80,"Oprt. Comment",ViewOnly,OYDescription,false,0);
-  if (FileExists("hob/hmdatadef.hob")) then begin//??? why here and not it ahansamail ?
+  if (FileExists("hob/hmdatadef.hob")) then begin//??? why here and not it ahansamail ? 
     EditField(h2,v+=vs,80,"ToBe Inv.Nr",ViewOnly,ToBeIVNr,false,0);
   end;
   //  ColourPushButton(-100,v,-20,v+60,"TestIVDClassCardData","Test" & chr(10) & "CardData",4);
@@ -990,7 +1004,7 @@ begin
   label = UserDefined("CUVc","InvAddr4");
   EditField(h,v+=vs, -20,label,Normal,InvAddr4,false,0);
   EditField(h,vm=(v+=vs),80,"Country",Normal,InvCountry,false,CountrySClass);
-  if (HasLocalization("BRA")) then begin
+  if (HasLocalization("BRA")) then begin 
     EditField(h2-89,v,232,"",ViewOnly,InvCountryName,false,0);
     h5 = -170;
     width = 150;
