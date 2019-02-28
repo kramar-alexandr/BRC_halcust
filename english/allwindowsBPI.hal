@@ -339,7 +339,6 @@ begin
   return;
 end;
 
-
 window CreditAgreementsRClass:1
   wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin

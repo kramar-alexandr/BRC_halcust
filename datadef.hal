@@ -282,6 +282,10 @@ begin
   RecordField(ExportFlagfromDelAddr,M4Int,0,0);
   RecordField(RequireCreditNoteReason,M4Int,0,0);
   RecordField(CreditIVTotNotExceedInvCheck,M4Int,0,0);
+  RecordField(SalesAccSeparateRows,M4Int,0,0);//8.5
+  RecordField(CashWithdrawalAcc,M4Code,10,AccVc);//8.5
+  RecordField(VATBase,M4Code,10,AccVc);//8.5
+  RecordField(VATBaseOppositeAcc,M4Code,10,AccVc);//8.5
   RecordField(ProfitVATCode,M4Code,10,VATCodeBlock); //OBS
   EndBlock;
 //<---  
@@ -483,6 +487,8 @@ begin
   RecordField(ItemPictureCustomer,M4Int,0,0);
   RecordField(NoZeroQty,M4Int,0,0);
   RecordField(CheckVATNo,M4Int,0,0);
+  RecordField(NoZeroSum,M4Int,0,0);//8.5
+  RecordField(PrintZReportatCashup,M4Int,0,0);//8.5
 	RecordField(AutoCashUp,M4Int,0,0);// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 16:14:57
   EndBlock;
 

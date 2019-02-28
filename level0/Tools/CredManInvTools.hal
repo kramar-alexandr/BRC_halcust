@@ -607,7 +607,7 @@ begin
             if (blank(CredManEventr.Comment)) then begin
               CredManEventr.Comment = IPrw.CustName;
             end;
-            CredManEventrw.ArtCode = installitem;
+            CredManEventrw.ArtCode = installitem;//EBS
             CredManEventrw.Comment = "";
             CredManEventrw.ChargeType = 2; // Instalment
             CredManEventrw.Sum = sum;

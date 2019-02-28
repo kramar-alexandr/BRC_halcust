@@ -7,8 +7,9 @@ begin
   Export("BRC - FR0471 imokos gyventojams",BRCFR0471EClass,BRCFR0471En,modPL); // EVS: HAL-225
   Export("BRC - GPM312 imokos gyventojams",BRCGPM312EClass,BRCGPM312En,modPL);// Edit ************************** BPI Ukraine - KramarAlexandr - 01, 14 01 2019 y. at 3:14:54 PM
   Setting("BRC - FR0471 eksportas",BRCFR0471SetTClass,modPL); // EVS: HAL-225
-	
+
 	Report("Kredito sutartys",CreditAgreementsRClass,CreditAgreementsRn,0,modCredMan);// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 19 02 2019 y. at 10:52:54 AM
+
 
   Maintenance("Sukurti menesines fakturas",EBS_CreateCredManInvVClass,EBS_CreateCredManInvMn,modCredMan);
   Maintenance("Sukurti credit sutarčių įvykius praėjusiems periodams",EBS_CreateCredManEvtVClass,EBS_CreateCredManEvtMn,modCredMan);

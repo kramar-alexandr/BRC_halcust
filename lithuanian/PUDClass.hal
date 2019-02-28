@@ -32,7 +32,6 @@ external inner function Boolean AllowedInCountry(integer);
 external inner function Integer ResourceWindowResourceType();
 external inner function Boolean ResPlan_Rental();
 external inner function Boolean ResPlan_ProdOperations();
-remote function Boolean ReadPOSButtons(string,string,longint,var string,var string,var string,var record POSButtonsVc,var Integer);
 external inner function Boolean TouchScreenLook();
 external inner procedure ExtractObj(string,var Integer,var string);
 external inner function Boolean IsSessionOpen(string,string,Date,Time);
@@ -86,7 +85,6 @@ external inner function real VATZoneButtonsLabelsENG(real,real,real,real);
 //external inner procedure TSERWTEST_ENG();
 //external inner procedure INVFORM_ENG(Boolean);
 external inner procedure DisplayRecordDetails_ENG(LongInt,LongInt,string,date,time,string,string,string,string,string,string,string,string,string,string,string,Integer,string,string,string,val,string,Boolean,string,string);
-external inner procedure DrawPOSInterface_ENG(string,string,record POSButtonsVc,Integer,string,Integer);
 //external inner procedure DisplayRecordDetailsCustDisplay_ENG(LongInt,LongInt,string,date,time,string,string,string,string,string,string,Integer,string,string,string,val);
 //external inner function string 255 ResDayWClassWindowTitle_ENG();
 //external inner function string 255 ResMonWClassWindowTitle_ENG();
@@ -454,7 +452,7 @@ begin
   end;
   if (HasLocalization("ARG,MEX,USA")) then begin 
     v = v + vs;
-    EditField(h3,v,80,"Dispatch Number",Normal,DispatchNumber,false,0); 
+    EditField(h3,v,80,"Siuntos nr.",Normal,DispatchNumber,false,0);  
   end;
 //  CheckBox(h4,v=vm,0,"Price Incl. #VAT#",InclVAT);
   EnterSkip(Math);
@@ -479,7 +477,7 @@ begin
     MatCol(1,94,"Kiekis",0,Quant,true,0); 
   end;
   EnterSkip(Spec);
-  MatText(t=3,28,"Parašas",true);
+  MatText(t=3,28,"Vartotojas",true);
   MatCol(t,100,"",0,Sign,false,0);
   MatText(t,160,"Pataisymo data",true);
   MatCol(t,290,"Atn. data",0,UpdDate,false,0);
@@ -519,9 +517,9 @@ begin
       MatCol(1,-164,"Muitai",0,CustomsCost,true,0); 
     end;
   if (CYb.UseTaxTemplatesforTaxCalc!=0) then begin
-  MatCol(1,-34,"Mok-kd",0,TaxTemplateCode,false,TaxTemplateSClass); 
-  end else begin
-  MatCol(1,-34,"PVM kd.",0,VATCode,false,VATCodeSClass);
+      MatCol(1,-45,"Mok-kd",0,TaxTemplateCode,false,TaxTemplateSClass);
+    end else begin
+      MatCol(1,-45,"PVM kd.",0,VATCode,false,VATCodeSClass);
   end;
     Flip(flipnr); flipnr = flipnr + 1;
   MatCol(1,144,"Aprašymas",0,Spec,false,0);
@@ -538,7 +536,7 @@ begin
   MatCol(1,-400,"Sand. tipas",0,StockType,false,SetSClass);
     end;
     if (HasTREO) then begin
-  MatCol(1,-310,"TREO",0,TREO,false,SetSClass);
+  MatCol(1,-310,"TREO",0,TREO,false,SetSClass); 
     end;
   MatCol(1,-220,"Sand. sąsk.",0,CostAcc,false,AccSClass);
   MatCol(1,-155,"Pirk. sąsk.",0,CredAcc,false,AccSClass);
@@ -589,7 +587,8 @@ begin
     if (HasSerialNumbers) then begin
       Flip(flipnr); flipnr = flipnr + 1;
       MatCol(1,144,"Aprašymas",0,Spec,false,0); 
-      MatCol(1,-150,"Serijinis Nr.",0,SerialNr,false,SerialNrSClass); 
+      MatCol(1,-230,"Serijinis Nr.",0,SerialNr,false,SerialNrSClass);
+      MatCol(1,-80,"Galioja iki",0,BestBefore,false,0); 
     end;
 /*
     MatCol(1,-280,"Vnt. kaina",0,UPrice,true,0); 
@@ -601,35 +600,35 @@ begin
   if (HasLocalization("ARG,MEX,USA")) then begin 
     Flip(flipnr); flipnr = flipnr + 1;
     MatCol(t=1,144,"Aprašymas",0,Spec,false,0); 
-    MatCol(t,-250,"Siuntos nr.",0,DispatchNumber,false,0); 
+    MatCol(t,-250,"Siuntos nr.",0,DispatchNumber,false,0);  
   end;
   if (HasJewelleryInterface) then begin
     Flip(flipnr); flipnr = flipnr + 1;
     MatCol(t=1,144,"Aprašymas",0,Spec,false,0); 
     MatCol(t,-350,"Tiek. ser. nr.",0,SuppSerialNr,true,0); 
-    MatCol(t,-200,"Metalas",0,Metal,true,0); 
-    MatCol(t,-150,"Svoris",0,RowWeight,true,0); 
-    MatCol(t,-100,"Dydis",0,Size,true,0); 
-    MatCol(t,-50,"Ilgis",0,Length,true,0); 
+    MatCol(t,-200,"Metalas",0,Metal,true,0);  
+    MatCol(t,-150,"Svoris",0,RowWeight,true,0);  
+    MatCol(t,-100,"Dydis",0,Size,true,0);  
+    MatCol(t,-50,"Ilgis",0,Length,true,0);  
     Flip(flipnr); flipnr = flipnr + 1;
     MatCol(t=1,144,"Apibūdinimas",0,Spec,false,0); 
-    MatCol(t,-350,"Didelis akmuo",0,MajStoneDet,true,0); 
+    MatCol(t,-350,"Pagr. akmuo",0,MajStoneDet,true,0);  
     MatCol(t,-250,"Spalva",0,Colour,true,0); 
-    MatCol(t,-200,"Švarumas",0,Clarity,true,0); 
-    MatCol(t,-150,"Sertif",0,Cert,true,0); 
-    MatCol(t,-100,"Mažas akmuo",0,MinStoneDet,true,0); 
+    MatCol(t,-200,"Skaidrumas",0,Clarity,true,0);  
+    MatCol(t,-150,"Sert.",0,Cert,true,0);  
+    MatCol(t,-100,"Pap. akmuo",0,MinStoneDet,true,0);  
     Flip(flipnr); flipnr = flipnr + 1;
     MatCol(t=1,144,"Aprašymas",0,Spec,false,0); 
-    MatCol(t,-400,"Laikr. gamint.",0,WatchBrand,true,0); 
-    MatCol(t,-300,"Stiliaus pav.",0,StyleName,true,0); 
-    MatCol(t,-200,"Laikr. metalas",0,WatchMetal,true,0); 
-    MatCol(t,-100,"Judėjimas",0,Movement,true,0); 
+    MatCol(t,-400,"Laikrodžio gamintojas",0,WatchBrand,true,0);  
+    MatCol(t,-300,"Stilius",0,StyleName,true,0);  
+    MatCol(t,-200,"Laikrodžio metalas",0,WatchMetal,true,0);  
+    MatCol(t,-100,"Judėjimas",0,Movement,true,0);  
     Flip(flipnr); flipnr = flipnr + 1;
     MatCol(t=1,144,"Aprašymas",0,Spec,false,0); 
-    MatCol(t,-400,"Apyrank.",0,BrcStr,true,0); 
-    MatCol(t,-300,"Gender",0,Gender,true,0); 
-    MatCol(t,-200,"Other",0,Other,true,0); 
-    MatCol(t,-100,"Other 2",0,Other2,true,0); 
+    MatCol(t,-400,"Brc/Str",0,BrcStr,true,0); 
+    MatCol(t,-300,"Lytis",0,Gender,true,0);  
+    MatCol(t,-200,"Kita",0,Other,true,0);  
+    MatCol(t,-100,"Kita 2",0,Other2,true,0);  
   end;
   InsertRowTest;
   DeleteRowTest;
@@ -639,6 +638,9 @@ begin
       RowMenuItem(0,"Atidaryti siuntos specifikaciją",' ',' ',0,"OpenBatchPUDsm");
     end;
     RowMenuItem(0,"Padalinti eilutę",' ',' ',0,"SplitRowPUDsm");
+    if (HasQualityControl) then begin
+      RowMenuItem(0,"Kokybės kontrolė",' ',' ',10,"QualConFromPUDsm"); 
+    end;
   end;
   EndRowMenu;
   EndMatrix;
@@ -647,7 +649,7 @@ begin
   v = v + 1;
   if (flipnr>2) then begin
     for (f=1;f<flipnr;f=f+1) begin
-      VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1)); 
+      VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1));  
       v = v + vs;
     end;
   end;
@@ -667,7 +669,7 @@ begin
   if (CYb.UseTaxTemplatesforTaxCalc==0) then begin
     EditField(410,-41,70,"#PVM#",Normal,VATVal,true,0);
     if (HasExtTax) then begin
-      EditField(410,-21,70,"Pap. kaštai",ViewOnly,TAX1Sum,true,0);
+      EditField(410,-21,70,"Pap. mok.",ViewOnly,TAX1Sum,true,0);
     end;
   end else begin
     EditField(410,-41,70,"Mok.",Normal,VATVal,true,0);
@@ -692,10 +694,10 @@ begin
       end;
       EditField(h2=295,v,50,"Kursas",Normal,FrRate,true,0); 
       if (HasBase2) then begin  
-        RateField(h3=360,v,50,":",Normal,"ToRateB1",true,h3+60,v+14,"Baz. val. 1",false); 
-        RateField(h3,v+=vs,50,":",Normal,"ToRateB2",true,h3+60,v+14,"Baz. val. 2",false);           
+        RateField(h3=360,v,50,":",Normal,"ToRateB1",true,h3+60,v+14,"Baz. val. 1",false);
+        RateField(h3,v+=vs,50,":",Normal,"ToRateB2",true,h3+60,v+14,"Baz. val. 2",false);
       end else begin
-        RateField(h3=360,v,50,":",Normal,"ToRateB1",true,h3+60,v+14,"Baz. val.",false);     
+        RateField(h3=360,v,50,":",Normal,"ToRateB1",true,h3+60,v+14,"Baz. val.",false);
       end;
     end else begin
       EditField(h1,v+=vs,50,"Baz. val. 1",Normal,BaseRate1,true,0); 
@@ -742,7 +744,7 @@ begin
   EditField(h1,v+=vs,-20,"Reg.Nr.",Normal,FreightCompanyRegNr,false,0);
   EditField(h1,v+=vs,-20,"Maš. inform.",Normal,TruckInfo,false,0);
   EditField(h1,v+=vs,-20,"Vairuotojas",Normal,Driver,false,0);
-  EditField(h1,v+=vs,-20,"CMR",Normal,CMRText,false,0); // International transporting number
+  EditField(h1,v+=vs,-20,"CMR",Normal,CMRText,false,0); // International transporting number 
     Tile(tilenr,30,false,tilenr,Comment); tilenr = tilenr + 1;
     EditField(h1,v=6,-20,"Komentaras",Normal,Comment,false,0); 
   end;
@@ -784,7 +786,7 @@ begin
     SpecialMenu("Patvirtinti sandėlio vald. perkėlimus",' ',9,"OKStockMovPUrDsm");
   end;
   if (HasLocalization("HRV")) then begin
-    SpecialMenu("Sales Price Calculation",' ',8,"SPCHRVPUDsm");
+    SpecialMenu("Pardavimo kainų skaičiavimas",' ',8,"SPCHRVPUDsm"); 
   end;
   if (HasApprovals) then begin
     SpecialMenu("Siųsti patvirtinimui",' ',6,"PUSendforAcceptancePUDsm");
@@ -806,8 +808,8 @@ begin
 //SpecialMenu("Scan",' ',8,"ScanBarCodePUDsm");
   SpecialMenu("Sukurti sandėlio perdavimą",' ',8,"INTransFromPUsm");
   end;
-    SpecialMenu("Pridėti tiekėją",' ',0,"AddSupplierPUDsm");
-    SpecialMenu("Pridėti prekę",' ',0,"AddItemPUDsm"); 
+    SpecialMenu("Pridėti tiekėją",' ',0,"AddSupplierPUDsm"); 
+    SpecialMenu("Pridėti prekę",' ',0,"AddItemPUDsm");     
   end;
   EndWindow;
 end;

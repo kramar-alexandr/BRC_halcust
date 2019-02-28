@@ -11,7 +11,7 @@ external inner procedure OPVc_PasteRecVal(var record OPVc,Integer);
 external inner procedure OPVc_PasteVECode(var record OPVc,Integer);
 external function string 255 BPI_ParseInvStr(string);
 external procedure FindCustomerByIBAN(string,string,var string,var boolean,string);
-external procedure BankFillIProws(var record IPVc,var integer,string,string,var val,string,boolean,string,string);
+external procedure BankFillIProws(var record IPVc,var integer,string,var string,var val,string,boolean,string,string);
 external procedure BankFillOProws(var record OPVc,var integer,string,string,var val,string,boolean,string,string);
 external inner procedure ExtractObjWithSeparator(string,string,Boolean,var Integer,var string);
 
