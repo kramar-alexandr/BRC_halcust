@@ -3,7 +3,10 @@ updating procedure ReadImportTagAccBlock2(string thetag)
 begin
   record AccBlock Accr;
   
+  logtext(0,"ReadImportTagAccBlock2");
   if (NextImportLine(false)) then begin
+  	logtext(0,"------- " & ImportField);
+  	logtext(0,"------- " & ImportField);
     Accr.ARAcc = ImportField;
     Accr.RndAcc = ImportField;
     Accr.CredAcc = ImportField;
