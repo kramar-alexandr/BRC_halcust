@@ -395,7 +395,7 @@ begin
       CheckBox(h2,v+=16,0,"Neleisti nulinių kiekių",NoZeroQty); 
   	end;
   end;
-  CheckBox(h2,v+=16,0,"Kasos pajamų apdorojimo funkcija kuomet uždaroma sesija",AutoCashUp);// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 18:29:49
+  //CheckBox(h2,v+=16,0,"Kasos pajamų apdorojimo funkcija kuomet uždaroma sesija",AutoCashUp);// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 18:29:49
 
 
   if (HasModNL) then begin

@@ -381,7 +381,7 @@ begin
     CheckBox(h2,v+=16,0,"Disallow Changes to OKed POS Invoices on Live Sync Clients",NoChangesPOSOnLiveSyncClient);
     CheckBox(h2,v+=16,0,"Require Return Reason",RequireReturnReason);
     CheckBox(h2,v+=16,0,"Require Return Customer",RequireReturnCustomer);
-    CheckBox(h2,v+=16,0,"Cashup maintenance when closing session",AutoCashUp);// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 18:29:49
+   // CheckBox(h2,v+=16,0,"Cashup maintenance when closing session",AutoCashUp);// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 18:29:49
     if (HasLocalization("LVA")) then begin
       CheckBox(h2,v+=16,0,"Don't allow zero Quantities",NoZeroQty);
     end;
