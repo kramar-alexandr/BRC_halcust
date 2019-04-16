@@ -32,7 +32,7 @@ begin
   
   IVDClassCalcProfitVATButtonAfter = res;
   return;
-end;
+end; 
 
 
 /*
