@@ -1,3 +1,6 @@
+external inner procedure BuildCredManPayPlan(record CredManVc,var record CredManPayPlanVc,record CredManSetBlock,Boolean,Boolean);
+
+
 SetLangMode(LangLithuanian,"LIT",2);
 
 function string 10 Checkbocout(boolean in)
@@ -12,6 +15,33 @@ begin
 return;
 end;
 
+function val GetFutureBalance(record CredManVc CredManr,record CredManSetBlock CredManSetb,Date baldate)
+begin
+	val res;
+	record CredManPayPlanVc CredManPayr;
+	row CredManPayPlanVc CredManPayrw;
+	Integer rwcnt,i;
+
+	res = blankval;
+	BuildCredManPayPlan(CredManr,CredManPayr,CredManSetb,false,false);
+	rwcnt = MatRowCnt(CredManPayr);
+	for (i=rwcnt-1;i>=0;i=i-1) begin
+		MatRowGet(CredManPayr,i,CredManPayrw);
+		logtext(0,"date " & CredManPayrw.TransDate);
+		if (CredManPayrw.TransDate<=baldate) then begin
+			res = CredManPayrw.Bal;
+			i = 0;
+		end;
+	end;
+	if (res==blankval) then begin
+		MatRowGet(CredManPayr,0,CredManPayrw);
+		res = CredManPayrw.Bal;
+	end;
+
+	GetFutureBalance = res;
+	return;
+end;
+
 global procedure CreditAgreementsRn(record RcVc RepSpec)
 begin
 	record CredManVc CredManr;
@@ -19,7 +49,9 @@ begin
 	record CredManEventVc CMEventr;
 	string 200 thekey;
 	val curbal;
-	
+	record CredManSetBlock CredManSetb;
+
+	BlockLoad(CredManSetb);
 	startreportjob(USetStr(1000005));
 	
 	endheader;
@@ -60,16 +92,25 @@ begin
 		if(CredManr.startDate<RepSpec.sStartDate)then begin testf = false; end;
 		if(CredManr.startDate>RepSpec.sEndDate)then begin testf = false; TrHs = false; end;
 		
-		curbal = blankval;
-		thekey = "CredManTransDate:" & CredManr.SerNr;
-		CMEventr.TransDate = currentdate;
-		readlastkey(thekey,CMEventr,1,false);
-		if(CMEventr.CredManNr==CredManr.SerNr)then begin
-			curbal = CMEventr.CredManBal;
+		if (testf) then begin
+			curbal = blankval;
+			if (RepSpec.d1>CurrentDate) then begin
+				curbal = GetFutureBalance(CredManr,CredManSetb,RepSpec.d1);
+			end else begin
+				thekey = "CredManTransDate:" & CredManr.SerNr;
+				CMEventr.TransDate = RepSpec.d1;
+				if (ReadLastKey(thekey,CMEventr,1,false)) then begin
+					curbal = CMEventr.CredManBal;
+				end else begin
+					ResetLoop(CMEventr);
+					RecordClear(CMEventr);
+					if (ReadFirstKey(thekey,CMEventr,1,false)) then begin
+						curbal = CMEventr.CredManBal;
+					end;
+				end;
+			end;
+			if(RepSpec.flags[5]==0 and curbal==0)then begin testf = false; end;
 		end;
-		if(RepSpec.flags[5]==0 and curbal==0)then begin testf = false; end;
-		
-		
 		
 		if(testf)then begin
 			startformat(15);

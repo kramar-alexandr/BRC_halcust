@@ -339,6 +339,7 @@ begin
   PeriodField(h=140,v=6,"Periodas");
   EditFieldTL(h,v+=20,150,"Klientas",M4UStr,Normal,40,f1,false,CUSClass);
   EditFieldTL(h,v+=20,150,"Tipas",M4UStr,Normal,40,f2,false,CredManTypeSClass);
+  EditFieldTL(h,v+=20,150,"Balanso Data",M4Date,Normal,0,d1,false,PasteCurDate);
   CheckBox(h,v+=30,0,"Įtraukti sustabdytus",flags[1]);
   CheckBox(h,v+=30,0,"Įtraukti nutrauktas",flags[2]);
   CheckBox(h,v+=30,0,"Įtraukti nepatvirtintus",flags[3]);

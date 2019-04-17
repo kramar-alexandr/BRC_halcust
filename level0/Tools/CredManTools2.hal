@@ -236,72 +236,74 @@ begin
         CredManPayPlanrw.AcumulatedInt = acumint;
         CredManPayPlanrw.Bal = calcbal;
         CredManPayPlanrw.IssuedNr = CredManEventr.SerNr;
-        switch (evt) begin
-          case 0:
-            Trace("Should not happen"," case 0");
-          case 1:
-            // CredManPayPlanrw.Bal = CredManPayPlanrw.Bal + CredManEventrw.Sum; //EBS intereset should not change balance
-            CredManPayPlanrw.AcumulatedInt = CredManPayPlanrw.AcumulatedInt - CredManEventrw.Sum;
-            if (CredManPayPlanrw.AcumulatedInt<0) then begin
+        if (EBS_ShouldItemChangeBal(CredManr,CredManEventrw.ArtCode,CredManEventrw.Sum)) then begin
+          switch (evt) begin
+            case 0:
+              Trace("Should not happen"," case 0");
+            case 1:
+              // CredManPayPlanrw.Bal = CredManPayPlanrw.Bal + CredManEventrw.Sum; //EBS intereset should not change balance
+              CredManPayPlanrw.AcumulatedInt = CredManPayPlanrw.AcumulatedInt - CredManEventrw.Sum;
+              if (CredManPayPlanrw.AcumulatedInt<0) then begin
+                CredManPayPlanrw.AcumulatedInt = 0;
+              end;
+            case 2:
+  //            if (CredManr.ChargeMethod==1) then begin
+                CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum;
+                realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
+  //            end;
+            case 3:
+  //            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
+            case 4:
+              CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
+            case 5:
+              // CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum; //EBS intereset should not chagne balance
+            case 6:
+              if (CredManr.ChargeMethod==0) then begin
+                CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+                realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
+              end;
+            case 7:
+              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+            case 8:
+              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+            case 9:
+              // CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum; //EBS paid interest should not decrease balance
+              realintpaid = realintpaid + CredManPayPlanrw.Sum;
+              extrainttopay = 0;
+            case 10:
+              if (CredManr.ChargeMethod==1) then begin
+                CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum;
+                realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
+              end;
+            case 11:
+  //            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
+            case 12:
+              // CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum; //EBS issued installment sum should not increase balance
+            case 13:
+              // CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum; //EBS interest should not change balance
+            case 14:
+              if (CredManr.ChargeMethod==0) then begin
+                CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+  //              realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
+              end;
+            case 15:
+              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+            case 16:
+              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+            case 17:
+              CredManPayPlanrw.Bal = CredManPayPlanrw.Bal + CredManEventrw.Sum;
               CredManPayPlanrw.AcumulatedInt = 0;
-            end;
-          case 2:
-//            if (CredManr.ChargeMethod==1) then begin
-              CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum;
-              realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
-//            end;
-          case 3:
-//            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
-          case 4:
-            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
-          case 5:
-            // CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum; //EBS intereset should not chagne balance
-          case 6:
-            if (CredManr.ChargeMethod==0) then begin
-              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
-              realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
-            end;
-          case 7:
-            CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
-          case 8:
-            CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
-          case 9:
-            // CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum; //EBS paid interest should not decrease balance
-            realintpaid = realintpaid + CredManPayPlanrw.Sum;
-            extrainttopay = 0;
-          case 10:
-            if (CredManr.ChargeMethod==1) then begin
-              CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum;
-              realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
-            end;
-          case 11:
-//            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
-          case 12:
-            // CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum; //EBS issued installment sum should not increase balance
-          case 13:
-            // CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum; //EBS interest should not change balance
-          case 14:
-            if (CredManr.ChargeMethod==0) then begin
-              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
-//              realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
-            end;
-          case 15:
-            CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
-          case 16:
-            CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
-          case 17:
-            CredManPayPlanrw.Bal = CredManPayPlanrw.Bal + CredManEventrw.Sum;
-            CredManPayPlanrw.AcumulatedInt = 0;
-          case 18:
-//            if (CredManr.ChargeMethod==1) then begin
-              CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum;
-              realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
-//            end;
-          case 19:
-//            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
-          case 20:
-            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
-            mfee = mfee + CredManPayPlanrw.Sum;
+            case 18:
+  //            if (CredManr.ChargeMethod==1) then begin
+                CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum;
+                realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
+  //            end;
+            case 19:
+  //            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
+            case 20:
+              CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
+              mfee = mfee + CredManPayPlanrw.Sum;
+          end;
         end;
         MatRowPut(CredManPayPlanr,MatRowCnt(CredManPayPlanr),CredManPayPlanrw);
         acumint = CredManPayPlanrw.AcumulatedInt;
@@ -662,7 +664,7 @@ begin
   end;
   //EBS -->
   if invdat >= CredManr.endDate then begin
-    AddRemainingValue(CredManr,CredManSetb,invdat,CredManPayPlanr,calcbal,printf);
+    //AddRemainingValue(CredManr,CredManSetb,invdat,CredManPayPlanr,calcbal,printf);CHN::removed 190416
   end;
   //EBS <--
   return;
