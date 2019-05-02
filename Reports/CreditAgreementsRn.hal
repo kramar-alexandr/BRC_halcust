@@ -95,7 +95,7 @@ begin
 		if (testf) then begin
 			curbal = blankval;
 			if (RepSpec.d1>CurrentDate) then begin
-				curbal = GetFutureBalance(CredManr,CredManSetb,RepSpec.d1);
+  			curbal = GetFutureBalance(CredManr,CredManSetb,RepSpec.d1);
 			end else begin
 				thekey = "CredManTransDate:" & CredManr.SerNr;
 				CMEventr.TransDate = RepSpec.d1;
