@@ -78,6 +78,10 @@ begin
   Integer res;
   string 20 installitem; //EBS
 
+
+  res = 0;
+  BlockLoad(CMSb);
+ 
   //EBS -->
   installitem = CMSb.InstalmentItem;
   CredManTyper.Code = type;
@@ -88,8 +92,6 @@ begin
   end;
   //EBS <--
 
-  res = 0;
-  BlockLoad(CMSb);
   if (artcode==installitem) then begin //EBS edit
     if (paidflag!=1) then begin
       if (chargemethod==1) then begin
@@ -271,23 +273,23 @@ begin
               realintpaid = realintpaid + CredManPayPlanrw.Sum;
               extrainttopay = 0;
             case 10:
-              if (CredManr.ChargeMethod==1) then begin
+    //          if (CredManr.ChargeMethod==1) then begin
                 CredManPayPlanrw.Bal = CredManPayPlanrw.Bal - CredManEventrw.Sum;
                 realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
-              end;
+    //          end;
             case 11:
-  //            CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
+              CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum;
             case 12:
               // CredManPayPlanrw.Bal = calcbal + CredManPayPlanrw.Sum; //EBS issued installment sum should not increase balance
             case 13:
               // CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum; //EBS interest should not change balance
             case 14:
               if (CredManr.ChargeMethod==0) then begin
-                CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+  //              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
   //              realinstpaid = realinstpaid + CredManPayPlanrw.Sum;
               end;
             case 15:
-              CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
+  //            CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
             case 16:
               CredManPayPlanrw.Bal = calcbal - CredManPayPlanrw.Sum;
             case 17:
