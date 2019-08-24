@@ -1,0 +1,236 @@
+external inner function Date DateFromString(string,string);
+external inner function val ValFromString(string,string,string);
+external inner function Boolean VIVc_PasteVECode(var record VIVc,Integer,Boolean,Boolean,var string);
+external inner remote procedure VIVc_PasteInvDate(var record VIVc);
+external inner procedure VIVc_PastePayDeal(var record VIVc);
+external inner procedure VISumup(record VIVc,var val);
+external inner procedure AutoObj(var string);
+external inner function Boolean VIVc_PasteAccNumber(var record VIVc,string,Boolean,Integer);
+external inner function string 60 AddObjectToObjectList(string,string);
+external inner procedure VIDDefault(Integer,string,var record VIVc);
+external inner function Boolean PasteInvIn2OPr(var record OPVc,Integer,Date,Integer,val,var string,Boolean,var Boolean);
+external inner procedure OPVc_PasteBankVal(var record OPVc,Integer);
+external inner procedure OPPastePayMode2(var record OPVc,string);
+external inner procedure OPVc_PasteTransDate(var record OPVc);
+
+procedure PreparePayment(Date td,var record OPVc OPr,record BankImpSupplierBlock BISb)
+begin
+
+  RecordClear(OPr);
+  RecordNew(OPr);
+  OPr.TransDate = td;
+  OPr.PayDate = td;
+  OPr.PayMode = BISb.PMCode;
+  OPPastePayMode2(OPr,""); 
+  OPVc_PasteTransDate(OPr);   
+
+  return;
+end;
+
+procedure AddHierObjects(string objects,var string objstr)
+begin
+  record ObjVc Objr;
+  Integer i;
+
+  objstr = objects;
+  for (i=len(objects);i>0;i=i-1) begin
+    if (Mid(objects,i,1)==",") then begin 
+      goto LENDFOR;
+    end;
+  end;
+LENDFOR:;  
+  if (i>0) then begin
+    Objr.Code = Right(objects,i);
+  end else begin
+    Objr.Code = objects;
+  end;
+  if (ReadFirstMain(Objr,1,true)) then begin
+    if (nonblank(Objr.AutoObjects)) then begin
+      if (nonblank(objstr)) then begin
+        objstr = objstr & ",";
+      end;
+      objstr = objstr & Objr.AutoObjects;
+    end;
+  end;
+  return;
+end;
+
+procedure AddInvoiceToPayment(xml x,string root,record OPVc OPr,var vector Boolean vAdded,record BankImpSupplierBlock BISb,val sum)
+begin
+  string 255 rowobj,tstr;
+  record APVc APr;
+  Boolean TrHs,foundf;
+  Integer i,rwcnt,rownr;
+  Longint pos;
+  Boolean installmentf;
+  val chk;
+  string 255 warning;
+  record VIVc VIr;
+  row VIVc VIrw;
+  row OPVc OPrw;
+  
+  rowobj = XmlGet(x,root & "/InvoiceItem/InvoiceItemGroup/ItemEntry/Reference/AssetIdent");
+  if (nonblank(rowobj)) then begin
+    while (GetNextSubstring(BISb.DebtVECode,pos,",",tstr) and foundf==false) begin
+      APr.VECode = tstr;
+      TrHs = true;
+      ResetLoop(APr);
+      while (LoopKey("VECode",APr,1,TrHs)) begin
+        if (APr.VECode!=tstr) then begin
+          TrHs = false;
+        end else begin
+          if (vAdded[APr.SerNr]==false) then begin
+            VIr.SerNr = APr.SerNr;
+            if (ReadFirstMain(VIr,1,true)) then begin
+              rwcnt = MatRowCnt(VIr);
+              for (i=0;i<rwcnt;i=i+1) begin
+                MatRowGet(VIr,i,VIrw);
+                if (SetInSet(rowobj,VIrw.Objects)) then begin
+                  rownr = MatRowCnt(OPr);
+                  ClearRow(OPr,OPrw,1);
+                  OPrw.VISerNr = VIr.SerNr;
+                  MatRowPut(OPr,rownr,OPrw);
+                  PasteInvIn2OPr(OPr,rownr,OPr.TransDate,1,chk,warning,false,installmentf);
+                  MatRowGet(OPr,rownr,OPrw);
+                  OPrw.RecVal = sum;
+                  OPrw.BankVal = sum;
+                  MatRowPut(OPr,rownr,OPrw);
+                  OPVc_PasteBankVal(OPr,rownr);
+                  foundf = true;
+                  vAdded[VIr.SerNr] = true;
+                end;
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+  if (!foundf) then begin
+    ClearRow(OPr,OPrw,1);
+    OPrw.RecVal = sum;
+    OPrw.BankVal = sum;
+    MatRowPut(OPr,rownr,OPrw);
+    OPVc_PasteBankVal(OPr,rownr);
+  end;
+
+  return;
+end;
+
+global
+updating procedure BRC_StorePayment(record OPVc OPr,record BankImpSupplierBlock BISb)
+begin
+  
+  if (BISb.OKOPFlag==1) then begin
+    OPr.OrderedFlag = 1;
+    OPr.SentFlag = 1;
+    OPr.DoneFlag = 1;
+  end;
+  OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");
+  RecordInsert(OPr,true);
+
+  return;
+end;
+
+global
+updating function Boolean BRC_StorePInvoice(record VIVc VIr,record BankImpSupplierBlock BISb)
+begin
+  Boolean res;
+
+  if (BISb.OKVIFlag==1) then begin
+    VIr.OKFlag = 1;
+  end;
+  VIr.SerNr = NextSerNr("VIVc",VIr.TransDate,-1,false,"");
+  if (RecordInsert(VIr,true)) then begin
+    res = true;
+  end;
+
+  BRC_StorePInvoice = res;
+  return;
+end;
+
+global
+procedure DoSiauliuIVIn(area a)
+begin
+  Integer i;
+  string 255 root,root2,objstr;
+  record BankImpSupplierBlock BISb;
+  string 255 tstr;
+  record VIVc VIr;
+  row VIVc VIrw;
+  Date td;
+  record OPVc OPr;
+  vector Boolean vAdded;
+  xml x;
+
+  x = ParseXMLArea(a);
+
+  BlockLoad(BISb);
+  td = DateFromString(XmlGet(x,"E_Invoice/Header/Date"),"YYYY-MM-DD");
+  PreparePayment(td,OPr,BISb);
+  i = 0;
+  root = "E_Invoice/Invoice";
+  while (XmlNodeExists(x,root & "[" & i & "]")) begin
+    root2 = root & "[" & i & "]";
+    RecordClear(VIr);
+    RecordNew(VIr);
+    VIr.VECode = BISb.VECode;
+    VIVc_PasteVECode(VIr,0,false,false,tstr);
+    VIr.PayVal = ValFromString(XmlGet(x,root2 & "/InvoiceSumGroup/InvoiceSum"),".","");
+    VIr.InvDate = DateFromString(XmlGet(x,root2 & "/InvoiceInformation/InvoiceDate"),"YYYY-MM-DD");
+    VIr.TransDate = VIr.InvDate;
+    VIVc_PasteInvDate(VIr); 
+    VIr.PayDeal = BISb.PayDeal;
+    VIVc_PastePayDeal(VIr);
+    VIr.InvoiceNr = XmlGet(x,root2 & "/InvoiceInformation/InvoiceNumber");
+    tstr = AddObjectToObjectList(VIr.Objects,BISb.Object); 
+    AddHierObjects(tstr,objstr);
+    AutoObj(objstr);
+    VIr.Objects = objstr;
+    ClearRow(VIr,VIrw,1);
+    VIrw.AccNumber = BISb.Account;
+    MatRowPut(VIr,0,VIrw);
+    VIVc_PasteAccNumber(VIr,"",true,0);
+    MatRowGet(VIr,0,VIrw);
+    tstr = AddObjectToObjectList(VIrw.Objects,BISb.RowObject); 
+    AddHierObjects(tstr,objstr);
+    AutoObj(objstr);
+    VIrw.Objects = objstr;
+    VIrw.Sum  = VIr.PayVal;
+    VIrw.VATCode = BISb.VATCode;
+    MatRowPut(VIr,0,VIrw);
+    VIDDefault(0,"VATCode",VIr);
+    if (qupdating.BRC_StorePInvoice(VIr,BISb)) then begin
+      //AddToPayment
+      if (MatRowCnt(OPr)>=200) then begin
+        qupdating.BRC_StorePayment(OPr,BISb);
+        PreparePayment(td,OPr,BISb);
+      end;
+      AddInvoiceToPayment(x,root2,OPr,vAdded,BISb,VIr.PayVal);
+    end;
+    i = i + 1;
+  end;
+
+  if (MatRowCnt(OPr)>0) then begin
+    qupdating.BRC_StorePayment(OPr,BISb);
+  end;
+
+  return;
+end;
+
+global
+updating procedure SiauliuIVIn(record RcVc RepSpec)
+begin
+  Longint pos;
+  area a;
+  
+  pos = 0;
+  while (TestEOF==false) begin
+    AddTextToArea(ReadChar(pos),a);
+    pos = pos + 1;
+  end;
+
+  threadasync.DoSiauliuIVIn(a);
+
+  return;
+end;

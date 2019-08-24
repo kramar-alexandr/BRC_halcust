@@ -492,5 +492,18 @@ begin
 	RecordField(AutoCashUp,M4Int,0,0);// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 16:14:57
   EndBlock;
 
+  BlockBegin(BankImpSupplierBlock,-,"");
+  RecordField(VECode,M4Code,20,CUVc);
+  RecordField(VATCode,M4Code,5,0);
+  RecordField(PayDeal,M4Code,10,PDVc);
+  RecordField(Account,M4Code,10,AccVc);
+  RecordField(RowObject,M4Code,20,ObjVc);
+  RecordField(Object,M4Code,20,ObjVc);
+  RecordField(DebtVECode,M4UStr,255,CUVc);
+  RecordField(PMCode,M4Code,2,0);
+  RecordField(OKVIFlag,M4Int,0,0);
+  RecordField(OKOPFlag,M4Int,0,0);
+  EndBlock;
+
   return;
 end;

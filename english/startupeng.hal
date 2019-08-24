@@ -24,5 +24,8 @@ begin
 	Export("BRC - FR0471 imokos gyventojams",BRCFR0471EClass,BRCFR0471En,modPL); // EVS: HAL-225
 	Export("BRC - GPM312 imokos gyventojams",BRCGPM312EClass,BRCGPM312En,modPL);// Edit ************************** BPI Ukraine - KramarAlexandr - 01, 14 01 2019 y. at 3:14:54 PM
 
+	Setting("BRC - Siauliu invoice and payment settings",BankImpSupplierTClass,modPL);
+  Import("BRC - Siauliu invoice and payment import",0,SiauliuIVIn,modPL);
+
   return;
 end;

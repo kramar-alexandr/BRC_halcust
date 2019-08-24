@@ -59,3 +59,25 @@ begin
 
   return;
 end;
+
+window BankImpSupplierTClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vs,v2,vs2,h2;
+  WindowBegin("áiauliu bankas import setting",BankImpSupplierTClass,CGSBl,-);
+  SetWRect(20,80,600,339);
+  UseView(BankImpSupplierBlock);
+  vs=20; h=170; vs2=16; h2 = 350;
+  EditField(h,v=6,120,"Supplier",Normal,VECode,false,CUSClass);
+  EditField(h,v+=vs,90,"Row VAT Code",Normal,VATCode,false,VATCodeSClass);
+  EditField(h,v+=vs,90,"Invoice payment term",Normal,PayDeal,false,PDSClass);
+  EditField(h,v+=vs,90,"Row Account",Normal,Account,false,AccSClass);
+  EditField(h,v+=vs,90,"Row Object",Normal,RowObject,false,ObjSClass);
+  EditField(h,v+=vs,90,"Header Object",Normal,Object,false,ObjSClass);
+  EditField(h,v+=vs,200,"Debt Invoice Suppliers",Normal,DebtVECode,false,CUSClass);
+  EditField(h,v+=vs,90,"Debt Invoice Payment Mode",Normal,PMCode,false,PMSClass);
+  CheckBox(h2,v=6,0,"OK Invoices",OKVIFlag);
+  CheckBox(h2,v+=vs,0,"OK Payment Orders",OKOPFlag);
+
+  EndWindow;
+end;
