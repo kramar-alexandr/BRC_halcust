@@ -60,6 +60,7 @@ begin
     ChangeMatrixField(ArtCode,M4Code,20,INVc);
     ArrayField(AddPayDate,M4Date,0,0);
     ArrayField(FeeBalType,M4Set,12000,0);
+    RecordField(HeaderComment,M4Str,255,0);
   EndRecordAdd;
 
   RecordAddBegin(CredManTypeVc,"brc_CredManTypeVc");

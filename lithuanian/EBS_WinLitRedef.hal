@@ -62,10 +62,11 @@ begin
   EditField(h,v+=vs,82,"Pardavėjas",Normal,SalesMan,false,UserSClass);
   EditField(h2,v,-40,"Kont.",Normal,ClientContact,false,ContactSClass);
   EditField(h,v+=vs,82,"Prekė",Normal,ArtCode,false,INSClass); //EBS
+  EditField(h2,v,-40,"Komentaras",Normal,HeaderComment,false,0); //EBS
+  EditField(h,v+=vs,82,"Viso suma be PVM",Normal,SumWOVAT,true,0); //EBS
   EditField(h2,v,100,"Patalpa",Normal,Location,false,LocationSClass); //EBS
   EditField(h3,v,82,"VAT Code",Normal,VATCode,false,VatCodeSClass); //EBS
-  EditField(h,vm=(v+=vs),82,"Viso suma be PVM",Normal,SumWOVAT,true,0); //EBS
-  EditField(h,v+=vs,82,"Viso suma",Normal,InvSum4,true,0);
+  EditField(h,vm=(v+=vs),82,"Viso suma",Normal,InvSum4,true,0);
   EditField(h,v+=vs,30,"Palūkanų %",Normal,IntRate,false,0);
   EditField(h,v+=vs,30,"Mėnesiai",Normal,InstalmentMonths,false,0);
   EditField(h,v+=vs,30,"Mok. terminai",Normal,PayDeal,false,PDSClass);

@@ -76,7 +76,8 @@ begin
 		outstring(315,0,"Mėnesiai",false);
 		outstring(350,0,"Palūkanų %",false);
 		outstring(385,0,"Mėnesiniai įnašai",false);
-		outstring(1,0,"Balansų vertė",true);
+		outstring(450,0,"Balansų vertė",true);
+		outstring(455,0,"Komentaras",false);
 	endformat;
 	
 	TrHs = true;
@@ -133,7 +134,8 @@ begin
 				outstring(315,0,CredManr.InstalmentMonths,false);
 				outstring(350,0,CredManr.IntRate,false);
 				outstring(385,0,CredManr.MonthlySum,false);
-				outstring(1,0,curbal,true);
+				outstring(450,0,curbal,true);
+				outstring(455,0,CredManr.HeaderComment,false);
 			endformat;
 		end;
 	
