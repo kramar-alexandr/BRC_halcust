@@ -77,7 +77,7 @@ begin
   return;
 end;
 
-function Integer FindNextToInvoice(record CredManPayPlanVc CredManPayPlanr,Date todat,var Date firstdat)
+function Integer FindNextToInvoice(record CredManPayPlanVc CredManPayPlanr,Date todat,var Date firstdat,Boolean buyoutf)
 begin
   row CredManPayPlanVc CredManPayPlanrw;
   LongInt i,rwcnt;
@@ -115,7 +115,10 @@ begin
     end else begin
       switch (CredManPayPlanrw.PlanType) begin
         case 1: foundissuedint = true;
-        case 6: foundissuedint = true;
+        case 6: 
+          if (buyoutf) then begin
+            foundissuedint = true;
+          end;
         case 9: foundissuedint = false;
         case 0:
           if (foundissuedint) then begin
@@ -173,7 +176,7 @@ begin
   BlockLoad(CredManSetb);
   RecordNew(CredManPayPlanr);
   BuildCredManPayPlan(CredManr,CredManPayPlanr,CredManSetb,true,false);
-  makedepinvf = FindNextToInvoice(CredManPayPlanr,todat,firstdat);
+  makedepinvf = FindNextToInvoice(CredManPayPlanr,todat,firstdat,buyoutf);
   // LogText(0,">>>>>>>> firstdat=" & firstdat & " makedepinvf=" & makedepinvf);
   // StopAlert("156" & " makedepinvf=" & makedepinvf & " todat=" & todat & " firstdat=" & firstdat);
   if (makedepinvf==0) then begin
