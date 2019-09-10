@@ -115,6 +115,7 @@ begin
     end else begin
       switch (CredManPayPlanrw.PlanType) begin
         case 1: foundissuedint = true;
+        case 6: foundissuedint = true;
         case 9: foundissuedint = false;
         case 0:
           if (foundissuedint) then begin

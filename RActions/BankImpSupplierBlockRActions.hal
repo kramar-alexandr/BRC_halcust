@@ -1,0 +1,33 @@
+global
+updating function LongInt BankImpSupplierBlockCheck(var record BankImpSupplierBlock BISb,record BankImpSupplierBlock BIS2b,LongInt stat,LongInt long4)
+BEGIN
+  LongInt res;
+  record CUVc CUr;
+  string 255 tstr;
+  Longint pos;
+  
+  res = 0;
+  CUr.Code = BISb.VECode;
+  if (ReadFirstMain(CUr,1,true)) then begin
+    if (CUr.VEType!=1) then begin
+      RecordCheckError(20875,"",-1,"VECode");
+      res = -1;
+      goto LBankImpSupplierBlockCheck;        
+    end;
+  end;
+  while (GetNextSubstring(BISb.DebtVECode,pos,",",tstr)) begin
+    CUr.Code = tstr;
+    if (ReadFirstMain(CUr,1,true)) then begin
+      if (CUr.VEType!=1) then begin
+        RecordCheckError(20875," " & tstr,-1,"DebtVECode");
+        res = -1;
+        goto LBankImpSupplierBlockCheck;        
+      end;
+    end;
+  end;
+
+LBankImpSupplierBlockCheck:;  
+  BankImpSupplierBlockCheck = res;
+  return;
+end;
+// :EVS

@@ -300,6 +300,9 @@ begin
       switch (fieldname) begin
         case "LangCode": res = true;
         case "LastInvDate": res = true;
+//CUST-BEGIN
+        case "HeaderComment": res = true;
+//CUST-END
         otherwise res = false;
       end;
       if (rownr>=0) then begin
