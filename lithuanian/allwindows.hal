@@ -417,3 +417,63 @@ begin
   end;
   EndWindow;
 end;
+
+window CULClass:10
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  WindowBegin("Kontaktai",CULClass,CGmlist,-);
+  SpawnClass(CUDClass);
+  if (HasJewelleryInterface) then begin
+    SetWRect(20,80,880,300);
+  end else begin
+    SetWRect(20,80,760,300);
+  end;
+  Sizeable(-1,-1,0,0);
+  UseView(CUVc);
+//  FormName(CustRn);  // Crash in multiuser
+//  h = 20; HalPushButton(h,v=3,h=h+100,v+vs,"VEList","#Suppliers#");
+//  HalPushButton(h=h+50,v=3,h=h+100,v+vs,"CUList","Pirkėjai");
+  RecordList(4,17,-21,-39);
+  RlColKey(4,4,"Nr.",Code,false,Code);
+  RlColKey(96,96,"Trumpas",SearchKey,false,SearchKey);
+  RlColKey(145,140,"Kateg.",CustCat,false,Group);
+  RlColKey(190,190,"Pavadinimas",Name,false,Name);
+  if (HasJewelleryInterface) then begin
+    RlColKey(-480,-480,"Telefonas",Phone,false,Phone);
+    RlColKey(-380,-380,"Mobilus",Mobile,false,Mobile);
+    RlCol(-280,-280,"El. paštas",eMail,true);
+    RlCol(-150,-150,"Adresas 1",InvAddr0,false);
+  end else begin
+    RlColKey(-420,-420,"Telefonas",Phone,false,Phone);
+    RlColKey(-325,-325,"Kontaktas",Person,false,Person);
+    RlColKey(-215,-215,"Skyrius",Department,false,Department);
+    if (CUVATNrColumn) then begin
+      RlColKey(-125,-125,"#PVM Reg. Nr.#",VATNr,false,VATNr);
+    end else begin
+      RlColKey(-125,-125,"#Reg. Nr.#",RegNr1,false,RegNr1);
+    end;
+    RlColKey(-50,-50,"Banko sąsk.",BankAccount,false,BankAccount);
+  end;
+  SearchField("Ieškoti");
+  if (HasMetroTestFeatures or GUIType!=kGUIMetro) then begin
+  CommunicateButton;
+  end;
+  if (HasLimitedAccess) then begin 
+  BrowseSubsetButton(-40,-15);
+  end;
+  if (UserCanReport("CustPSRn","",true) and HasCustomerStatusReport and GuiType!=kGuiiPhone and GuiType!=kGuiAndroid) then begin
+  SpecialMenu("Pirkėjo būklė",'e',0,"CUStatusCULsm");
+  end;
+  if (UserCanReport("VEPSRn","VendPSRClass",true) and GuiType!=kGuiiPhone and GuiType!=kGuiAndroid) then begin
+  SpecialMenu("Tiekėjo būklė",'u',2,"VEStatusLsm");
+  end;
+  SpecialMenu("Pakeisti slaptažodį",' ',1,"ChangePasswdCULsm");
+  SpecialMenu("Ieškoti",'F',3,"CUSearchLsm");
+  if (GuiType==kGuiCocoa) then begin
+    SpecialMenu("Importuoti adresų knygą",' ',5,"ImportAddressbooksm");
+  end;
+  SpecialMenu("Update Contacts",'',6,"UpdateCustInfoMn");// Edit ************************** BPI Ukraine - KramarAlexandr - 03, 18 09 2019 y. at 3:19:48 PM
+  SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);
+  SpecialMenu("Sukurti veiklą",'c',4,"NewActCULsm");
+  EndWindow;
+end;

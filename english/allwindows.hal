@@ -406,3 +406,63 @@ if (HasModNL) then begin
   end;
   EndWindow;
 end;
+
+window CULClass:10
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  WindowBegin("Contacts",CULClass,CGmlist,-);
+  SpawnClass(CUDClass);
+  if (HasJewelleryInterface) then begin
+    SetWRect(20,80,880,300);
+  end else begin
+    SetWRect(20,80,760,300);
+  end;
+  Sizeable(-1,-1,0,0);
+  UseView(CUVc);
+//  FormName(CustRn);  // Crash in multiuser
+//  h = 20; HalPushButton(h,v=3,h=h+100,v+vs,"VEList","#Suppliers#");
+//  HalPushButton(h=h+50,v=3,h=h+100,v+vs,"CUList","Customers");
+  RecordList(4,17,-21,-39);
+  RlColKey(4,4,"N_o.",Code,false,Code);
+  RlColKey(96,96,"Short",SearchKey,false,SearchKey);
+  RlColKey(145,140,"C_at",CustCat,false,Group);
+  RlColKey(190,190,"Name",Name,false,Name);
+  if (HasJewelleryInterface) then begin
+    RlColKey(-480,-480,"Tele_phone",Phone,false,Phone);
+    RlColKey(-380,-380,"Mobile",Mobile,false,Mobile);
+    RlCol(-280,-280,"Email",eMail,true);
+    RlCol(-150,-150,"Address 1",InvAddr0,false);
+  end else begin
+    RlColKey(-420,-420,"Tele_phone",Phone,false,Phone);
+    RlColKey(-325,-325,"Con_tact",Person,false,Person);
+    RlColKey(-215,-215,"Department",Department,false,Department);
+    if (CUVATNrColumn) then begin
+      RlColKey(-125,-125,"#VAT Reg. No.#",VATNr,false,VATNr);
+    end else begin
+      RlColKey(-125,-125,"#Reg. No.#",RegNr1,false,RegNr1);
+    end;
+    RlColKey(-50,-50,"Bank Acc",BankAccount,false,BankAccount);
+  end;
+  SearchField("Search");
+  if (HasMetroTestFeatures or GUIType!=kGUIMetro) then begin
+    CommunicateButton;
+  end;
+  if (HasLimitedAccess) then begin
+    BrowseSubsetButton(-40,-15);
+  end;
+  if (UserCanReport("CustPSRn","",true) and HasCustomerStatusReport and GuiType!=kGuiiPhone and GuiType!=kGuiAndroid) then begin
+    SpecialMenu("Customer Status",'e',0,"CUStatusCULsm");
+  end;
+  if (UserCanReport("VEPSRn","VendPSRClass",true) and GuiType!=kGuiiPhone and GuiType!=kGuiAndroid) then begin
+    SpecialMenu("#Supplier# Status",'u',2,"VEStatusLsm");
+  end;
+  SpecialMenu("Change Password",' ',1,"ChangePasswdCULsm");
+  SpecialMenu("Search",'F',3,"CUSearchLsm");
+  if (GuiType==kGuiCocoa) then begin
+    SpecialMenu("Import address book",' ',5,"ImportAddressbooksm");
+  end;
+  SpecialMenu("Update Contacts",'',6,"UpdateCustInfoMn");// Edit ************************** BPI Ukraine - KramarAlexandr - 03, 18 09 2019 y. at 3:19:48 PM
+  SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);
+  SpecialMenu("Activity",'c',4,"NewActCULsm");
+  EndWindow;
+end;

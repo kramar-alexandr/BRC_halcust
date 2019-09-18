@@ -1,14 +1,16 @@
-external  inner function LongInt CUExternalTaxUpdateAddress(string,var record CUVc,Integer,var string);
-external  inner function LongInt DelAddrExternalTaxUpdateAddress(string,var record DelAddrVc,var string);
-external  inner function LongInt ValidCUDataForVATLaw(Integer,string,record CUVc,var string,var string);
+remote procedure CUDCLass_remote_BIChartAsync(Integer,record CUVc);
+remote function LongInt CUExternalTaxUpdateAddress(string,var record CUVc,Integer,var string);
+remote function LongInt DelAddrExternalTaxUpdateAddress(string,var record DelAddrVc,var string);
+remote function LongInt ValidCUDataForVATLaw(Integer,string,record CUVc,var string,var string);
 external inner procedure LogAreaToFile(string,area);
 external inner function boolean ValidateIBAN(string);
 external inner procedure AutomatedSalesOrderly(string);
-external  inner updating procedure CreateCUObject(var record CUVc,Boolean);
-external  inner procedure CUVc_PasteDelCountryCode(var record CUVc,string);
-external  inner function Boolean TransactionForCustomerExists(string);
-external  inner procedure CUDCLass_BIChart_Tool(record CUVc,var val,var Array val,var Array Integer);
-external  inner procedure FindCurMailboxName(var string);
+remote updating procedure CreateCUObject(var record CUVc,Boolean);
+remote procedure CUDClassOnOpenWindowRemote(record CUVc,var Integer,var string,var string);
+remote procedure CUVc_PasteDelCountryCode(var record CUVc,string);
+remote function Boolean TransactionForCustomerExists(string);
+remote procedure CUDCLass_BIChart_Tool(record CUVc,var val,var Array val,var Array Integer);
+remote procedure FindCurMailboxName(var string);
 external inner procedure CUVc_PasteInvAddr(var record CUVc,Integer);
 external inner procedure ActVcRecordDefClient(var record ActVc);
 external inner procedure ReadTXServiceReply(var record TXServiceReplyVc,var Area,Boolean);
@@ -19,23 +21,26 @@ external inner procedure PasteFromTRObjS(Integer,Integer);
 external inner procedure SendTextParameter(string,var Area);
 external inner procedure SendFunctionVersion(string,string,var Area);
 external inner updating procedure RecordActionProfile_Print(var record CUVc,string,Boolean);
+remote updating function Boolean NewContactCUDsmRemote(record CUVc,var record CUVc); // Must be remote
 external inner function Boolean FindCustomerRelation(string,string,var record CUVc);
 external inner function Integer CountObjects(string);
 external inner procedure StripEndingSpaces(var string);
 external inner updating function Boolean SendServiceRequest(string,Boolean,area,var Area);
 external inner function Integer XmlGetInt(var xml,string);
-external  inner function Boolean MakeMailFromCU(record CUVc,var record MailVc,Boolean);
+remote updating procedure UpdContactAddrCUDsmRemote(record CUVc);
+remote function Boolean MakeMailFromCU(record CUVc,var record MailVc,Boolean);
 external inner function Boolean InterNetAddrTest(string);
-external  inner function Boolean CurUserHasMailbox(var string);
-external  inner function Boolean CUVc_PasteRegNr2(var record CUVc);
-external  inner function Boolean CUVc_PasteSalesMan(var record CUVc);
-external  inner function Boolean CUVc_PasteName(var record CUVc);
-external  inner updating function Boolean MakeActFromCU(record CUVc,var record ActVc,Boolean);
-external  inner procedure SetupCustPS2Rn(string,var record RcVc);
-external  inner function Boolean PasteCustInQT(var record QTVc,string,string,var string,Boolean);
+remote function Boolean CurUserHasMailbox(var string);
+remote function Boolean CUVc_PasteRegNr2(var record CUVc);
+remote function Boolean CUVc_PasteSalesMan(var record CUVc);
+remote function Boolean CUVc_PasteName(var record CUVc);
+remote updating function Boolean MakeActFromCU(record CUVc,var record ActVc,Boolean);
+remote procedure SetupCustPS2Rn(string,var record RcVc);
+remote function Boolean PasteCustInQT(var record QTVc,string,string,var string,Boolean);
 external inner procedure FindUserMailboxName(string,var string,var string);
 external inner function Integer GetCodeFromCompanyCode(Integer);
-external  inner procedure CUVc_PasteCountryCode(var record CUVc,string);
+remote procedure CUVc_PasteCountryCode(var record CUVc,string);
+forward updating procedure UpdateCUAddr(integer,string,string,integer,Integer);
 
 event startup
 begin
@@ -156,12 +161,14 @@ BEGIN
   
   CUr.Code = "";
   while(loopmain(CUr,1,true))begin
+  	
   	testf = true;
   	if(CUr.ExportFlag!=0)then begin testf = false; end;
   	if(CUr.CustType!=0)then begin testf = false; end;
   	if(blank(CUr.RegNr1))then begin testf = false; end;
   	
   	if(testf)then begin
+  		logtext(0,"UpdateCustInfoMn for customer " & CUr.Code);
   		compid = "";
   		regno = "";
   		setareazerosize(a_req);
@@ -212,7 +219,7 @@ BEGIN
 		end;
     
   end;
-  
+  Messagebox(0,"Customer updating finish");
   
  RETURN;
 END;
