@@ -208,7 +208,8 @@ BEGIN
 						Lithuanian_UpdateCustomerAddress(a_reply,CUr,type); 
 						CUr.RegNr1 = regno;
 						logtext(0,"Customer updated " & CUr.Code);
-						recordupdate(oldCUr,CUr,true);
+						//recordupdate(oldCUr,CUr,true);
+						recordstore(CUr,true);// Edit ************************** BPI Ukraine - KramarAlexandr - 01, 23 09 2019 y. at 5:51:12 PM
 					end else begin
 						logtext(rerror,rerrordesc);
 					end;
