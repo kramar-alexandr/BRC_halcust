@@ -451,7 +451,7 @@ begin
   	KeySegment(OwnID);
 	EndRecord;
 	
-	BlockBegin(CashierDefBlock,-,"CashierDefBlock3");// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 16:14:50
+	BlockBegin(CashierDefBlock,-,"CashierDefBlockBRC2");// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 5 October 2018 16:14:50
   NewAutosyncBlock(kSyncDirectionToClient);
   RecordField(DefCustCode,M4Code,20,CUVc);
   RecordField(POSNr,M4Long,0,0);
