@@ -36,6 +36,11 @@ begin
   SourceFile("halcust\\rik\\tools", 0);
   SourceFile("halcust\\rik\\wactions", 0);
 
+/*Mesente SMS*/
+  Exec_file("halcust\\Integrations\\Mesente\\datadef.hal");
+  SourceFile("halcust\\Integrations\\Mesente", 3);
+
+
   RecordAddBegin(PUVc,"BRC_Purchase2");
   //cust start 60->200
   ChangeField(Comment,M4Str,200,0);

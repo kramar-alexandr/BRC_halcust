@@ -1,0 +1,173 @@
+external inner function Boolean IPVc_PasteCustCode(var record IPVc,Integer,var LongInt);
+external inner procedure IPVc_PasteCUPNr(var record IPVc,Integer);
+external inner function Boolean PasteInvIn2IPr(var record IPVc,Integer,Date,var val,Boolean,var Boolean);
+
+procedure AddARPayToArray(var array record ORVc aORr,record ARPayVc ARPayr)
+begin
+  record ORVc ORr;
+  row ORVc ORrw;
+  Boolean foundf;
+  
+  if (aORr.length>0) then begin
+    ORr = aORr[aORr.length-1];
+    if (ORr.CustCode==ARPayr.CustCode) then begin
+      ClearRow(ORr,ORrw,1);
+      ORrw.GroupOrdRow = ARPayr.CUPNr;
+      ORrw.Sum = ARPayr.BookRVal;
+      MatRowPut(ORr,MatRowCnt(ORr),ORrw);
+      foundf = true;
+    end;
+  end;
+
+  if (!foundf) then begin
+    RecordNew(ORr);
+    ORr.CustCode = ARPayr.CustCode;
+    ClearRow(ORr,ORrw,1);
+    ORrw.GroupOrdRow = ARPayr.CUPNr;
+    ORrw.Sum = ARPayr.RVal;
+    ORrw.PickingDate = ARPayr.PayDate;
+    ORrw.rowGP = ARPayr.RVal;
+    MatRowPut(ORr,0,ORrw);
+    aORr[aORr.length] = ORr;
+  end;
+
+  return;
+end;
+
+procedure AddARToArray(var array record ORVc aORr,record ARVc ARr)
+begin
+  record ORVc ORr;
+  row ORVc ORrw;
+  Integer i,rwcnt,j;
+  val tsum,sum;
+
+  for (j=0;j<aORr.length;j=j+1) begin
+    ORr = aORr[j];
+    if (ORr.CustCode==ARr.CustCode) then begin
+      rwcnt = MatRowCnt(ORr);
+      sum = ARr.RVal;
+      for (i=0;i<rwcnt;i=i+1) begin
+        MatRowGet(ORr,i,ORrw);
+        if (ORrw.PickingDate<ARr.InvDate and ORrw.Sum>0 and sum>0 and ORrw.stp==1) then begin
+          tsum = sum;
+          if (ORrw.Sum<tsum) then begin
+            tsum = ORrw.Sum;
+          end;
+          ORrw.Sum = ORrw.Sum - tsum;
+          MatRowPut(ORr,i,ORrw);
+          ClearRow(ORr,ORrw,2);
+          ORrw.GroupOrdRow = ARr.InvoiceNr;
+          ORrw.Sum = tsum;
+          MatRowInsert(ORr,i+1,ORrw);
+          sum = sum - tsum;
+        end;
+      end;
+      aORr[j] = ORr;
+      j = aORr.length;
+    end;
+  end;
+
+  return;
+end;
+
+procedure SetupNewIP(var record IPVc IPr,record RcVc RepSpec)
+begin
+  
+  RecordClear(IPr);
+  RecordNew(IPr);
+  IPr.SerNr = NextSerNr("IPVc",CurrentDate,-1,false,"");
+  IPr.PayMode = RepSpec.f2;
+  IPr.TransDate = RepSpec.d1;
+  IPr.Comment = RepSpec.f3;
+
+  return;
+end;
+
+global
+updating procedure EBS_ConnectPrepayInvMn(record RcVc RepSpec)
+begin
+  Longint error;
+  Boolean installmentf;
+  val chk;
+  record ARPayVc ARPayr;
+  record ARVc ARr;
+  Boolean TrHs;
+  vector Boolean vCust;
+  array record ORVc aORr;
+  record ORVc ORr;
+  row ORVc ORrw;
+  Integer i,j,rwcnt,rw;
+  record IPVc IPr;
+  row IPVc IPrw;
+   
+  TrHs = true;
+  ARPayr.CustCode = RepSpec.f1;
+  while (LoopKey("CustPay",ARPayr,1,TrHs)) begin
+    if (nonblank(RepSpec.f1) and RepSpec.f1!=ARPayr.CustCode) then begin
+      TrHs = false;
+    end else begin
+      if (ARPayr.PayDate<RepSpec.d1) then begin
+        AddARPayToArray(aORr,ARPayr);
+        vCust[ARPayr.CustCode] = true;
+      end;
+    end;
+  end;
+
+  TrHs = true;
+  ARr.CustCode = RepSpec.f1;
+  while (LoopKey("CustCode",ARr,1,TrHs)) begin
+    if (nonblank(RepSpec.f1) and ARr.CustCode!=RepSpec.f1) then begin
+      TrHs = false;
+    end else begin
+      if (vCust[ARr.CustCode] and ARr.InvDate<RepSpec.d1) then begin
+        AddARToArray(aORr,ARr);
+      end;
+    end;
+  end;
+
+  SetupNewIP(IPr,RepSpec);
+  for (i=0;i<aORr.length;i=i+1) begin
+    ORr = aORr[i];
+    rwcnt = MatRowCnt(ORr);
+    if (rw+rwcnt>200) then begin
+      RecordStore(IPr,true);
+      SetupNewIP(IPr,RepSpec);
+      rw = 0;
+    end;
+    for (j=0;j<rwcnt;j=j+1) begin
+      MatRowGet(ORr,j,ORrw);
+      ClearRow(IPr,IPrw,1);
+      if (ORrw.stp==2) then begin
+        IPrw.InvoiceNr = ORrw.GroupOrdRow;
+        MatRowPut(IPr,rw,IPrw);
+        PasteInvIn2IPr(IPr,rw,IPr.TransDate,chk,false,installmentf);
+        MatRowGet(IPr,rw,IPrw);
+        IPrw.RecVal = ORrw.Sum;
+        IPrw.BankVal = ORrw.Sum;
+        MatRowPut(IPr,rw,IPrw);
+        rw = rw + 1;
+      end else begin
+        if (ORrw.Sum-ORrw.rowGP<0) then begin
+          IPrw.CustCode = ORr.CustCode;
+          MatRowPut(IPr,rw,IPrw);
+          IPVc_PasteCustCode(IPr,rw,error);
+          MatRowGet(IPr,rw,IPrw);
+          IPrw.CUPNr = ORrw.GroupOrdRow;
+          MatRowPut(IPr,rw,IPrw);
+          IPVc_PasteCUPNr(IPr,rw);
+          MatRowGet(IPr,rw,IPrw);
+          IPrw.RecVal = (ORrw.Sum-ORrw.rowGP);
+          IPrw.BankVal = (ORrw.Sum-ORrw.rowGP);
+          MatRowPut(IPr,rw,IPrw);
+          rw = rw + 1;
+        end;
+      end;
+    end;
+  end; 
+
+  if (rw>0) then begin
+    RecordStore(IPr,true);
+  end; 
+
+  return;
+end;

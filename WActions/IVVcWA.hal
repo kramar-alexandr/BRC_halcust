@@ -34,6 +34,33 @@ begin
   return;
 end; 
 
+global
+function Boolean EBS_ConnectPrepayInvVClassOnOKWindow(Integer wn)
+begin
+  Boolean res;
+  record RcVc RepSpec;
+  
+  DeselectWindow(wn,true);
+  GetWindowRecord(wn,RepSpec);
+  if (blank(RepSpec.f2)) then begin
+    MessageBox(1058,"");
+    WindowFieldGoto(wn,RepSpec,-1,"f2",0);
+    res = false;
+    goto LEBS_ConnectPrepayInvVClassOnOKWindow;
+  end;
+  if (blank(RepSpec.d1)) then begin
+    MessageBox(1058,"");
+    WindowFieldGoto(wn,RepSpec,-1,"d1",0);
+    res = false;
+    goto LEBS_ConnectPrepayInvVClassOnOKWindow;
+  end;
+
+LEBS_ConnectPrepayInvVClassOnOKWindow:;
+  SelectWindow(wn);
+  EBS_ConnectPrepayInvVClassOnOKWindow = res;
+  return;
+end;
+
 
 /*
 global function integer EmailValidationStatusWithStdID()

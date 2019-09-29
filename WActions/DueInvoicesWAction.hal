@@ -1,0 +1,97 @@
+remote procedure RunUnpaidInvoiceMessage(record RcVc,string,string);
+
+global
+procedure DblBRCSendSMS(string dblstr,string l,Integer currepwn)
+begin
+  Integer wn;
+  record RcVc RepSpec;
+  record CUVc CUr;
+   
+  //Openwindow to specify text 
+  CUr.Code = l;
+  if (ReadFirstMain(CUr,1,true)) then begin
+    RepSpec.searchstr = CUr.Mobile;
+  end;
+
+  RepSpec.f1 = l;
+  OpenWindow("BRCSendSMSWClass",0,currepwn,"","",RepSpec);
+
+  //On "Create" we will run through the report spec and find all the customers 
+  
+  return;
+end;
+
+global
+procedure DblBRCSendEmail(string dblstr,string l,Integer currepwn)
+begin
+  Integer wn;
+  record RcVc RepSpec;
+   
+  //Openwindow to specify text  
+  RepSpec.f1 = l;
+  OpenWindow("BRCSendEmailWClass",0,currepwn,"","",RepSpec);
+
+  //On "Create" we will run through the report spec and find all the customers 
+  
+  return;
+end;
+
+global
+procedure BRCSendSMSWClassCreate()
+begin
+  Integer wn;
+  record RcVc RepSpec,tRepSpec;
+
+  wn = CurWindow;
+  
+  DeselectWindow(wn,true);
+  GetWindowRecord(wn,RepSpec);
+  GetWindowRecord(MotherWindow(wn),tRepSpec);
+  tRepSpec.f1 = RepSpec.f1;
+  tRepSpec.searchstr = RepSpec.searchstr;
+  threadremoteasync.RunUnpaidInvoiceMessage(tRepSpec,"sms",RepSpec.f2);
+  CloseWindow(wn);
+  //remote call to server and close the window
+
+  return;
+end;
+
+global
+procedure BRCSendEmailWClassCreate()
+begin
+  Integer wn;
+  record RcVc RepSpec,tRepSpec;
+
+  wn = CurWindow;
+  
+  DeselectWindow(wn,true);
+  GetWindowRecord(wn,RepSpec);
+  GetWindowRecord(MotherWindow(wn),tRepSpec);
+  tRepSpec.f1 = RepSpec.f1;
+  threadremoteasync.RunUnpaidInvoiceMessage(tRepSpec,"email",RepSpec.f2);
+  CloseWindow(wn);
+  //remote call to server and close the window
+
+  return;
+end;
+
+/*
+global
+function Boolean ARRClassOnOkWindow(Integer wn)
+begin
+  record RcVc RepSpec;
+  string 255 tstr;
+  
+
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  if (RepSpec.ArtMode==2) then begin
+    //RepSpec.Scaling = 0;//really?
+    //RepSpec.BaseWidth = 800;
+    //PutWindowRecord(wn,RepSpec);
+  end;
+  SelectWindow(wn);
+  ARRClassOnOkWindow = true;
+  return;
+end;
+*/

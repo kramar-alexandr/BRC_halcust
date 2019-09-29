@@ -1,0 +1,11 @@
+begin
+  
+  BlockBegin(MesenteSMSBlock,-,"");
+  RecordField(SMSSender,M4Str,20,0);
+  RecordField(APIUser,M4Str,50,0);
+  RecordField(APIPassword,M4Str,50,0);
+  RecordField(APIUrl,M4Str,50,0);
+  EndBlock;
+
+  return;
+end;

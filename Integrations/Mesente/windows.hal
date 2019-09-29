@@ -1,0 +1,41 @@
+event startup
+begin
+  
+  SetLangMode(LangEnglish,"ENG",0);
+
+  Setting("Mesente SMS",MesenteSMSTClass,modSY);
+
+end;
+
+event DefineWindows
+begin
+  real h,v,vs;
+
+  vs = 20;
+
+  SetLangMode(LangEnglish,"ENG",0);
+
+  WindowBegin("Mesente SMS",MesenteSMSTClass,CGSbl,SRType);
+  SetBlid(MesenteSMSBlock);
+  SetWRect(20,80,570,298);
+  Sizeable(-1,-1,0,0);
+  EditField(h=150,v=6,200,"Sender (optional)",Normal,SMSSender,false,0);
+  EditField(h,v+=vs,200,"API Url",Normal,APIUrl,false,0);
+  EditField(h,v+=vs,200,"API User",Normal,APIUser,false,0);
+  EditField(h,v+=vs,200,"API Password",Normal,APIPassword,false,0);
+  SpecialMenu("Send SMS",'',1,"SendMesentaSMS");
+  
+  EndWindow;
+
+  WindowBegin("Send SMS",SendSMSWClass,CGother,RcType);
+  UseView(RcVc);
+  SetWRect(20,80,400,180);
+  AutoSizeWindow(false);  
+  h = 150;
+  EditFieldTL(h,v=6,120,"To",M4Str,Normal,255,f1,false,0);
+  EditFieldTL(h,v+=vs,120,"Text",M4Str,Normal,255,f2,false,0);
+  HalPushButton(h,v+=vs,h+120,v+20,"SendSMSWClassSend","Send");
+  EndWindow;
+
+  return;
+end;
