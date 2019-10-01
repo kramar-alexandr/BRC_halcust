@@ -1,3 +1,4 @@
+//<halrule>server-only</halrule>
 
 procedure DoSendMessage(string receiver,string text,var string messageid)
 begin

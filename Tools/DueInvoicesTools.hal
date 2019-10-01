@@ -53,7 +53,7 @@ begin
   area a;
 
   
-  LogText(0,"Sending " & type & " to " & CUr.Code & " with amount " & amount & " for invoices" & invlist & ":" & text);
+  LogText(0,"DoSendUnpaidInvoiceMessage " & type & " to " & CUr.Code & " with amount " & amount & " for invoices" & invlist & ":" & text);
   //Convert all the texts
   LTxtr.Code = text;
   if (ReadFirstMain(LTxtr,1,true)) then begin
@@ -72,14 +72,12 @@ begin
   switch (type) begin
     case "email":
       RecordNew(Mailr);
-      if (CurUserHasMailbox(tstr)) then begin
-        FindUserMailboxName(CurrentUser,mailboxcode,mailboxname);
-        if (nonblank(mailboxname)) then begin
-          ClearRow(Mailr,Mailrw,1);
-          Mailrw.RowTyp = 0;
-          Mailrw.AddrCode = mailboxname;
-          MatRowPut(Mailr,0,Mailrw);
-        end;
+      FindUserMailboxName(CurrentUser,mailboxcode,mailboxname);
+      if (nonblank(mailboxname)) then begin
+        ClearRow(Mailr,Mailrw,1);
+        Mailrw.RowTyp = 1;
+        Mailrw.AddrCode = mailboxname;
+        MatRowPut(Mailr,0,Mailrw);
       end else begin
         BlockLoad(MSb);
         ClearRow(Mailr,Mailrw,1);
@@ -92,7 +90,6 @@ begin
       Mailrw.AddrCode = CUr.eMail;
       MatRowPut(Mailr,MatRowCnt(Mailr),Mailrw);
       Mailr.Header = LTxtr.Comment;
-
       l = GetAreaLength(a);
       pos = 0;
       while (pos<l) begin
