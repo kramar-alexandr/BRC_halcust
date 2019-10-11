@@ -86,15 +86,19 @@ window BRCSendEmailWClass:1
   wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real h,v,vs;
-  WindowBegin("Send E-mail",BRCSendEmailWClass,CGother,RcType);
-  UseView(RcVc);
-  SetWRect(40,80,360,150);
+  WindowBegin("Send E-mail",BRCSendEmailWClass,CGother,0);
+  UseView(SMVc);
+  SetWRect(40,80,700,400);
   v = 6; vs = 20;
   ToolBar;
   HalPushButton(-120,v,-20,v+20,"BRCSendEmailWClassCreate","Create");
   EndToolBar;
-  EditFieldTL(h=110,v=6,70,"Text",M4Code,Normal,20,f2,false,LTxtSClass);
-//  EditFieldTL(h,v+=vs,170,"Register",M4StrSet,Normal,kSetAllRegisters,f1,false,StrSetSClass);
+  EditFieldTL(h=110,v=6,120,"Text",M4Code,Normal,10,Sign,false,LTxtSClass);
+  MatrixBegin(10,v+=40,-50,-20,-,99);
+  MatColTL(1,32,"Customer",0,M4Code,ViewOnly,20,Objects,false,0);
+  MatCol(1,150,"Name",0,Comment,false,0);
+  MatCol(1,-120,"Email",0,ExtraComment,false,0);
+  EndMatrix;
   EndWindow;
 end;
 
@@ -102,15 +106,19 @@ window BRCSendSMSWClass:1
   wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
   real h,v,vs;
-  WindowBegin("Send SMS",BRCSendSMSWClass,CGother,RcType);
-  UseView(RcVc);
-  SetWRect(40,80,360,150);
+  WindowBegin("Send SMS",BRCSendSMSWClass,CGother,0);
+  UseView(SMVc);
+  SetWRect(40,80,700,400);
   v = 6; vs = 20;
   ToolBar;
   HalPushButton(-120,v,-20,v+20,"BRCSendSMSWClassCreate","Create");
   EndToolBar;
-  EditFieldTL(h=110,v=6,150,"Phone No.",M4Str,Normal,20,searchstr,false,0);
-  EditFieldTL(h,v+=vs,70,"Text",M4Code,Normal,20,f2,false,LTxtSClass);
+  EditFieldTL(h=110,v+=vs,120,"Text",M4Code,Normal,10,Sign,false,LTxtSClass);
+  MatrixBegin(10,v+=40,-50,-20,-,99);
+  MatColTL(1,32,"Customer",0,M4Code,ViewOnly,20,Objects,false,0);
+  MatCol(1,150,"Name",0,Comment,false,0);
+  MatCol(1,-150,"Phone",0,ExtraComment,false,0);
+  EndMatrix;
   EndWindow;
 end;
 

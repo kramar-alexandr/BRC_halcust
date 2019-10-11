@@ -1,20 +1,13 @@
-remote procedure RunUnpaidInvoiceMessage(record RcVc,string,string);
+remote procedure RunUnpaidInvoiceMessage(record RcVc,string,record SMVc);
 
 global
 procedure DblBRCSendSMS(string dblstr,string l,Integer currepwn)
 begin
-  Integer wn;
-  record RcVc RepSpec;
-  record CUVc CUr;
-   
-  //Openwindow to specify text 
-  CUr.Code = l;
-  if (ReadFirstMain(CUr,1,true)) then begin
-    RepSpec.searchstr = CUr.Mobile;
-  end;
+  record SMVc SMr; 
 
-  RepSpec.f1 = l;
-  OpenWindow("BRCSendSMSWClass",0,currepwn,"","",RepSpec);
+  //Openwindow to specify text 
+
+  OpenWindow("BRCSendSMSWClass",0,currepwn,"","",SMr);
 
   //On "Create" we will run through the report spec and find all the customers 
   
@@ -24,12 +17,11 @@ end;
 global
 procedure DblBRCSendEmail(string dblstr,string l,Integer currepwn)
 begin
-  Integer wn;
-  record RcVc RepSpec;
+  record SMVc SMr; 
    
   //Openwindow to specify text  
-  RepSpec.f1 = l;
-  OpenWindow("BRCSendEmailWClass",0,currepwn,"","",RepSpec);
+
+  OpenWindow("BRCSendEmailWClass",0,currepwn,"","",SMr);
 
   //On "Create" we will run through the report spec and find all the customers 
   
@@ -37,19 +29,108 @@ begin
 end;
 
 global
+procedure DblBRCMarkSMS(string dblstr,string l,Integer currepwn)
+begin
+  Integer wn;
+  record SMVc SMr; 
+  row SMVc SMrw; 
+  Integer i,rwcnt;
+  record CUVc CUr;
+  Boolean foundf;
+
+  wn = FindWindow("BRCSendSMSWClass");
+  if (wn<=0) then begin
+    wn =  OpenWindow("BRCSendSMSWClass",0,currepwn,"","",SMr);
+  end;
+
+  if (wn>0) then begin
+    GetWindowRecord(wn,SMr);
+    rwcnt = MatRowCnt(SMr);
+    for (i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(SMr,i,SMrw);
+      if (SMrw.Objects==l) then begin
+        foundf = true;
+        MatRowDelete(SMr,i);
+        i = rwcnt; 
+      end;
+    end;
+    if (!foundf) then begin
+      CUr.Code = l;
+      if (ReadFirstMain(CUr,1,true)) then begin
+        ClearRow(SMr,SMrw,1);
+        SMrw.Objects = CUr.Code;
+        SMrw.Comment = CUr.Name;
+        SMrw.ExtraComment = CUr.Phone;
+        MatRowPut(SMr,rwcnt,SMrw); 
+      end;     
+    end;
+    PutWindowRecord(wn,SMr);
+  end;
+  //On "Create" we will run through the report spec and find all the customers 
+  
+  return;
+end;
+
+global
+procedure DblBRCMarkEmail(string dblstr,string l,Integer currepwn)
+begin
+  Integer wn;
+  record SMVc SMr; 
+  row SMVc SMrw; 
+  Integer i,rwcnt;
+  record CUVc CUr;
+  Boolean foundf;
+
+  wn = FindWindow("BRCSendEmailWClass");
+  if (wn<=0) then begin
+    wn =  OpenWindow("BRCSendEmailWClass",0,currepwn,"","",SMr);
+  end;
+  if (wn>0) then begin
+    GetWindowRecord(wn,SMr);
+    rwcnt = MatRowCnt(SMr);
+    for (i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(SMr,i,SMrw);
+      if (SMrw.Objects==l) then begin
+        foundf = true;
+        MatRowDelete(SMr,i);
+        i = rwcnt; 
+      end;
+    end;
+    if (!foundf) then begin
+      CUr.Code = l;
+      if (ReadFirstMain(CUr,1,true)) then begin
+        ClearRow(SMr,SMrw,1);
+        SMrw.Objects = CUr.Code;
+        SMrw.Comment = CUr.Name;
+        SMrw.ExtraComment = CUr.eMail;
+        MatRowPut(SMr,rwcnt,SMrw);   
+      end;   
+    end;
+    PutWindowRecord(wn,SMr);
+  end;
+  //OpenWindow("BRCSendEmailWClass",0,currepwn,"","",SMr);
+
+  //On "Create" we will run through the report spec and find all the customers 
+  
+  return;
+end;
+
+
+global
 procedure BRCSendSMSWClassCreate()
 begin
   Integer wn;
-  record RcVc RepSpec,tRepSpec;
+  record RcVc RepSpec;
+  record SMVc SMr;
 
   wn = CurWindow;
   
   DeselectWindow(wn,true);
-  GetWindowRecord(wn,RepSpec);
-  GetWindowRecord(MotherWindow(wn),tRepSpec);
-  tRepSpec.f1 = RepSpec.f1;
-  tRepSpec.searchstr = RepSpec.searchstr;
-  threadremoteasync.RunUnpaidInvoiceMessage(tRepSpec,"sms",RepSpec.f2);
+  GetWindowRecord(wn,SMr);
+  GetWindowRecord(MotherWindow(wn),RepSpec);
+  if (MatRowCnt(SMr)>0) then begin
+    threadremoteasync.RunUnpaidInvoiceMessage(RepSpec,"sms",SMr);
+  end;
   CloseWindow(wn);
   //remote call to server and close the window
 
@@ -60,15 +141,17 @@ global
 procedure BRCSendEmailWClassCreate()
 begin
   Integer wn;
-  record RcVc RepSpec,tRepSpec;
+  record RcVc RepSpec;
+  record SMVc SMr;
 
   wn = CurWindow;
   
   DeselectWindow(wn,true);
-  GetWindowRecord(wn,RepSpec);
-  GetWindowRecord(MotherWindow(wn),tRepSpec);
-  tRepSpec.f1 = RepSpec.f1;
-  threadremoteasync.RunUnpaidInvoiceMessage(tRepSpec,"email",RepSpec.f2);
+  GetWindowRecord(wn,SMr);
+  GetWindowRecord(MotherWindow(wn),RepSpec);
+  if (MatRowCnt(SMr)>0) then begin
+    threadremoteasync.RunUnpaidInvoiceMessage(RepSpec,"email",SMr);
+  end;
   CloseWindow(wn);
   //remote call to server and close the window
 

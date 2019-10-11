@@ -41,7 +41,7 @@ begin
 end;
 
 global
-updating procedure DoSendUnpaidInvoiceMessage(record CUVc CUr,string type,string phoneno,string text,val amount,Date lastd,Longint age,string invlist)
+updating procedure DoSendUnpaidInvoiceMessage(record CUVc CUr,string type,string id,string text,val amount,Date lastd,Longint age,string invlist)
 begin
   string 255 tstr,mailboxname,mailboxcode;
   record LTxtVc LTxtr;
@@ -53,7 +53,6 @@ begin
   area a;
 
   
-  LogText(0,"DoSendUnpaidInvoiceMessage " & type & " to " & CUr.Code & " with amount " & amount & " for invoices" & invlist & ":" & text);
   //Convert all the texts
   LTxtr.Code = text;
   if (ReadFirstMain(LTxtr,1,true)) then begin
@@ -87,7 +86,7 @@ begin
       end;
       ClearRow(Mailr,Mailrw,1);
       Mailrw.RowTyp = 0;
-      Mailrw.AddrCode = CUr.eMail;
+      Mailrw.AddrCode = id;
       MatRowPut(Mailr,MatRowCnt(Mailr),Mailrw);
       Mailr.Header = LTxtr.Comment;
       l = GetAreaLength(a);
@@ -118,7 +117,7 @@ begin
         tstr = tstr & GetStringFromArea(a,pos,255);
         pos = pos+255;
       end;
-      SendMessenteMessage(phoneno,tstr);
+      SendMessenteMessage(id,tstr);
       
   end;
 
@@ -126,7 +125,7 @@ begin
 end;
 
 global
-procedure RunUnpaidInvoiceMessage(record RcVc RepSpec,string type,string text)
+procedure RunUnpaidInvoiceMessage(record RcVc RepSpec,string type,record SMVc SMr)
 begin
   
  record ARVc ARr;
@@ -186,7 +185,16 @@ begin
   val brctotinv;
   Integer brclastage;
   string 255 invlist;
+  vector string 255 vCust;
+  row SMVc SMrw;
+
+  rwcnt = MatRowCnt(SMr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(SMr,i,SMrw);
+    vCust[SMrw.Objects] = SMrw.ExtraComment;
+  end;
 //CUST-END
+
   
   BlockLoad(AgedRec);
   BlockLoad(Agedb);
@@ -301,6 +309,9 @@ L22:;
           end;
         end;    
       end;
+      if (blank(vCust[CUr.Code])) then begin
+        testf = false;
+      end;
     end;
   if (CUs==false) then begin goto L88; end;
   if (testf==false) then begin goto L22; end;
@@ -332,7 +343,12 @@ L22:;
   currenttot[0] = blankval; currenttot[1] = blankval; currenttot[2] = blankval;
   notduetot[0] = blankval; notduetot[1] = blankval; notduetot[2] = blankval;
   TotalCurrent[0] = blankval; TotalCurrent[1] = blankval; TotalCurrent[2] = blankval;
-
+//CUST-BEGIN
+  brclastd = "";
+  brctotinv = 0;
+  brclastage = 0;
+  invlist = "";
+//CUST-END
   if (backdatf) then begin
     ResetLoop(IPrsr);
     IPrsr.CustCode = CUr.Code;
@@ -701,7 +717,7 @@ L22:;
     end;
   end;
 
-  qupdating.DoSendUnpaidInvoiceMessage(CUr,type,RepSpec.searchstr,text,brctotinv,brclastd,brclastage,invlist);
+  qupdating.DoSendUnpaidInvoiceMessage(CUr,type,vCust[CUr.Code],SMr.Sign,brctotinv,brclastd,brclastage,invlist);
 
 goto L22;
 

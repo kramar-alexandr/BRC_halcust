@@ -981,8 +981,8 @@ if (testf) then begin
       EndFormat;
 //CUST-BEGIN
       StartFormat(15);
-        OutStringID(440,"DblBRCSendSMS","SMS",true,CUr.Code);
-        OutStringID(1,"DblBRCSendEmail","E-mail",true,CUr.Code);
+        OutStringID(440,"DblBRCMarkSMS","SMS",true,CUr.Code);
+        OutStringID(1,"DblBRCMarkEmail","E-mail",true,CUr.Code);
       EndFormat;
 //CUST-END
     end;
