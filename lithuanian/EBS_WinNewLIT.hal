@@ -130,6 +130,7 @@ begin
   WindowBegin("Connect Prepayments to Invoices",EBS_ConnectPrepayInvVClass,CGMnt,RcType);
     SetWRect(20,80,450,150);
     EditFieldTL(h=140,v=10,100,"Customer",M4Code,Normal,20,f1,false,CUSClass);
+    EditFieldTL(h,v+=20,100,"Customer Category",M4Code,Normal,20,f4,false,CCatSClass);
     EditFieldTL(h,v+=20,100,"Payment Mode",M4Code,Normal,10,f2,false,PMSClass);
     EditFieldTL(h,v+=20,100,"Transaction Date",M4Date,Normal,0,d1,false,PasteCurDate);
     EditFieldTL(h,v+=20,100,"Comment",M4Str,Normal,200,f3,false,0);

@@ -91,7 +91,7 @@ begin
   val chk;
   record ARPayVc ARPayr;
   record ARVc ARr;
-  Boolean TrHs;
+  Boolean TrHs,testf;
   vector Boolean vCust;
   array record ORVc aORr;
   record ORVc ORr;
@@ -99,6 +99,7 @@ begin
   Integer i,j,rwcnt,rw;
   record IPVc IPr;
   row IPVc IPrw;
+  record CUVc CUr;
    
   TrHs = true;
   ARPayr.CustCode = RepSpec.f1;
@@ -106,7 +107,20 @@ begin
     if (nonblank(RepSpec.f1) and RepSpec.f1!=ARPayr.CustCode) then begin
       TrHs = false;
     end else begin
-      if (ARPayr.PayDate<RepSpec.d1) then begin
+      testf = true;
+      if (ARPayr.PayDate>RepSpec.d1) then begin
+        testf = false;
+      end;
+      if (testf and nonblank(RepSpec.f4)) then begin
+        CUr.Code = ARPayr.CustCode;
+        if (ReadFirstMain(CUr,1,true)) then begin
+          if (CUr.CustCat!=RepSpec.f4) then begin
+            testf = false;
+          end;
+        end;
+      end;  
+
+      if (testf) then begin
         AddARPayToArray(aORr,ARPayr);
         vCust[ARPayr.CustCode] = true;
       end;

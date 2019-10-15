@@ -39,6 +39,8 @@ function Boolean EBS_ConnectPrepayInvVClassOnOKWindow(Integer wn)
 begin
   Boolean res;
   record RcVc RepSpec;
+
+  res = true;
   
   DeselectWindow(wn,true);
   GetWindowRecord(wn,RepSpec);
