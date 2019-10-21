@@ -22,11 +22,10 @@ begin
   end;
   AddTextToArea("&to=" & receiver,request);
 
-  path = path & "?" & GetStringFromArea(request,0,255);
+  path = path & "?" & GetStringFromArea(request,0,GetAreaLength(request));
   SetAreaZeroSize(request);
 
   if (SendWebRequest(url,443,-1,true,"POST",path,"text/plain","",false,request,reply,10)) then begin
-    WriteAreaToFile(reply,"sms_success.txt",0);
     pos = FindStringInArea("omnimessage_id",reply);
     if (pos>0) then begin
       messageid = GetStringFromArea(reply,pos+15,GetAreaLength(reply)-pos-15);

@@ -87,6 +87,8 @@ window BRCSendEmailWClass:1
 begin
   real h,v,vs;
   WindowBegin("Send E-mail",BRCSendEmailWClass,CGother,0);
+  Sizeable(-1,-1,0,0);
+  AutoSizeWindow(false);
   UseView(SMVc);
   SetWRect(40,80,700,400);
   v = 6; vs = 20;
@@ -95,9 +97,9 @@ begin
   EndToolBar;
   EditFieldTL(h=110,v=6,120,"Text",M4Code,Normal,10,Sign,false,LTxtSClass);
   MatrixBegin(10,v+=40,-50,-20,-,99);
-  MatColTL(1,32,"Customer",0,M4Code,ViewOnly,20,Objects,false,0);
+  MatColTL(1,32,"Customer",0,M4Code,ViewOnly,20,Objects,false,CUSClass);
   MatCol(1,150,"Name",0,Comment,false,0);
-  MatCol(1,-120,"Email",0,ExtraComment,false,0);
+  MatCol(1,350,"Email",0,ExtraComment,false,0);
   EndMatrix;
   EndWindow;
 end;
@@ -107,6 +109,8 @@ window BRCSendSMSWClass:1
 begin
   real h,v,vs;
   WindowBegin("Send SMS",BRCSendSMSWClass,CGother,0);
+  Sizeable(-1,-1,0,0);
+  AutoSizeWindow(false);
   UseView(SMVc);
   SetWRect(40,80,700,400);
   v = 6; vs = 20;
