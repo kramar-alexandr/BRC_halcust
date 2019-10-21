@@ -1,6 +1,7 @@
 external inner function Boolean IPVc_PasteCustCode(var record IPVc,Integer,var LongInt);
 external inner procedure IPVc_PasteCUPNr(var record IPVc,Integer);
 external inner function Boolean PasteInvIn2IPr(var record IPVc,Integer,Date,var val,Boolean,var Boolean);
+external inner procedure IPVc_PasteRecVal(var record IPVc,Integer);
 
 procedure AddARPayToArray(var array record ORVc aORr,record ARPayVc ARPayr)
 begin
@@ -158,7 +159,9 @@ begin
         MatRowGet(IPr,rw,IPrw);
         IPrw.RecVal = ORrw.Sum;
         IPrw.BankVal = ORrw.Sum;
+        
         MatRowPut(IPr,rw,IPrw);
+        IPVc_PasteRecVal(IPr,rw);
         rw = rw + 1;
       end else begin
         if (ORrw.Sum-ORrw.rowGP<0) then begin
@@ -173,6 +176,7 @@ begin
           IPrw.RecVal = (ORrw.Sum-ORrw.rowGP);
           IPrw.BankVal = (ORrw.Sum-ORrw.rowGP);
           MatRowPut(IPr,rw,IPrw);
+          IPVc_PasteRecVal(IPr,rw);
           rw = rw + 1;
         end;
       end;
