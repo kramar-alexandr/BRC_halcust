@@ -102,13 +102,17 @@ begin
     end;
 
     tstr  = GetTabTextFromArea(0,9,a_reply);
-    if (nonblank(tstr)) then begin
-      CUr.Phone = tstr;
+    if(blank(CUr.Phone))then begin
+			if (nonblank(tstr)) then begin
+				CUr.Phone = tstr;
+			end;
     end;
 
     tstr  = GetTabTextFromArea(0,10,a_reply);
-    if (nonblank(tstr)) then begin
-      CUr.Mobile = tstr;
+    if(blank(CUr.Mobile))then begin
+			if (nonblank(tstr)) then begin
+				CUr.Mobile = tstr;
+			end;
     end;
 
     tstr  = GetTabTextFromArea(0,11,a_reply);
