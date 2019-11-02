@@ -1,0 +1,20 @@
+//<halrule>server-only</halrule>
+external procedure DoSiauliuIVIn(area);
+
+
+global
+procedure SiauliuIVMn(record RcVc RepSpec)
+begin
+  record BankImpSupplierBlock BISb;
+  string 255 path;
+  area request,reply;
+
+  BlockLoad(BISb);
+  path = "/sinfo/services.php?login=" & BISb.APIUserName & "&password=" & BISb.APIPassword & "&date_from=" & DateToString(RepSpec.sStartDate,"YYYY-MM-DD") & "&date_to=" & DateToString(RepSpec.sEndDate,"YYYY-MM-DD") & "&service=invoices";
+  if (SendWebRequest("lizingas.sb.lt",443,-1,true,"GET",path,"text/xml","",false,request,reply,30)) then begin
+    //extract data and check the company
+    DoSiauliuIVIn(reply);
+  end;
+
+  return;
+end;

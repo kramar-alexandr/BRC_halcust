@@ -30,6 +30,7 @@ begin
 
 	Setting("BRC - Siauliu invoice and payment settings",BankImpSupplierTClass,modPL);
   Import("BRC - Siauliu invoice and payment import",0,SiauliuIVIn,modPL);
+  Maintenance("BRC - Siauliu invoice and payment import",SiauliuIVVClass,SiauliuIVMn,modPL);
 
   return;
 end;

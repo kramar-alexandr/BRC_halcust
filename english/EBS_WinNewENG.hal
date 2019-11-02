@@ -13,6 +13,19 @@ begin
   return;
 end;
 
+window SiauliuIVVClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,h3,t,v,vm,vm2,vs;
+
+  WindowBegin("Siauliu invoice and payment import",SiauliuIVVClass,CGMnt,RcType);
+  SetWRect(20,80,450,150);
+  PeriodField(h=100,v=10,"Period");
+  EndWindow;
+
+  return;
+end;
+
 window EBS_CreateCredManEvtVClass:1
   wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin
@@ -65,7 +78,9 @@ begin
   SetWRect(20,80,600,339);
   UseView(BankImpSupplierBlock);
   vs=20; h=170; vs2=16; h2 = 350;
-  EditField(h,v=6,120,"Supplier",Normal,VECode,false,VESClass);
+  EditField(h,v=6,120,"API UserName",Normal,APIUserName,false,0);
+  EditField(h,v+=vs,120,"API Password",Normal,APIPassword,false,0);
+  EditField(h,v+=vs,120,"Supplier",Normal,VECode,false,VESClass);
   EditField(h,v+=vs,90,"Row VAT Code",Normal,VATCode,false,VATCodeSClass);
   EditField(h,v+=vs,90,"Invoice payment term",Normal,PayDeal,false,PDSClass);
   EditField(h,v+=vs,90,"Row Account",Normal,Account,false,AccSClass);

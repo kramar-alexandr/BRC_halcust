@@ -509,6 +509,8 @@ begin
   RecordField(PMCode,M4Code,2,0);
   RecordField(OKVIFlag,M4Int,0,0);
   RecordField(OKOPFlag,M4Int,0,0);
+  RecordField(APIUserName,M4Str,255,0);
+  RecordField(APIPassword,M4Str,255,0);
   EndBlock;
 
   return;
