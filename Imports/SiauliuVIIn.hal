@@ -12,6 +12,7 @@ external inner function Boolean PasteInvIn2OPr(var record OPVc,Integer,Date,Inte
 external inner procedure OPVc_PasteBankVal(var record OPVc,Integer);
 external inner procedure OPPastePayMode2(var record OPVc,string);
 external inner procedure OPVc_PasteTransDate(var record OPVc);
+external inner procedure OPVc_PasteRecVal(var record OPVc,Integer);
 
 procedure PreparePayment(Date td,var record OPVc OPr,record BankImpSupplierBlock BISb)
 begin
@@ -96,6 +97,7 @@ begin
                   OPrw.BankVal = sum;
                   MatRowPut(OPr,rownr,OPrw);
                   OPVc_PasteBankVal(OPr,rownr);
+                  OPVc_PasteRecVal(OPr,rownr);
                   foundf = true;
                   vAdded[VIr.SerNr] = true;
                 end;
@@ -107,11 +109,13 @@ begin
     end;
   end;
   if (!foundf) then begin
+    rownr = MatRowCnt(OPr);
     ClearRow(OPr,OPrw,1);
     OPrw.RecVal = sum;
     OPrw.BankVal = sum;
     MatRowPut(OPr,rownr,OPrw);
     OPVc_PasteBankVal(OPr,rownr);
+    OPVc_PasteRecVal(OPr,rownr);
   end;
 
   return;
@@ -120,14 +124,18 @@ end;
 global
 updating procedure BRC_StorePayment(record OPVc OPr,record BankImpSupplierBlock BISb)
 begin
+  record OPVc oldOPr;
   
-  if (BISb.OKOPFlag==1) then begin
-    OPr.OrderedFlag = 1;
-    OPr.SentFlag = 1;
-    OPr.DoneFlag = 1;
-  end;
   OPr.SerNr = NextSerNr("OPVc",OPr.TransDate,-1,false,"");
-  RecordInsert(OPr,true);
+  if (RecordInsert(OPr,true)) then begin
+    if (BISb.OKOPFlag==1) then begin
+      RecordCopy(oldOPr,OPr);
+      OPr.OrderedFlag = 1;
+      OPr.SentFlag = 1;
+      OPr.DoneFlag = 1;
+      RecordUpdate(oldOPr,OPr,true);
+    end;
+  end;
 
   return;
 end;
@@ -136,15 +144,18 @@ global
 updating function Boolean BRC_StorePInvoice(record VIVc VIr,record BankImpSupplierBlock BISb)
 begin
   Boolean res;
+  record VIVc oldVIr;
 
-  if (BISb.OKVIFlag==1) then begin
-    VIr.OKFlag = 1;
-  end;
   VIr.SerNr = NextSerNr("VIVc",VIr.TransDate,-1,false,"");
   if (RecordInsert(VIr,true)) then begin
+    if (BISb.OKVIFlag==1) then begin
+      RecordCOpy(oldVIr,VIr);
+      VIr.OKFlag = 1;
+      RecordUpdate(oldVIr,VIr,true);
+    end;
     res = true;
   end;
-
+  logtext(0,"store invoice " & VIr.SerNr);
   BRC_StorePInvoice = res;
   return;
 end;
