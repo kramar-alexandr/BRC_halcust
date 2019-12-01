@@ -278,6 +278,13 @@ BEGIN
     res = -1;
     goto LCredManVcRecordCheck;
   end;
+//CUST-BEGIN
+  if (CredManr.DiscountMonths>0 and CredManr.DiscountMonths>CredManr.InstalmentMonths) then begin
+    RecordCheckError(1000006,"",-1,"DiscountMonths");
+    res = -1;
+    goto LCredManVcRecordCheck;
+  end;
+//CUST-END  
 L12:;
   transf = false;
   if (CredManr.OKFlag==1) then begin

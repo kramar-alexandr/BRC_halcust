@@ -9,6 +9,7 @@ begin
   SString(1000004,"Monthly invoice already has credit note");
 	
 	SString(1000005,"Credit agreements");// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 19 02 2019 y. at 11:13:17 AM
+	SString(1000006,"Discounted Months must be less than Months");
 	
   SetBegin(12000);
   SetText(0,"Do not reduce");

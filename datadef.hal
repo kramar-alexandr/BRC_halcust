@@ -66,11 +66,15 @@ begin
     ArrayField(AddPayDate,M4Date,0,0);
     ArrayField(FeeBalType,M4Set,12000,0);
     RecordField(HeaderComment,M4Str,255,0);
+    RecordField(DiscountMonths,M4Long,0,0);
+    RecordField(DiscountInterest,M4Qty,0,0);
   EndRecordAdd;
 
   RecordAddBegin(CredManTypeVc,"brc_CredManTypeVc");
     RecordField(RemBuyPrc,M41Val,0,0);
     RecordField(InstalmentItem,M4Code,20,INVc); //EBS
+    RecordField(DiscountMonths,M4Long,0,0);
+    RecordField(DiscountInterest,M4Qty,0,0);
   EndRecordAdd;
 
   BlockBegin(CredManSetBlock,-,"");

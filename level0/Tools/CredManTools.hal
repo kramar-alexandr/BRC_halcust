@@ -306,6 +306,10 @@ begin
     CredManr.IntRate = CredManTyper.IntRate;
     CredManr.ChargeMethod = CredManTyper.ChargeMethod;
     CredManr.RemBuyPrc = CredManTyper.RemBuyPrc; //EBS
+//CUST-BEGIN
+    CredManr.DiscountMonths = CredManTyper.DiscountMonths;
+    CredManr.DiscountInterest = CredManTyper.DiscountInterest; 
+//CUST-END
     AddCredManTypeMatrix(CredManr,CredManTyper);
     if (CredManr.DepositSum==0) then begin
       CredManr.DepositSum = Round(CredManr.DepositPrc/100 * CredManr.InvSum4,SetRoundModeD(2));

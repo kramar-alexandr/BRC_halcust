@@ -77,6 +77,10 @@ begin
   EditField(h2,v+=vs,82,"First Interest Date",Normal,FirstIntDate,false,PasteCurDate);
   EditField(h2,v+=vs,82,"End Date",ViewOnly,endDate,false,PasteCurDate);
   EditField(h2,v+=vs,82,"Create Date",Normal,TransDate,false,PasteCurDate);
+//CUST-BEGIN
+  EditField(h2,v+=vs,82,"Discounted Months",Normal,DiscountMonths,false,0);
+  EditField(h2,v+=vs,82,"Discounted Interest",Normal,DiscountInterest,false,0);
+//CUST-END
   EditField(h3,v=vm,82,"Monthly #Instalment#",ViewOnly,MonthlySum,false,0);
   EditField(h3,v+=vs,82,"VAT Sum",ViewOnly,VATSum,true,0); //EBS
   EditField(h3,v+=vs,82,"VAT months",Normal,VATAddMonths,false,0); //EBS
@@ -205,6 +209,10 @@ begin
   ButtonFrame(h2,v+=40,150,2,"Charge Method");
   RadioButton(h2,v,0,0,"Running Balance",ChargeMethod);
   RadioButton(h2,v+=16,1,0,"Monthly Invoices",ChargeMethod);
+//CUST-BEGIN
+  EditField(h2,v+=30,82,"Disc. Months",Normal,DiscountMonths,false,0);
+  EditField(h2,v+=vs,82,"Disc. Interest",Normal,DiscountInterest,false,0);
+//CUST-END
 /*
   ButtonFrame(h=50,vm=(v+=45),140,2,"Default Interest Type");
   RadioButton(h,v,0,0,"Fixed",RateType);
