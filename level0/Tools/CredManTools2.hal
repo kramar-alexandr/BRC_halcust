@@ -542,7 +542,7 @@ begin
   Date thedat;
   Integer i,days;
   Integer months;
-  val hundred,twelve,rate,therate,monthtot,calcbal,acumint,discrate;
+  val hundred,twelve,rate,therate,monthtot,calcbal,acumint;
   val sofar,bal_for_interest;
   val instal,inter,opentot,totsum,instalment,interest,extrainttopay;
   val realinstpaid,realintpaid,mfee;
@@ -597,9 +597,12 @@ begin
 
   for(i=0;i<=months;i=i+1) begin
     CalcCredManCurrentPeriod(CredManr,i-1,frdat,todat,invdat); //sets dates, frdat, todat and invdat
-    therate = GetCredManRate(CredManr.RateType,CredManr.Type,CredManr.IntRate,invdat); //RateType always 0, so therate == CredManr.IntRate
+    if (CredManr.DiscountMonths>0 and i<=CredManr.DiscountMonths) then begin
+      therate = GetCredManRate(CredManr.RateType,CredManr.Type,CredManr.DiscountInterest,invdat); //RateType always 0, so therate == CredManr.IntRate
+    end else begin
+      therate = GetCredManRate(CredManr.RateType,CredManr.Type,CredManr.IntRate,invdat); //RateType always 0, so therate == CredManr.IntRate
+    end;
     rate = therate / twelve / hundred;
-    discrate = CredManr.DiscountInterest / twelve / hundred;
     // LogText(0,">>>> frdat=" & frdat & " todat=" & todat & " invdat=" & invdat & " i=" & i);
     if (i==0) then begin
       if (withactuals) then begin
@@ -620,9 +623,6 @@ begin
     end else begin
       // monthtot = (calcbal) * rate;
       interest = (bal_for_interest) * rate;
-      if (CredManr.DiscountMonths>0 and i<=CredManr.DiscountMonths) then begin
-        interest = (bal_for_interest) * discrate;
-      end;
       // LogText(0,">>>> interest = " & interest & " calcbal=" & calcbal & " rate=" & rate & " bal_for_interest=" & bal_for_interest);
       AddCalculatedInterest(CredManr,CredManSetb,invdat,CredManPayPlanr,interest,calcbal,acumint,printf);
       AddIssuedInterest(CredManr,CredManSetb,invdat,CredManPayPlanr,extrainttopay,calcbal,acumint,printf);
