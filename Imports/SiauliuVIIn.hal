@@ -92,12 +92,12 @@ begin
                   OPrw.VISerNr = VIr.SerNr;
                   MatRowPut(OPr,rownr,OPrw);
                   PasteInvIn2OPr(OPr,rownr,OPr.TransDate,1,chk,warning,false,installmentf);
-                  MatRowGet(OPr,rownr,OPrw);
-                  OPrw.RecVal = sum;
-                  OPrw.BankVal = sum;
-                  MatRowPut(OPr,rownr,OPrw);
-                  OPVc_PasteBankVal(OPr,rownr);
-                  OPVc_PasteRecVal(OPr,rownr);
+                  //MatRowGet(OPr,rownr,OPrw);
+                  //OPrw.RecVal = sum;
+                  //OPrw.BankVal = sum;
+                  //MatRowPut(OPr,rownr,OPrw);
+                  //OPVc_PasteBankVal(OPr,rownr);
+                  //OPVc_PasteRecVal(OPr,rownr);
                   foundf = true;
                   vAdded[VIr.SerNr] = true;
                 end;

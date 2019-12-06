@@ -30,6 +30,8 @@ begin
     if (pos>0) then begin
       messageid = GetStringFromArea(reply,pos+15,GetAreaLength(reply)-pos-15);
       LogText(0,"MessageID::" & messageid);;
+    end else begin
+      LogText(0,GetStringFromArea(reply,0,GetAreaLength(reply)));
     end;
   end else begin
     WriteAreaToFile(request,"sms_fail.txt",0);
