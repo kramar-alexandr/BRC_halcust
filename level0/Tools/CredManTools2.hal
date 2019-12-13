@@ -550,6 +550,8 @@ begin
   Boolean printf;
   Integer paymentnr,ratedays;
   vector val vatPayments;
+  val instmonths,instsum,instbal;
+  Integer num;
 
   RecordNew(CredManPayPlanr);
   RecordCopy(CredManr,inCredManr);
@@ -634,7 +636,19 @@ begin
         end;
       end;
 
-      monthtot = FIN_PPMT(rate, CredManr.InstalmentMonths, (CredManr.InvSum4 - CredManr.VATSum - CredManr.RemBuyAmt - CredManr.DepositSum), i);
+      instmonths = CredManr.InstalmentMonths;
+      instsum = (CredManr.InvSum4 - CredManr.VATSum - CredManr.RemBuyAmt - CredManr.DepositSum);
+      num = i;
+      if (CredManr.DiscountMonths>0 and i==CredManr.DiscountMonths) then begin
+        instbal = calcbal;
+      end;
+      if (CredManr.DiscountMonths>0 and i>CredManr.DiscountMonths) then begin
+        instmonths = CredManr.InstalmentMonths - CredManr.DiscountMonths;
+        instsum = instbal;
+        num = i - CredManr.DiscountMonths;
+      end;
+
+      monthtot = FIN_PPMT(rate,instmonths,instsum,num);
       // LogText(0,">>>> paymentnr=" & paymentnr & " monthtot=" & monthtot & " thedat=" & thedat);
       monthtot = Round(monthtot, SetRoundModeD(2));
       if (i)==CredManr.InstalmentMonths then begin
