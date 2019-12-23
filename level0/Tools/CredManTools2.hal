@@ -639,7 +639,7 @@ begin
       instmonths = CredManr.InstalmentMonths;
       instsum = (CredManr.InvSum4 - CredManr.VATSum - CredManr.RemBuyAmt - CredManr.DepositSum);
       num = i;
-      if (CredManr.DiscountMonths>0 and i==CredManr.DiscountMonths) then begin
+      if (CredManr.DiscountMonths>0 and i-1==CredManr.DiscountMonths) then begin
         instbal = calcbal;
       end;
       if (CredManr.DiscountMonths>0 and i>CredManr.DiscountMonths) then begin
