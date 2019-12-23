@@ -92,12 +92,12 @@ begin
                   OPrw.VISerNr = VIr.SerNr;
                   MatRowPut(OPr,rownr,OPrw);
                   PasteInvIn2OPr(OPr,rownr,OPr.TransDate,1,chk,warning,false,installmentf);
-                  //MatRowGet(OPr,rownr,OPrw);
-                  //OPrw.RecVal = sum;
-                  //OPrw.BankVal = sum;
-                  //MatRowPut(OPr,rownr,OPrw);
-                  //OPVc_PasteBankVal(OPr,rownr);
-                  //OPVc_PasteRecVal(OPr,rownr);
+                  MatRowGet(OPr,rownr,OPrw);
+                  OPrw.RecVal = sum;
+                  OPrw.BankVal = sum;
+                  MatRowPut(OPr,rownr,OPrw);
+                  OPVc_PasteBankVal(OPr,rownr);
+                  OPVc_PasteRecVal(OPr,rownr);
                   foundf = true;
                   vAdded[VIr.SerNr] = true;
                 end;
@@ -160,6 +160,29 @@ begin
   return;
 end;
 
+function val GetPaidAmount(xml x,string root)
+begin
+  val res;
+  string 255 tstr,tmp;
+  Integer i;
+
+  res = 0;
+  i = 0;
+  while (XmlNodeExists(x,root & "/InvoiceSumGroup/Addition[" & i & "]")) begin
+    tstr = root & "/InvoiceSumGroup/Addition[" & i & "]";
+    tmp = XMLGetAttribute(x,tstr,"addType");
+    if (tmp=="PRINCIPAL") then begin
+      res = ValFromString(XmlGet(x,tstr & "/AddSum"),".","");
+      goto LGetPaidAmount;
+    end;
+    i = i + 1;
+  end;
+
+LGetPaidAmount:;
+  GetPaidAmount = res;
+  return;
+end;
+
 global
 procedure DoSiauliuIVIn(area a)
 begin
@@ -173,6 +196,7 @@ begin
   record OPVc OPr;
   vector Boolean vAdded;
   xml x;
+  val paidsum;
 
   x = ParseXMLArea(a);
 
@@ -210,14 +234,17 @@ begin
     VIrw.Sum  = VIr.PayVal;
     VIrw.VATCode = BISb.VATCode;
     MatRowPut(VIr,0,VIrw);
+    paidsum = GetPaidAmount(x,root2);
     VIDDefault(0,"VATCode",VIr);
     if (qupdating.BRC_StorePInvoice(VIr,BISb)) then begin
       //AddToPayment
-      if (MatRowCnt(OPr)>=200) then begin
-        qupdating.BRC_StorePayment(OPr,BISb);
-        PreparePayment(td,OPr,BISb);
+      if (paidsum>0) then begin
+        if (MatRowCnt(OPr)>=200) then begin
+          qupdating.BRC_StorePayment(OPr,BISb);
+          PreparePayment(td,OPr,BISb);
+        end;
+        AddInvoiceToPayment(x,root2,OPr,vAdded,BISb,paidsum);
       end;
-      AddInvoiceToPayment(x,root2,OPr,vAdded,BISb,VIr.PayVal);
     end;
     i = i + 1;
   end;

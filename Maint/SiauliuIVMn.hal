@@ -11,8 +11,9 @@ begin
 
   BlockLoad(BISb);
   path = "/sinfo/services.php?login=" & BISb.APIUserName & "&password=" & BISb.APIPassword & "&date_from=" & DateToString(RepSpec.sStartDate,"YYYY-MM-DD") & "&date_to=" & DateToString(RepSpec.sEndDate,"YYYY-MM-DD") & "&service=invoices";
-  if (SendWebRequest("lizingas.sb.lt",443,-1,true,"GET",path,"text/xml","",false,request,reply,60)) then begin
+  if (SendWebRequest("lizingas.sb.lt",443,-1,true,"GET",path,"text/xml","",false,request,reply,200)) then begin
     //extract data and check the company
+    //WriteAreaToFIle(reply,"__reply.txt",0);
     DoSiauliuIVIn(reply);
   end else begin
     logtext(0,"request timed out");
