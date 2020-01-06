@@ -77,6 +77,7 @@ begin
     // end;
 
     CredManr.StopFlag = 1;
+    CredManr.StopDate = CurrentDate;
     Putwindowrecord(wn,CredManr);
     WindowDoOk(wn,0);
 
@@ -113,6 +114,7 @@ begin
     end;
 
     CredManr.CancelFlag = 1;
+    CredManr.CancelDate = CurrentDate;
     Putwindowrecord(wn,CredManr);
     WindowDoOk(wn,0);
 

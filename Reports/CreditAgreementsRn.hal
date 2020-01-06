@@ -86,12 +86,20 @@ begin
 		testf = true;
 		if(nonblank(RepSpec.f1) and CredManr.CustCode!=RepSpec.f1)then begin testf = false; end;
 		if(nonblank(RepSpec.f2) and CredManr.Type!=RepSpec.f2)then begin testf = false; end;
-		if(RepSpec.flags[1]==0 and CredManr.StopFlag==1)then begin testf = false; end;
-		if(RepSpec.flags[2]==0 and CredManr.CancelFlag==1)then begin testf = false; end;
 		if(RepSpec.flags[3]==0 and CredManr.Approved==0)then begin testf = false; end;
 		if(RepSpec.flags[4]==0 and CredManr.OKFlag==0)then begin testf = false; end;
 		if(CredManr.startDate<RepSpec.sStartDate)then begin testf = false; end;
 		if(CredManr.startDate>RepSpec.sEndDate)then begin testf = false; TrHs = false; end;
+		if (RepSpec.flags[1]==0) then begin
+      if ((CredManr.StopDate<=RepSpec.d1 or blank(CredManr.StopDate)) and CredManr.StopFlag==1) then begin 
+        testf = false; 
+      end;
+    end;
+		if (RepSpec.flags[2]==0) then begin
+      if ((CredManr.CancelDate<=RepSpec.d1 or blank(CredManr.CancelDate)) and CredManr.CancelFlag==1)then begin 
+        testf = false; 
+      end;
+    end;
 		
 		if (testf) then begin
 			curbal = blankval;

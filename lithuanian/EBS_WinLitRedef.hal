@@ -86,6 +86,10 @@ begin
   EditField(h3,v=vm,82,"Mėnesiniai įnašai",ViewOnly,MonthlySum,false,0);
   EditField(h3,v+=vs,82,"VAT Sum",ViewOnly,VATSum,true,0); //EBS
   EditField(h3,v+=vs,82,"VAT months",Normal,VATAddMonths,false,0); //EBS
+//CUST-BEGIN
+  EditField(h3,v+=vs,82,"Cancelled Date",Normal,CancelDate,false,PasteCurDate); //EBS
+  EditField(h3,v+=vs,82,"Stopped Date",Normal,StopDate,false,PasteCurDate); //EBS
+//CUST-END
   ButtonFrame(h4,v=vm+20,150,2,"Skaičiavimo metodas");
   RadioButton(h4,v,0,0,"Kaupiamas balansas",ChargeMethod);
   RadioButton(h4,v+=16,1,0,"Mėnesinės faktūros",ChargeMethod);

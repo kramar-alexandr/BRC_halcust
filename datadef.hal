@@ -68,6 +68,8 @@ begin
     RecordField(HeaderComment,M4Str,255,0);
     RecordField(DiscountMonths,M4Long,0,0);
     RecordField(DiscountInterest,M4Qty,0,0);
+    RecordField(CancelDate,M4Date,0,0);
+    RecordField(StopDate,M4Date,0,0);
   EndRecordAdd;
 
   RecordAddBegin(CredManTypeVc,"brc_CredManTypeVc");

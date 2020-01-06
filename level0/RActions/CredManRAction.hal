@@ -75,7 +75,9 @@ BEGIN
   CredManr.OKFlag = 0;
   CredManr.Approved = 0;
   CredManr.StopFlag = 0; //EBS
+  CredManr.StopDate = bldat;//EBS
   CredManr.CancelFlag = 0; //EBS
+  CredManr.CancelDate = bldat;//EBS
   CredManr.TotInvoiceNr = -1; //EBS
   CredManVc_PasteCurncyCode(CredManr);
   CredManr.IVNr = -1;

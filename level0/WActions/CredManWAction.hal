@@ -302,6 +302,8 @@ begin
         case "LastInvDate": res = true;
 //CUST-BEGIN
         case "HeaderComment": res = true;
+        case "CancelDate": res = true;
+        case "StopDate": res = true;
 //CUST-END
         otherwise res = false;
       end;

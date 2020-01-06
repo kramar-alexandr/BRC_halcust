@@ -84,6 +84,11 @@ begin
   EditField(h3,v=vm,82,"Monthly #Instalment#",ViewOnly,MonthlySum,false,0);
   EditField(h3,v+=vs,82,"VAT Sum",ViewOnly,VATSum,true,0); //EBS
   EditField(h3,v+=vs,82,"VAT months",Normal,VATAddMonths,false,0); //EBS
+//CUST-BEGIN
+  EditField(h3,v+=vs,82,"Cancelled Date",Normal,CancelDate,false,PasteCurDate); //EBS
+  EditField(h3,v+=vs,82,"Stopped Date",Normal,StopDate,false,PasteCurDate); //EBS
+//CUST-END
+  
   ButtonFrame(h4,v=vm+20,150,2,"Charge Method");
   RadioButton(h4,v,0,0,"Running Balance",ChargeMethod);
   RadioButton(h4,v+=16,1,0,"Monthly Invoices",ChargeMethod);
