@@ -56,9 +56,9 @@ LENDFOR:;
   return;
 end;
 
-procedure AddInvoiceToPayment(xml x,string root,record OPVc OPr,var vector Boolean vAdded,record BankImpSupplierBlock BISb,val sum)
+procedure AddInvoiceToPayment(xml x,string root,record OPVc OPr,var vector Boolean vAdded,record BankImpSupplierBlock BISb,val sum,string rowobj)
 begin
-  string 255 rowobj,tstr;
+  string 255 tstr;
   record APVc APr;
   Boolean TrHs,foundf;
   Integer i,rwcnt,rownr;
@@ -70,7 +70,7 @@ begin
   row VIVc VIrw;
   row OPVc OPrw;
   
-  rowobj = XmlGet(x,root & "/InvoiceItem/InvoiceItemGroup/ItemEntry/Reference/AssetIdent");
+  //rowobj = XmlGet(x,root & "/InvoiceItem/InvoiceItemGroup/ItemEntry/Reference/AssetIdent");
   if (nonblank(rowobj)) then begin
     while (GetNextSubstring(BISb.DebtVECode,pos,",",tstr) and foundf==false) begin
       APr.VECode = tstr;
@@ -187,9 +187,10 @@ global
 procedure DoSiauliuIVIn(area a)
 begin
   Integer i;
-  string 255 root,root2,objstr;
+  Longint j;
+  string 255 root,root2,objstr,tmp;
   record BankImpSupplierBlock BISb;
-  string 255 tstr;
+  string 255 tstr,rowobj;
   record VIVc VIr;
   row VIVc VIrw;
   Date td;
@@ -234,16 +235,24 @@ begin
     VIrw.Sum  = VIr.PayVal;
     VIrw.VATCode = BISb.VATCode;
     MatRowPut(VIr,0,VIrw);
-    paidsum = GetPaidAmount(x,root2);
+    //paidsum = GetPaidAmount(x,root2);
     VIDDefault(0,"VATCode",VIr);
     if (qupdating.BRC_StorePInvoice(VIr,BISb)) then begin
       //AddToPayment
-      if (paidsum>0) then begin
-        if (MatRowCnt(OPr)>=200) then begin
-          qupdating.BRC_StorePayment(OPr,BISb);
-          PreparePayment(td,OPr,BISb);
+      j = 0;
+      while (XmlNodeExists(x,root2 & "/InvoiceSumGroup/Addition[" & j & "]")) begin
+        tstr = root2 & "/InvoiceSumGroup/Addition[" & j & "]";
+        tmp = XMLGetAttribute(x,tstr,"addType");
+        if (tmp=="PRINCIPAL") then begin
+          paidsum = ValFromString(XmlGet(x,tstr & "/AddSum"),".","");
+          rowobj = XMLGetAttribute(x,tstr,"AssetIdent");
+          if (MatRowCnt(OPr)>=200) then begin
+            qupdating.BRC_StorePayment(OPr,BISb);
+            PreparePayment(td,OPr,BISb);
+          end;
+          AddInvoiceToPayment(x,root2,OPr,vAdded,BISb,paidsum,rowobj);
         end;
-        AddInvoiceToPayment(x,root2,OPr,vAdded,BISb,paidsum);
+        j = j + 1;
       end;
     end;
     i = i + 1;
