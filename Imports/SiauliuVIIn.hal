@@ -203,7 +203,6 @@ begin
 
   BlockLoad(BISb);
   td = DateFromString(XmlGet(x,"E_Invoice/Header/Date"),"YYYY-MM-DD");
-  PreparePayment(td,OPr,BISb);
   i = 0;
   root = "E_Invoice/Invoice";
   while (XmlNodeExists(x,root & "[" & i & "]")) begin
@@ -240,6 +239,10 @@ begin
     if (qupdating.BRC_StorePInvoice(VIr,BISb)) then begin
       //AddToPayment
       j = 0;
+      if (MatRowCnt(OPr)>0) then begin
+        qupdating.BRC_StorePayment(OPr,BISb);
+      end;
+      PreparePayment(td,OPr,BISb);
       while (XmlNodeExists(x,root2 & "/InvoiceSumGroup/Addition[" & j & "]")) begin
         tstr = root2 & "/InvoiceSumGroup/Addition[" & j & "]";
         tmp = XMLGetAttribute(x,tstr,"addType");
