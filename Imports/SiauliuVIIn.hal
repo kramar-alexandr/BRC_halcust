@@ -13,6 +13,7 @@ external inner procedure OPVc_PasteBankVal(var record OPVc,Integer);
 external inner procedure OPPastePayMode2(var record OPVc,string);
 external inner procedure OPVc_PasteTransDate(var record OPVc);
 external inner procedure OPVc_PasteRecVal(var record OPVc,Integer);
+external inner procedure OPVc_PasteVECode(var record OPVc,Integer);
 
 procedure PreparePayment(Date td,var record OPVc OPr,record BankImpSupplierBlock BISb)
 begin
@@ -89,15 +90,29 @@ begin
                 if (SetInSet(rowobj,VIrw.Objects)) then begin
                   rownr = MatRowCnt(OPr);
                   ClearRow(OPr,OPrw,1);
-                  OPrw.VISerNr = VIr.SerNr;
-                  MatRowPut(OPr,rownr,OPrw);
-                  PasteInvIn2OPr(OPr,rownr,OPr.TransDate,1,chk,warning,false,installmentf);
-                  MatRowGet(OPr,rownr,OPrw);
-                  OPrw.RecVal = sum;
-                  OPrw.BankVal = sum;
-                  MatRowPut(OPr,rownr,OPrw);
-                  OPVc_PasteBankVal(OPr,rownr);
-                  OPVc_PasteRecVal(OPr,rownr);
+                  if (VIr.InvDate>OPr.TransDate) then begin
+                    OPrw.VECode = VIr.VECode;
+                    MatRowPut(OPr,rownr,OPrw);
+                    OPVc_PasteVECode(OPr,rownr);
+                    MatRowGet(OPr,rownr,OPrw);
+                    OPrw.BankCurncy = VIr.CurncyCode;
+                    OPrw.RecCurncy = VIr.CurncyCode;
+                    OPrw.RecVal = sum;
+                    OPrw.BankVal = sum;
+                    MatRowPut(OPr,rownr,OPrw);
+                    OPVc_PasteBankVal(OPr,rownr);
+                    OPVc_PasteRecVal(OPr,rownr);
+                  end else begin
+                    OPrw.VISerNr = VIr.SerNr;
+                    MatRowPut(OPr,rownr,OPrw);
+                    PasteInvIn2OPr(OPr,rownr,OPr.TransDate,1,chk,warning,false,installmentf);
+                    MatRowGet(OPr,rownr,OPrw);
+                    OPrw.RecVal = sum;
+                    OPrw.BankVal = sum;
+                    MatRowPut(OPr,rownr,OPrw);
+                    OPVc_PasteBankVal(OPr,rownr);
+                    OPVc_PasteRecVal(OPr,rownr);
+                  end;
                   foundf = true;
                   vAdded[VIr.SerNr] = true;
                 end;
