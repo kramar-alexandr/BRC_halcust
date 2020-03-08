@@ -69,7 +69,7 @@ begin
 
     tstr  = GetTabTextFromArea(0,1,a_reply);
     if (nonblank(tstr)) then begin
-      CUr.Name = tstr; 
+      //CUr.Name = tstr; //CUST>>Asked to not update the name
     end;
     
     tstr  = GetTabTextFromArea(0,4,a_reply);
