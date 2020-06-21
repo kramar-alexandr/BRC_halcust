@@ -101,7 +101,7 @@ external function string 255 SAFTHashControl(string);
 external function string 255 CreateInternationalCreditorReference(string);
 external function string 50 CreateBrazilEInvoiceId(record IVVc);
 external function string 255 OfficialNumberReformatFromSeries(string,string,string);
-external outer procedure EBS_PrintCredManInfo(record IVVc); //EBS
+external outer procedure EBS_PrintCredManInfo(record IVVc,record LangNrVc,record SysFormatBlock,Boolean); //EBS
 external outer procedure OBS_PrintAdditionalFiels(record IVVc); //OBS
 
 procedure RebVal(record IVVc ivrp,record RoundBlock RoundRec,Integer base,var string res)
@@ -1599,7 +1599,7 @@ BEGIN
 
   OUTFORMFIELD("F_RECEIPTINFO",IVr.ReceiptInfo);
 
-  EBS_PrintCredManInfo(IVr); //EBS
+  EBS_PrintCredManInfo(IVr,LangNrr,SysFormatRec,negamountf); //EBS
   OBS_PrintAdditionalFiels(IVr);  //OBS
   PrintPremiseData;
   PrintBranchData(IVr.BranchID);

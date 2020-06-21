@@ -14,6 +14,7 @@ external inner procedure PasteCredManToInv(var record IVVc,record CredManVc,bool
 external inner updating procedure BuildIVFromCredMan2(record RcVc,var record IVVc,var record CredManEventVc,record CredManVc,Date,Boolean,Boolean,date);
 external inner procedure IVVc_PasteVATCode(var record IVVc,Integer,string,var Boolean);
 external inner procedure IVVc_PasteInvDate(var record IVVc,record LocalMachineBlock,var Integer,var Integer);
+external inner procedure PrintValue(string,val,Integer,record LangNrVc,record SysFormatBlock,Boolean);
 
 global
 function val CalcCredManRemVal(record CredManVc CredManr)
@@ -87,11 +88,31 @@ begin
   return;
 end;
 
+procedure PrintItemValue(record IVVc IVr,string item,string fn,record LangNrVc LangNrr,record SysFormatBlock SysFormatRec,Boolean negamountf)
+begin
+  row IVVc IVrw;
+  Integer i,rwcnt;
+  val res;
+
+  rwcnt = MatRowCnt(IVr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(IVr,i,IVrw);
+    if (IVrw.ArtCode==item) then begin
+      res = res + IVrw.Sum;
+    end;
+  end;
+
+  PrintValue(fn,res,M4Val,LangNrr,SysFormatRec,negamountf);
+  
+  return;
+end;
+
 global
-procedure EBS_PrintCredManInfo(record IVVc IVr)
+procedure EBS_PrintCredManInfo(record IVVc IVr,record LangNrVc LangNrr,record SysFormatBlock SysFormatRec,Boolean negamountf)
 begin
   record CredManVc CredManr;
   record INVc INr;
+  record CredManSetBlock CMb;
 
   if (IVr.CredManNr>0) then begin
     CredManr.SerNr = IVr.CredManNr;
@@ -101,6 +122,10 @@ begin
         OutFormField("FF_CREDMANITEMNAME", INr.Name);
       end;
     end;
+    OutFormField("FF_CREDMANNR",IVr.CredManNr);
+    BlockLoad(CMb);
+    PrintItemValue(IVr,CMb.RateItem,"FF_CREDMANRATE",LangNrr,SysFormatRec,negamountf);
+    PrintItemValue(IVr,CMb.InstalmentItem,"FF_CREDMANINST",LangNrr,SysFormatRec,negamountf);
   end;
 
   return;
