@@ -610,6 +610,29 @@ L22:;
               end;
             end;
           end;
+//CUST-BEGIN
+          begin
+            //row IVVc IVrw;
+            Integer i,rwcnt;
+            record INVc INr;
+
+            if (testf) then begin
+              if (nonblank(RepSpec.f12)) then begin
+                testf = false;
+                rwcnt = MatRowCnt(IVr);
+                for (i=0;i<rwcnt and testf==false;i=i+1) begin
+                  MatRowGet(IVr,i,IVrw);
+                  INr.Code = IVrw.ArtCode;
+                  if (ReadFirstMain(INr,1,true)) then begin
+                    if (INr.Group==RepSpec.f12) then begin
+                      testf = true;
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          end;
+//CUST-END
         end else begin
           rs = ARr.BookRVal;
           Base1ToBase2(rs,ARr.DueDate,rs2);
