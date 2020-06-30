@@ -650,3 +650,25 @@ begin
   end;
   EndWindow;
 end;
+
+window LTxtDClass:3
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real f,h,v,vs;
+  WindowBegin("Standard Text",LTxtDClass,CGview,LTxtView);
+  DynamicWindow;
+  UseView(LTxtVc);
+  SetWRect(64,80,470,298);
+  Sizeable(-1,-1,0,0);
+  vs = 20;
+  h=120;
+  f = 200;
+  CheckBox(-100,v=6,0,"HTML",HtmlFlag);
+  EditField(h,v,100,"Code",Normal,Code,false,0);
+//CUST-BEGIN
+  EditField(350,v,-150,"Email",Normal,SenderEmail,false,0);
+//CUST-END
+  EditField(h,v+=vs,f,"Comment",Normal,Comment,false,0);
+  TextField(0,v+=vs,-1,-1,Math,0);
+  EndWindow;
+end;

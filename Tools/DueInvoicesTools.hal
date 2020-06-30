@@ -71,18 +71,25 @@ begin
   switch (type) begin
     case "email":
       RecordNew(Mailr);
-      FindUserMailboxName(CurrentUser,mailboxcode,mailboxname);
-      if (nonblank(mailboxname)) then begin
+      if (nonblank(LTxtr.SenderEmail)) then begin
         ClearRow(Mailr,Mailrw,1);
         Mailrw.RowTyp = 1;
-        Mailrw.AddrCode = mailboxname;
+        Mailrw.AddrCode = LTxtr.SenderEmail;
         MatRowPut(Mailr,0,Mailrw);
       end else begin
-        BlockLoad(MSb);
-        ClearRow(Mailr,Mailrw,1);
-        Mailrw.RowTyp = 1;
-        Mailrw.AddrCode = MSb.Postmaster;
-        MatRowPut(Mailr,0,Mailrw);
+        FindUserMailboxName(CurrentUser,mailboxcode,mailboxname);
+        if (nonblank(mailboxname)) then begin
+          ClearRow(Mailr,Mailrw,1);
+          Mailrw.RowTyp = 1;
+          Mailrw.AddrCode = mailboxname;
+          MatRowPut(Mailr,0,Mailrw);
+        end else begin
+          BlockLoad(MSb);
+          ClearRow(Mailr,Mailrw,1);
+          Mailrw.RowTyp = 1;
+          Mailrw.AddrCode = MSb.Postmaster;
+          MatRowPut(Mailr,0,Mailrw);
+        end;
       end;
       ClearRow(Mailr,Mailrw,1);
       Mailrw.RowTyp = 0;

@@ -519,5 +519,9 @@ begin
   RecordField(APIPassword,M4Str,255,0);
   EndBlock;
 
+  RecordAddBegin(LTxtVc,"LTxtVc_BRC");
+  RecordField(SenderEmail,M4Str,60,0);
+  EndRecordAdd;
+
   return;
 end;
