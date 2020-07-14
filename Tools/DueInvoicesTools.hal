@@ -47,8 +47,8 @@ begin
   record LTxtVc LTxtr;
   record RcVc RepSpec;
   record MailSettingsBlock MSb;
-  record MailVc Mailr,oldMailr;
-  row MailVc Mailrw;
+  record EMailQueVc EMQr,oldEMQr;
+  row EMailQueVc EMQrw;
   Longint pos,l;
   area a;
 
@@ -70,50 +70,62 @@ begin
   //do the actual sending
   switch (type) begin
     case "email":
-      RecordNew(Mailr);
+      RecordNew(EMQr);
+
+      EMQr.SerNr = NextSerNr("EMailQueVc",CurrentDate,-1,false,"");
+      EMQr.OrgSerNr = -1;
+      EMQr.FileName = "";
+      EMQr.TransDate = CurrentDate;
+      EMQr.TransTime = CurrentTime;
+      EMQr.HasFileAtt = 0;
+      EMQr.HasRecAtt = 0;
+      EMQr.Priority = 1;
+      EMQr.EMailSent = 0;
+      EMQr.Lifespan = 0;
+      EMQr.QueDate = CurrentDate;
+      EMQr.QueTime = CurrentTime;
+      EMQr.HtmlFlag = LTxtr.HtmlFlag;
+
+
       if (nonblank(LTxtr.SenderEmail)) then begin
-        ClearRow(Mailr,Mailrw,1);
-        Mailrw.RowTyp = 1;
-        Mailrw.AddrCode = LTxtr.SenderEmail;
-        MatRowPut(Mailr,0,Mailrw);
+        ClearRow(EMQr,EMQrw,1);
+        EMQrw.RowTyp = 1;
+        EMQrw.AddrCode = LTxtr.SenderEmail;
+        MatRowPut(EMQr,0,EMQrw);
       end else begin
         FindUserMailboxName(CurrentUser,mailboxcode,mailboxname);
         if (nonblank(mailboxname)) then begin
-          ClearRow(Mailr,Mailrw,1);
-          Mailrw.RowTyp = 1;
-          Mailrw.AddrCode = mailboxname;
-          MatRowPut(Mailr,0,Mailrw);
+          ClearRow(EMQr,EMQrw,1);
+          EMQrw.RowTyp = 1;
+          EMQrw.AddrCode = mailboxname;
+          MatRowPut(EMQr,0,EMQrw);
         end else begin
           BlockLoad(MSb);
-          ClearRow(Mailr,Mailrw,1);
-          Mailrw.RowTyp = 1;
-          Mailrw.AddrCode = MSb.Postmaster;
-          MatRowPut(Mailr,0,Mailrw);
+          ClearRow(EMQr,EMQrw,1);
+          EMQrw.RowTyp = 1;
+          EMQrw.AddrCode = MSb.Postmaster;
+          MatRowPut(EMQr,0,EMQrw);
         end;
       end;
-      ClearRow(Mailr,Mailrw,1);
-      Mailrw.RowTyp = 0;
-      Mailrw.AddrCode = id;
-      MatRowPut(Mailr,MatRowCnt(Mailr),Mailrw);
-      Mailr.Header = LTxtr.Comment;
+      ClearRow(EMQr,EMQrw,1);
+      EMQrw.RowTyp = 0;
+      EMQrw.AddrCode = id;
+      MatRowPut(EMQr,MatRowCnt(EMQr),EMQrw);
+      EMQr.Header = LTxtr.Comment;
       l = GetAreaLength(a);
       pos = 0;
       while (pos<l) begin
         tstr = GetStringFromArea(a,pos,255);
-        AddToText(tstr,Mailr); 
+        AddToText(tstr,EMQr); 
         pos = pos+255;
       end;
 
-      Mailr.SerNr = NextSerNr("MailVc",CurrentDate,-1,false,"");
-      Mailr.HtmlFlag = LTxtr.HtmlFlag;
-      if (RecordStore(Mailr,false)) then begin
-        CopyRecordLinks(LTxtr,Mailr);
+      EMQr.HtmlFlag = LTxtr.HtmlFlag;
+      if (RecordStore(EMQr,false)) then begin
+        CopyRecordLinks(LTxtr,EMQr);
         if (LTxtr.HtmlFlag==1) then begin
-          ParseHtmlField(Mailr,RepSpec,"BRCLTxtVcReplaceToken");
+          ParseHtmlField(EMQr,RepSpec,"BRCLTxtVcReplaceToken");
         end;
-        RecordCopy(oldMailr,Mailr);
-        Mailr.SendFlag = 1;
-        RecordUpdate(oldMailr,Mailr,true);
       end;
 
     case "sms":
