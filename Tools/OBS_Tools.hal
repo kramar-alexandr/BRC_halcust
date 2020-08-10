@@ -72,6 +72,28 @@ begin
   return;
 end;
 
+function val GetItemValue(record IVVc IVr,string item,Boolean setzerof)
+begin
+  Integer i,rwcnt;
+  val res;
+  row IVVc IVrw;
+
+  if (setzerof) then begin
+    res = 0;
+  end;
+  
+  rwcnt = MatRowCnt(IVr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(IVr,i,IVrw);
+    if (IVrw.ArtCode==item) then begin
+      res = res + IVrw.Sum;
+    end;
+  end;
+
+  GetItemValue = res;
+  return;
+end;
+
 global
 procedure OBS_PrintAdditionalFiels(record IVVc IVr)
 begin
@@ -79,6 +101,8 @@ begin
   integer i,rwc;
   boolean VATZoneIn,VATZoneOut;
   string 255 tstr;
+  record CredManSetBlock CMb;
+  val fees;
   
   if IVr.ExportFlag==1 /* or IVr.ExportFlag==3 */ then begin  //iekš ES
     VATZoneIn=true;
@@ -102,6 +126,12 @@ begin
     end;
   end;
   OutFormField("FF_SPECIALNOTE",tstr);
+
+  BlockLoad(CMb);
+  OutFormField("F_DEPOSITVALUE",GetItemValue(IVr,CMb.DepositItem,true));
+  fees = GetItemValue(IVr,CMb.InstalmentItem,true);
+  fees = fees + GetItemValue(IVr,CMb.ServFeeItem,true);
+  OutFormField("F_FEESVALUE",fees);
 
   return;
 end;
