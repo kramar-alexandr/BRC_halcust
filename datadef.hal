@@ -100,6 +100,7 @@ begin
   RecordField(InvLang,M4Code,10,0); //EBS
   RecordField(ServFeeItem,M4Code,20,INVc); //EBS
   RecordField(RemBalItem,M4Code,20,INVc); //EBS
+  RecordField(LangCode2,M4Code,10,0);//EBS
   EndBlock;
 
   // RIK request start

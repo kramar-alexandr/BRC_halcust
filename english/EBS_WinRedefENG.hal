@@ -37,6 +37,7 @@ begin
   EditField(h,v+=vs,100,"Depr. account",Normal,DeprAccount,false,AccSClass); //EBS
   EditField(h,v+=vs,100,"VAT Code",Normal,VATCode,false,VatCodeSClass); //EBS
   EditField(h,v+=vs,100,"Invoice language",Normal,InvLang,false,LangSClass); //EBS
+  EditField(h,v+=vs,100,"First Invoice Lang.",Normal,LangCode2,false,LangSClass);//EBS
   EndWindow;
 end;
 
