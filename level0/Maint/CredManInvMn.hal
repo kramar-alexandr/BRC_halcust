@@ -253,7 +253,7 @@ begin
   IVp.Objects = CredManr.Objects; //EBS
   IVp.LangCode = CredManSetb.InvLang; //EBS
 //CUST-BEGIN
-  if (IVp.InvDate==CredManr.FirstInvDate and nonblank(CredManSetb.LangCode2)) then begin
+  if (IVp.InvDate<CredManr.FirstInvDate and nonblank(CredManSetb.LangCode2)) then begin
     IVp.LangCode = CredManSetb.LangCode2; //EBS
   end;
 //CUST-END
