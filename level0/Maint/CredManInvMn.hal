@@ -77,6 +77,18 @@ begin
   return;
 end;
 
+function Boolean IsPaidPlanType(Integer type)
+begin
+  Boolean res;
+
+  if (type==13 or type==14) then begin
+    res = true;
+  end;
+
+  IsPaidPlanType = res;
+  return;
+end;
+
 function Integer FindNextToInvoice(record CredManPayPlanVc CredManPayPlanr,Date todat,var Date firstdat,Boolean buyoutf)
 begin
   row CredManPayPlanVc CredManPayPlanrw;
@@ -100,7 +112,7 @@ begin
     
     // This block is for the last invoice, because without this it will not be generated
     if i!=0 then begin
-        if prev_td > CredManPayPlanrw.TransDate then begin
+        if (prev_td > CredManPayPlanrw.TransDate) then begin
             if (foundissuedint) then begin
               firstdat = AddDay(prev_td,-1);
               res = 1;
@@ -108,8 +120,9 @@ begin
             goto LFindNextToInvoice;
         end;
     end;
-    prev_td = CredManPayPlanrw.TransDate;
-    
+    if (IsPaidPlanType(CredManPayPlanrw.PlanType)==false) then begin
+      prev_td = CredManPayPlanrw.TransDate;
+    end;
     if (CredManPayPlanrw.TransDate>todat) then begin
       goto LFindNextToInvoice;
     end else begin
