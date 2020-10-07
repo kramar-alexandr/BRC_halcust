@@ -153,6 +153,7 @@ begin
     EditFieldTL(h,v+=20,100,"Payment Mode",M4Code,Normal,10,f2,false,PMSClass);
     EditFieldTL(h,v+=20,100,"Transaction Date",M4Date,Normal,0,d1,false,PasteCurDate);
     EditFieldTL(h,v+=20,100,"Comment",M4Str,Normal,200,f3,false,0);
+    CheckBox(h,v+=30,0,"Skip open Invoices",flags[3]);
   EndWindow;
 
   return;

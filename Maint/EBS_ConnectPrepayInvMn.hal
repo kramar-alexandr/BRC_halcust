@@ -135,7 +135,9 @@ begin
       TrHs = false;
     end else begin
       if (vCust[ARr.CustCode] and ARr.InvDate<RepSpec.d1) then begin
-        AddARToArray(aORr,ARr);
+        if (RepSpec.flags[3]==0 or ARr.DueDate<=CurrentDate) then begin
+          AddARToArray(aORr,ARr);
+        end;
       end;
     end;
   end;

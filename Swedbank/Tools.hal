@@ -259,7 +259,7 @@ begin
     ARr.CustCode = cucode;
     TrHs = true;
     while(loopkey("CustCode",ARr,1,TrHs))begin
-      if(ARr.CustCode!=cucode)then begin TrHs = false; end;
+      if (ARr.CustCode!=cucode) then begin TrHs = false; end;
                   
       if(TrHs)then begin
         if(remsum>0)then begin
@@ -284,7 +284,7 @@ begin
           if(invused[ARr.InvoiceNr]==true)then begin testf = false; end;
           if (ARr.InvDate>IPr.TransDate) then begin testf = false; end;
           
-          if(testf)then begin
+          if (testf) then begin
             clearrow(IPr,IPrw,1);
             IPrw.InvoiceNr = ARr.InvoiceNr;
             invused[IPrw.InvoiceNr] = true;
@@ -421,6 +421,9 @@ begin
         if(ARr.CustCode!=cucode)then begin TrHs = false; testf = false; end;
         if(invused[ARr.InvoiceNr]==true)then begin testf = false; end;
         if (ARr.InvDate>IPr.TransDate) then begin testf = false; end;
+        if (BISb.SkipOpenInvoices==1 and ARr.DueDate>CurrentDate) then begin
+          testf = false;
+        end;
               
         if(testf)then begin
           if(remsum>0)then begin

@@ -63,6 +63,19 @@ LEBS_ConnectPrepayInvVClassOnOKWindow:;
   return;
 end;
 
+global
+procedure EBS_ConnectPrepayInvVClassReportDefaults(Integer wn)
+begin
+  record RcVc RepSpec;
+
+  DeselectWindow(wn,false);
+  GetWindowRecord(wn,RepSpec);
+  ReportDefaults(RepSpec,"EBS_ConnectPrepayInvVClass");
+  RepSpec.flags[3] = 1;
+  PutWindowRecord(wn,RepSpec);
+  SelectWindow(wn);
+  return;
+end;
 
 /*
 global function integer EmailValidationStatusWithStdID()

@@ -299,6 +299,8 @@ begin
   	CheckBox(h,v+=20,0,"Import payments",ImpPaym);
   	CheckBox(h,v+=20,0,"Import payment orders",ImpPaymOrd);
   	CheckBox(h,v+=20,0,"Import charges",ImpCharges);
+  	CheckBox(h,v+=20,0,"Skip open Invoices",SkipOpenInvoices);
+
   	v = v + vs + 40;
   	h=h+150;
 		EditField(h,v+=vs,50,"Swedbank Payment mode",Normal,DefPayModeSW,false,PMSClass);
