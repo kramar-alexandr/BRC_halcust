@@ -672,3 +672,29 @@ begin
   TextField(0,v+=vs,-1,-1,Math,0);
   EndWindow;
 end;
+
+window MailTextDClass:1
+  wtag("language","ENG"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v;
+  WindowBegin("Mail Text",MailTextDClass,CGview,-);
+  Sizeable(-1,-1,0,0);
+  UseView(MailTextVc);
+  SetWRect(64,80,509,380);
+  h = 70;
+  EditField(h=100,v=6,150,"Form",Normal,Register,false,MailTextRegisterSClass);
+//CUST-BEGIN
+  EditField(h+300,v,70,"Private Person Email",Normal,FormLang,false,LangSClass);
+//CUST-EDN
+  EditField(h,v+=20,-20,"Subject",Normal,Header,false,0);
+  EditField(h,v+=20,70,"First Text",Normal,FirstTxt,false,LTxtSClass);
+  EditField(h+150,v,70,"Last Text",Normal,LastTxt,false,LTxtSClass);
+  CheckBox(h+300,v,0,"Do not put Record Details in Mail Body",IgnoreRecordDetails);
+  MatrixBegin(h,v+=40,-30,-10,-,100);
+  MatCol(1,30,"Language",0,Language,false,LangSClass);
+  MatCol(1,-450,"Subject",0,Header,false,0);
+  MatCol(1,-140,"First Text",0,FirstTxt,false,LTxtSClass);
+  MatCol(1,-70,"Last Text",0,LastTxt,false,LTxtSClass);
+  EndMatrix;
+  EndWindow;
+end;

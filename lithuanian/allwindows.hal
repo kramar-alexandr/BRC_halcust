@@ -685,3 +685,29 @@ begin
 end;
 
 
+window MailTextDClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v;
+  WindowBegin("Laiško tekstas",MailTextDClass,CGview,-);
+  Sizeable(-1,-1,0,0);
+  UseView(MailTextVc);
+  SetWRect(64,80,509,380);
+  h = 70;
+  EditField(h=100,v=6,150,"Forma",Normal,Register,false,MailTextRegisterSClass);
+//CUST-BEGIN
+  EditField(h+300,v,70,"Private Person Email",Normal,FormLang,false,LangSClass);
+//CUST-EDN
+  EditField(h,v+=20,-20,"Antraštė",Normal,Header,false,0);
+  EditField(h,v+=20,70,"Pradžios tekstas",Normal,FirstTxt,false,LTxtSClass);
+  EditField(h+150,v,70,"Pabaigos tekstas",Normal,LastTxt,false,LTxtSClass);
+  CheckBox(h+300,v,0,"Nedėti įrašo detalių į laišką",IgnoreRecordDetails);
+  MatrixBegin(h,v+=40,-30,-10,-,100);
+  MatCol(1,30,"Kalba",0,Language,false,LangSClass);
+  MatCol(1,-450,"Antraštė",0,Header,false,0);
+  MatCol(1,-140,"Pradžios tekstas",0,FirstTxt,false,LTxtSClass);
+  MatCol(1,-70,"Pabaigos tekstas",0,LastTxt,false,LTxtSClass);
+  EndMatrix;
+  EndWindow;
+end;
+

@@ -525,5 +525,9 @@ begin
   RecordField(SenderEmail,M4Str,60,0);
   EndRecordAdd;
 
+  RecordAddBegin(MailTextVc,"MailTextVc_BRC");
+  RecordField(FormLang,M4Code,60,0);
+  EndRecordAdd;
+
   return;
 end;
