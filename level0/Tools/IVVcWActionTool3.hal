@@ -1361,6 +1361,10 @@ begin
   record COCUServiceBlock CSb;
   transaction Boolean gPDFEmailf;
   transaction string 255 gaPDFEmailFiles;
+//CUST-BEGIN
+  string 255 oldlang;
+  Boolean resetlangf;
+//CUST-END
 
   res = 0;
   if (IVSerNrs.length==0) then begin
@@ -1554,6 +1558,7 @@ LIVArrayHIDDENLine:;
       end;
     end;
   end;
+  resetlangf = BRC_SetInvoiceLanguage(IVr,oldlang);//CUST
   if (nonblank(MTrw.LastTxt)) then begin
     LTxtr.Code = MTrw.LastTxt;
   end else begin
@@ -1600,6 +1605,11 @@ LIVArrayHIDDENLine:;
       gPDFEmailf = true;
       SetMedia(mtPdf);
       PrintDocument(IVr,docname,false);
+//CUST-BEGIN
+      if (resetlangf) then begin
+        IVr.LangCode = oldlang;
+      end;
+//CUST-END
       if (FormLinkDocumentFilenames(Mailr,gaPDFEmailFiles)) then begin
         RecordCopy(oldIVr,IVr);
         IVr.Prntdf = 1;
