@@ -1558,7 +1558,6 @@ LIVArrayHIDDENLine:;
       end;
     end;
   end;
-  resetlangf = BRC_SetInvoiceLanguage(IVr,oldlang);//CUST
   if (nonblank(MTrw.LastTxt)) then begin
     LTxtr.Code = MTrw.LastTxt;
   end else begin
@@ -1586,6 +1585,7 @@ LIVArrayHIDDENLine:;
   for (i = 0; i<IVSerNrs.length; i = i + 1) begin
     IVr.SerNr = IVSerNrs[i];
     if (ReadFirstMain(IVr,1,true)) then begin
+      resetlangf = BRC_SetInvoiceLanguage(IVr,oldlang);//CUST
       docname = pdfform;
       if (blank(docname)) then begin
         docname = "InvForm";
