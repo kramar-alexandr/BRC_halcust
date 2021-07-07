@@ -1011,9 +1011,9 @@ what is it for ?
             end;
             switch (IVp.InvType) begin
               case kInvoiceTypeCreditSpecialSales: 
-                goto LkInvoiceTypeCredit;
+                goto LkInvoiceTypeCredit1;
               case kInvoiceTypeCredit:
-LkInvoiceTypeCredit:;
+LkInvoiceTypeCredit1:;
                 SalesVATAcc = VATCbrw.CredSalesVATAcc;
                 if (blank(SalesVATAcc)) then begin SalesVATAcc = VATCbrw.SalesVATAcc; end;
               otherwise
