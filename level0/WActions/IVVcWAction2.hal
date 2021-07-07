@@ -599,7 +599,7 @@ BEGIN
   if (nwn>0) then begin
     if (MotherWindow(nwn)==wn) then begin
       res = false;
-      goto LIVDClassActiveEditField;
+      goto LIVDClassActiveEditField1;
     end;
   end;
   if (wnst!=Rs_update) then begin
@@ -613,7 +613,7 @@ BEGIN
 
       if (arglock!=kArgentinianInvoiceLockNone) then begin
         res = ArgEInvActiveField(IVr,arglock,fieldname,rownr);
-        goto LIVDClassActiveEditField;
+        goto LIVDClassActiveEditField1;
       end;
     end;
     if (IVr.OKFlag!=0) then begin
@@ -673,7 +673,7 @@ BEGIN
       res = ActiveField(IVr,IV2r,rownr,fieldname,wnst,true);
     end;
   end;
-LIVDClassActiveEditField:;
+LIVDClassActiveEditField1:;
   IVDClassActiveEditField = res;
   RETURN;
 END;
