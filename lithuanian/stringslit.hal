@@ -22,6 +22,10 @@ begin
   SetText(0,"Nemažina");
   SetText(1,"Mažina");
   EndSet;
+  
+  StrSetAdd(3);
+    StrSetText(AllowChangeCustInIVCash,"Allow change Customer in POS Invices");  // Edit ************************** BPI Ukraine - KramarAlexandr - 03, 15 09 2021 y. at 3:31:50 PM
+  EndStrSet;
 
   return;
 end;

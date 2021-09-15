@@ -83,3 +83,22 @@ begin
 	EmailValidationStatusWithStdID = 2;
 end;
 */
+
+
+
+global
+function Boolean IVCashDClassActiveEditField(Integer wn,string fieldname,Integer fn,Integer wnst,Integer rownr,Integer changed)
+BEGIN
+  boolean res;
+
+  res =  inner.IVCashDClassActiveEditField(wn,fieldname,fn,wnst,rownr,changed); 
+  
+  if(fieldname=="CustCode")then begin
+    if(usercanaction("AllowChangeCustInIVCash",false))then begin
+      res = true;
+    end;  
+  end;
+  
+  IVCashDClassActiveEditField = res;
+  RETURN;
+END;
