@@ -24,7 +24,7 @@ begin
   EndSet;
   
   StrSetAdd(3);
-    StrSetText(AllowChangeCustInIVCash,"Allow change Customer in POS Invices");  // Edit ************************** BPI Ukraine - KramarAlexandr - 03, 15 09 2021 y. at 3:31:50 PM
+    StrSetText(AllowChangeCustInIVCash,"Allow changing POS customer");  // Edit ************************** BPI Ukraine - KramarAlexandr - 03, 15 09 2021 y. at 3:31:50 PM
   EndStrSet;
 
   return;

@@ -18,7 +18,7 @@ begin
   
   
   StrSetAdd(3);
-    StrSetText(AllowINInitPriceChange,"Allow to change item initial price");  // Edit ************************** BPI Ukraine - KramarAlexandr - 03, 15 09 2021 y. at 3:31:50 PM
+    StrSetText(AllowChangeCustInIVCash,"Allow changing POS customer");  // Edit ************************** BPI Ukraine - KramarAlexandr - 03, 15 09 2021 y. at 3:31:50 PM
   EndStrSet;
 
   return;
