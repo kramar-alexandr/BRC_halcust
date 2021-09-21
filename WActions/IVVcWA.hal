@@ -1,4 +1,5 @@
 remote inner procedure IVSumup(var record IVVc,Boolean);
+remote function Boolean okedIVCashVc_PasteCustCode(var record IVCashVc,string,string,string,var Integer,var string);
 
 global
 function Boolean IVDClassCalcProfitVATButtonAction(Integer wn,Integer value)
@@ -100,5 +101,52 @@ BEGIN
   end;
   
   IVCashDClassActiveEditField = res;
+  RETURN;
+END;
+
+
+function Boolean okedIVCashDClassCustCodeEFAfter(Integer wn,Integer rownr,Integer changed)
+begin
+  record IVCashVc IVCashr;
+  Integer err;
+  string 255 warning;
+  record LocalMachineBlock LMb;
+  
+  GetWindowRecord(wn,IVCashr);
+  if ((changed!=0) or (blank(IVCashr.Addr0) and (nonblank(IVCashr.CustCode)) )) then begin
+    BlockLoad(LMb);
+    if (okedIVCashVc_PasteCustCode(IVCashr,WindEFstr(wn),LMb.DefLocation,LMb.PLCode,err,warning)) then begin
+      if (nonblank(warning)) then begin
+        MessageBox(0,warning);
+      end;
+      if (err!=0) then begin
+        MessageBox(err,"");
+      end;
+    end else begin
+      if (err!=0) then begin
+        MessageBox(err,"");
+      end;
+    end;
+    PutWindowRecord(wn,IVCashr);
+  end;
+  okedIVCashDClassCustCodeEFAfter = true;
+  return;
+end;
+
+global
+function Boolean IVCashDClassAfterEditField(Integer wn,string fieldname,Integer fn, Integer rownr,Integer changed)
+BEGIN
+  boolean res;
+  record IVCashVc IVCashr;
+  
+  
+  getwindowrecord(wn,IVCashr);
+  if(IVCashr.OKFlag==1 and fieldname=="CustCode")then begin
+    okedIVCashDClassCustCodeEFAfter(wn,rownr,changed)
+  end else begin
+    res =  inner.IVCashDClassAfterEditField(wn,fieldname,fn,rownr,changed); 
+  end;
+  
+  IVCashDClassAfterEditField = res;
   RETURN;
 END;

@@ -1,0 +1,76 @@
+external inner procedure RemoveOldCustObjects(string,var string);
+external inner procedure IVCashVc_PasteLoyaltyCardNr(var record IVCashVc);
+external inner function string 60 AddObjectToObjectList(string,string);
+
+
+function Boolean PasteCustInCashInv(var record IVCashVc IVCashp,string lmlocation,string defpricelist,var string warning)
+BEGIN
+  record CUVc CUr;
+  Boolean found;
+  string 255 tstr,pricelist,curcode;
+  Integer InclVAT;
+  val fr,to1,to2,br1,br2;
+  string 5 oldSalesMan,tstr2;
+  record LoyaltyCardVc LoyaltyCardr;
+  record AccBlock ARb;
+  
+  CUr.Code = IVCashp.CustCode;
+  found = ReadFirstMain(CUr,1,true);
+  if (found) then begin
+    BlockLoad(ARb);
+    IVCashp.Addr0 = CUr.Name;
+    IVCashp.Addr1 = CUr.InvAddr0;
+    IVCashp.Addr2 = CUr.InvAddr1;
+    IVCashp.Addr3 = CUr.InvAddr2;
+    IVCashp.InvAddr3 = CUr.InvAddr3;
+    IVCashp.InvAddr4 = CUr.InvAddr4;
+    IVCashp.ClientContact = CUr.Person;
+    IVCashp.CustCat = CUr.CustCat;
+    IVCashp.PayLinkFlag = CUr.PayLinkFlag;
+    if (HasLocalization("POL")) then begin
+      switch (CUr.IPBookVAT) begin
+        case 1:
+          IVCashp.IPBookVAT = CUr.IPBookVAT;
+        case 2:
+          IVCashp.IPBookVAT = 0;
+        otherwise
+          IVCashp.IPBookVAT = ARb.IPBookVAT;
+      end;
+    end else begin
+      IVCashp.IPBookVAT = ARb.IPBookVAT;  
+    end;
+
+    IVCashp.Objects = AddObjectToObjectList(IVCashp.Objects,CUr.Objects);
+    IVCashp.LangCode = CUr.LangCode;    
+    IVCashp.VATNr = CUr.VATNr;
+    IVCashp.RegNr1 = CUr.RegNr1;
+    IVCashp.RebCode = CUr.RebCode;
+    IVCashp.LoyaltyCardNr = "";
+    IVCashp.LCMLevel = "";
+    IVCashp.Points = 0;
+
+    LoyaltyCardr.CustCode = CUr.Code;
+    if (ReadFirstKey("ActCustCode",LoyaltyCardr,1,true)) then begin
+      IVCashp.LoyaltyCardNr = LoyaltyCardr.SerNr;
+      IVCashVc_PasteLoyaltyCardNr(IVCashp);
+    end;
+  end;
+  PasteCustInCashInv = found;
+  RETURN;
+END;
+
+
+global
+function Boolean okedIVCashVc_PasteCustCode(var record IVCashVc IVCashr,string oldcustcode,string DefLocation,string DefPLCode,var Integer err,var string warning)
+begin
+  Boolean res;
+  
+  if ((oldcustcode!=IVCashr.CustCode) and (nonblank(oldcustcode))) then begin
+    RemoveOldCustObjects(oldcustcode,IVCashr.Objects);
+  end;
+  if (PasteCustInCashInv(IVCashr,DefLocation,DefPLCode,warning)) then begin
+    res = true;
+  end;
+  okedIVCashVc_PasteCustCode = res;
+  return;
+end;
