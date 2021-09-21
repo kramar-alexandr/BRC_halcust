@@ -73,7 +73,7 @@ BEGIN
   StartPrintDialogGroup;
   
   if(RepSpec.Media==mtPdf)then begin
-    filename = SaveFileDialog("","","");
+    filename = RepSpec.f7;
     if(blank(filename))then begin
       filename = "Invoice";
     end;
@@ -309,5 +309,27 @@ global
 updating procedure ForwardingInvForm(record RcVc RepSpec)
 begin
   PrintInvoices(RepSpec);
+  return;
+end;
+
+
+global
+function Boolean IVRClassOnOKWindow(Integer wn)
+begin
+  Boolean res;
+  record RcVc RepSpec;
+  
+  res = true;
+  GetWindowRecord(wn,RepSpec);
+  if (blank(RepSpec.f1) and blank(RepSpec.f3)) then begin
+    MessageBox(20873,"");
+    WindowFieldGoto(wn,RepSpec,-1,"f1",true);
+    res = false;
+  end;
+  if(RepSpec.Media==mtPdf)then begin
+    RepSpec.f7 = SaveFileDialog("","","");
+    putwindowrecord(wn,RepSpec);
+  end;
+  IVRClassOnOKWindow = res;
   return;
 end;
