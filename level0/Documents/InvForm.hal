@@ -75,9 +75,6 @@ BEGIN
   
   if(RepSpec.Media==mtPdf)then begin
     filename = RepSpec.f7;
-    if(blank(filename))then begin
-      filename = "Invoice";
-    end;
   end;
   
   fiscalf = false;
@@ -229,7 +226,7 @@ LkInvoiceTypeCash:;
         end;
       end;
       if (testf) then begin
-        if(RepSpec.Media==mtPdf)then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
+        if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
           qupdating.FormSetDocumentFilename(filename & IVr.SerNr & ".pdf");
         end;
       
