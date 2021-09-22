@@ -253,6 +253,7 @@ END;
 global
 procedure InvForm(record RcVc RepSpec)
 BEGIN
+  logtext(0,"RepSpec " & RepSpec.f7);
   PrintInvoices(RepSpec);
   RETURN;
 END;
