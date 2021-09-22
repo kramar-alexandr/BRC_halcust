@@ -229,7 +229,9 @@ LkInvoiceTypeCash:;
       if (testf) then begin
         if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
           logtext(0,filename & IVr.SerNr & ".pdf");
+          setfileonserver(false);
           qupdating.FormSetDocumentFilename(IVr.SerNr & ".pdf");
+          setfileonserver(true);
         end;
       
         if (RepSpec.OnlyUnprntd==0) then begin
