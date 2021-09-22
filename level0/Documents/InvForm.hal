@@ -74,6 +74,7 @@ BEGIN
   StartPrintDialogGroup;
   
   if(RepSpec.Media==mtPdf)then begin
+    logtext(0,"filename " & filename);
     filename = RepSpec.f7;
   end;
   
