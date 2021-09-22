@@ -330,7 +330,6 @@ begin
   end;
   if(RepSpec.Media==mtPdf)then begin
     RepSpec.f7 = SaveFileDialog("","","");
-    messagebox(0,RepSpec.f7);
     putwindowrecord(wn,RepSpec);
   end;
   IVRClassOnOKWindow = res;
