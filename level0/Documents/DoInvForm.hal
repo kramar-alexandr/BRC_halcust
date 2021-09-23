@@ -2170,3 +2170,11 @@ BEGIN
 LPrintInvoice:;
   RETURN;
 END;
+
+
+global
+updating procedure FormSetDocumentFilename(string fname)
+begin
+  SetDocumentFilename(fname);
+  return;
+end;

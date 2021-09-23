@@ -71,11 +71,13 @@ BEGIN
   record ModuleBlock MBb;
   string 255 filename;
 
-  StartPrintDialogGroup;
+  
   
   if(RepSpec.Media==mtPdf)then begin
     filename = RepSpec.f7;
     logtext(0,"filename " & filename);
+  end else begin
+    StartPrintDialogGroup;
   end;
   
   fiscalf = false;
@@ -229,8 +231,8 @@ LkInvoiceTypeCash:;
       if (testf) then begin
         if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
           logtext(0,filename & IVr.SerNr & ".pdf");
-          setfileonserver(false);
-          qupdating.FormSetDocumentFilename(filename & IVr.SerNr & ".pdf");
+          millisleep(500);
+          clientremoteasync.FormSetDocumentFilename(filename & IVr.SerNr & ".pdf");
         end;
       
         if (RepSpec.OnlyUnprntd==0) then begin
@@ -248,7 +250,9 @@ LkInvoiceTypeCash:;
     end;
   end;
 LPrintInvoices:;
-  EndPrintDialogGroup;
+  if(RepSpec.Media!=mtPdf)then begin
+    EndPrintDialogGroup;
+  end;
   RETURN;
 END;
 
