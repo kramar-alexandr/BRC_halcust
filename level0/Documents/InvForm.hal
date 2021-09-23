@@ -71,14 +71,12 @@ BEGIN
   record ModuleBlock MBb;
   string 255 filename;
 
+  StartPrintDialogGroup;
   
-  
-  if(RepSpec.Media==mtPdf)then begin
+  /*if(RepSpec.Media==mtPdf)then begin
     filename = RepSpec.f7;
     logtext(0,"filename " & filename);
-  end else begin
-    StartPrintDialogGroup;
-  end;
+  end;*/
   
   fiscalf = false;
   BlockLoad(LMb);
@@ -229,12 +227,12 @@ LkInvoiceTypeCash:;
         end;
       end;
       if (testf) then begin
-        if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
+        /*if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
           logtext(0,filename & IVr.SerNr & ".pdf");
           millisleep(500);
           clientremoteasync.FormSetDocumentFilename(filename & IVr.SerNr & ".pdf");
           millisleep(500);
-        end;
+        end;*/
       
         if (RepSpec.OnlyUnprntd==0) then begin
           if (IVr.Prntdf==0 or (MBb.NoTestprintEnabler!=0)) then begin
@@ -251,9 +249,7 @@ LkInvoiceTypeCash:;
     end;
   end;
 LPrintInvoices:;
-  if(RepSpec.Media!=mtPdf)then begin
-    EndPrintDialogGroup;
-  end;
+  EndPrintDialogGroup;
   RETURN;
 END;
 
