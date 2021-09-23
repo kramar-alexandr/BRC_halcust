@@ -2175,6 +2175,9 @@ END;
 global
 updating procedure FormSetDocumentFilename(string fname)
 begin
+
+  logtext(0,"FormSetDocumentFilename " & fname);
   SetDocumentFilename(fname);
+  
   return;
 end;

@@ -233,6 +233,7 @@ LkInvoiceTypeCash:;
           logtext(0,filename & IVr.SerNr & ".pdf");
           millisleep(500);
           clientremoteasync.FormSetDocumentFilename(filename & IVr.SerNr & ".pdf");
+          millisleep(500);
         end;
       
         if (RepSpec.OnlyUnprntd==0) then begin
