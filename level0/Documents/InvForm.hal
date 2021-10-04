@@ -8,6 +8,9 @@ external function Boolean FindLocalSerialPortDevice(Integer,LongInt,string,var r
 external function Boolean IsEnterprise();
 external function Boolean IsForwardingInvoice(record IVVc);
 external updating procedure FormSetDocumentFilename(string);
+external procedure FinishMessage();
+
+FinishMessage
 
 function Boolean TestElecInvoicing(string custcode,LongInt sernr)
 begin
@@ -73,10 +76,10 @@ BEGIN
 
   StartPrintDialogGroup;
   
-  /*if(RepSpec.Media==mtPdf)then begin
+  if(RepSpec.Media==mtPdf)then begin
     filename = RepSpec.f7;
     logtext(0,"filename " & filename);
-  end;*/
+  end;
   
   fiscalf = false;
   BlockLoad(LMb);
@@ -227,12 +230,12 @@ LkInvoiceTypeCash:;
         end;
       end;
       if (testf) then begin
-        /*if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
+        if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
           logtext(0,filename & IVr.SerNr & ".pdf");
           millisleep(500);
           clientremoteasync.FormSetDocumentFilename(filename & IVr.SerNr & ".pdf");
           millisleep(500);
-        end;*/
+        end;
       
         if (RepSpec.OnlyUnprntd==0) then begin
           if (IVr.Prntdf==0 or (MBb.NoTestprintEnabler!=0)) then begin
@@ -250,6 +253,11 @@ LkInvoiceTypeCash:;
   end;
 LPrintInvoices:;
   EndPrintDialogGroup;
+  
+  if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
+    FinishMessage;
+  end;
+  
   RETURN;
 END;
 
