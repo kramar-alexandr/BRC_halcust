@@ -2186,7 +2186,7 @@ global
 procedure FinishMessage()
 begin
 
-  Messagebox(1303,"");
+  Messagebox(12424,"");
   
   return;
 end;

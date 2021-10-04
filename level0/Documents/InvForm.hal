@@ -255,7 +255,7 @@ LPrintInvoices:;
   EndPrintDialogGroup;
   
   if(RepSpec.Media==mtPdf and nonblank(filename))then begin// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 21 09 2021 y. at 3:48:01 PM
-    FinishMessage;
+    clientremoteasync.FinishMessage;
   end;
   
   RETURN;
