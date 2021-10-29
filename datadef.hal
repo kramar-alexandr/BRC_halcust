@@ -61,7 +61,8 @@ begin
     RecordField(CancelFlag,M4Mark,0,0);
     RecordField(TotInvoiceNr,M4Long,0,0);
     RecordField(VATCode,M4Code,10,VATCodeBlock); //EBS
-
+    RecordField(ContractNo,M4Long,0,0);//EBS
+    
     ChangeMatrixField(ArtCode,M4Code,20,INVc);
     ArrayField(AddPayDate,M4Date,0,0);
     ArrayField(FeeBalType,M4Set,12000,0);

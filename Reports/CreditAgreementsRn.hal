@@ -59,6 +59,7 @@ begin
 	startformat(15);
 		outstring(0,0,"Nr",false);
 		if(RepSpec.Media==mtExcel)then begin
+		  outstring(25,0,"Sutarties nr",false);//EBS
 			outstring(35,0,"Sustabdytos",false);
 			outstring(70,0,"Nutrauktos",false);
 			outstring(70,0,"Nepatvirtintos",false);
@@ -125,6 +126,7 @@ begin
 			startformat(15);
 				outstring(0,"DblCredManVc",CredManr.SerNr,false);
 				if(RepSpec.Media==mtExcel)then begin
+				  outstring(25,0,CredManr.ContractNo,false);//EBS
 					outstring(35,0,Checkbocout(CredManr.StopFlag),false);
 					outstring(70,0,Checkbocout(CredManr.CancelFlag),false);
 					outstring(70,0,Checkbocout(CredManr.Approved==0),false);

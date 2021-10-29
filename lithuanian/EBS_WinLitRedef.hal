@@ -55,6 +55,7 @@ begin
   h = 120; h2 = 320; h3 = 550; h4 = 670; vs = 20;
   Tile(0,290,false,"",SerNr);
   EditField(h,vm=(v=6), 82,"Nr.",St_i,SerNr,false,TSerSClass);
+  EditField(h,v+=vs,82,"Sutarties nr",Normal,ContractNo,false,0);
   EditField(h,v+=vs,82,"Tipas",Normal,Type,false,CredManTypeSClass);
   EditField(h2,v,-40,"Delspinigiai",Normal,InstalmentType,false,SetSClass);
   EditField(h,v+=vs,82, "Klientas",Normal,CustCode,false,CUSClass);

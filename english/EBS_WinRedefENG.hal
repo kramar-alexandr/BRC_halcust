@@ -53,6 +53,7 @@ begin
   h = 120; h2 = 320; h3 = 550; h4 = 670; vs = 20;
   Tile(0,270,false,"",SerNr);
   EditField(h,vm=(v=6), 82,"No.",St_i,SerNr,false,TSerSClass);
+  EditField(h,v+=vs,82,"Contract #",Normal,ContractNo,false,0);
   EditField(h,v+=vs,82,"Type",Normal,Type,false,CredManTypeSClass);
   EditField(h2,v,-40,"Interest",Normal,InstalmentType,false,SetSClass);
   EditField(h,v+=vs,82, "Customer",Normal,CustCode,false,CUSClass);

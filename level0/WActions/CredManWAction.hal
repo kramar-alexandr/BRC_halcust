@@ -341,6 +341,14 @@ begin
       end;
     end;
   end;
+  
+  //CUST-BEGIN
+  switch (fieldname) begin// Edit ************************** BPI Ukraine - KramarAlexandr - 05, 29 10 2021 y. at 11:39:03 AM
+    case "Addr0": res = true;//Asana Credit agreement new field ""Sutarties nr."
+    case "ContractNo": res = true;
+  end;
+  //CUST-END
+  
   CredManDClassActiveEditField = res;
   return;
 end;

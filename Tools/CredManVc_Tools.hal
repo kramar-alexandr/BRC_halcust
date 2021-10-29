@@ -319,6 +319,9 @@ begin
 
   tstr = USetStr(1168);
   t2 = CredManr.SerNr;
+  if(CredManr.ContractNo>-1)then begin//EBS
+    t2 = CredManr.ContractNo;
+  end;
   tstr = tstr & t2;
   ClearRow(IVp,IVrw,1);
   IVrw.Spec = tstr;
