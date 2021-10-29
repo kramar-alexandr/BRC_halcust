@@ -61,7 +61,6 @@ begin
     RecordField(CancelFlag,M4Mark,0,0);
     RecordField(TotInvoiceNr,M4Long,0,0);
     RecordField(VATCode,M4Code,10,VATCodeBlock); //EBS
-    RecordField(ContractNo,M4Long,0,0);//EBS
     
     ChangeMatrixField(ArtCode,M4Code,20,INVc);
     ArrayField(AddPayDate,M4Date,0,0);
@@ -71,6 +70,8 @@ begin
     RecordField(DiscountInterest,M4Qty,0,0);
     RecordField(CancelDate,M4Date,0,0);
     RecordField(StopDate,M4Date,0,0);
+    RecordField(ContractNo,M4Long,0,0);//EBS
+    
   EndRecordAdd;
 
   RecordAddBegin(CredManTypeVc,"brc_CredManTypeVc");
