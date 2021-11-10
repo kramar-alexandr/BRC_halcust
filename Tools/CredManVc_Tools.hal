@@ -122,7 +122,12 @@ begin
         OutFormField("FF_CREDMANITEMNAME", INr.Name);
       end;
     end;
-    OutFormField("FF_CREDMANNR",IVr.CredManNr);
+    
+    if(CredManr.ContractNo>-1)then begin
+      OutFormField("FF_CREDMANNR",CredManr.ContractNo);
+    end else begin
+      OutFormField("FF_CREDMANNR",IVr.CredManNr);
+    end;
     BlockLoad(CMb);
     PrintItemValue(IVr,CMb.RateItem,"FF_CREDMANRATE",LangNrr,SysFormatRec,negamountf);
     PrintItemValue(IVr,CMb.InstalmentItem,"FF_CREDMANINST",LangNrr,SysFormatRec,negamountf);
