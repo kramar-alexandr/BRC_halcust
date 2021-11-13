@@ -1,3 +1,5 @@
+external inner function string 255 F_Label(string);
+external inner procedure SetupColumWithKeypadWindow(var real,var real,var real,var real,var real,var real,var real);
 external inner procedure RateField(real,real,real,string,integer,string,boolean,real,real,string,boolean);
 external inner function Boolean HasCategories();
 external inner function Boolean HasContactClassification();
@@ -7,6 +9,8 @@ external inner function Boolean IsEnterprise();
 external inner function Boolean StandardHansa();
 external inner function Boolean HasInvoiceOfficialSerNr();
 external inner function Boolean HasOfficialSerNr();
+external inner procedure SplitButton(LongInt,LongInt,LongInt,LongInt,LongInt,string,string,string,string,LongInt);
+external inner procedure POSKeyPad(LongInt,LongInt,LongInt,LongInt,LongInt,string,LongInt);
 
 SetLangMode(LangLithuanian,"LIT",2);
 
@@ -296,5 +300,57 @@ begin
   RadioButton(h2,v+=16,1,0,"Mok. data",flags[5]);
 
   //CheckBox(h,v=v-130,0,"Include received Receipts",flags[4]);
+  EndWindow;
+end;
+
+window NPTSSearchCURClass:1
+  wtag("language","LIT"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer,iPad,android_tab")
+begin
+  real fieldh,fieldh2,keypadh,keypadh2,keypadv,h,v,vs,f,fntsize;
+  record LocalMachineBlock LMb;
+
+  BlockLoad(LMb);
+  WindowBegin("Ieškoti kontaktų1",NPTSSearchCURClass,CGOther,RcType);
+  Modality(kModalityGlobal);
+  SetWRect(64,80,600,448);
+  AutoSizeWindow(false);
+
+  SetupColumWithKeypadWindow(fieldh,fieldh2,keypadh,keypadh2,keypadv,vs,fntsize);
+ 
+  h = fieldh;
+  switch (GuiType) begin
+    case kGuiAndroid:
+    otherwise
+      if (LMb.POSButtonsPosition==kPOSButtonsPositionRight) then begin
+        h = h - 60;
+  end;   
+  end;
+
+  EditFieldTL(h,v=20 ,f=120,"Ieškoti",M4Str,Normal,40,f1,false,0);
+  EditFieldTL(h,v+=vs,f,"Klasė",M4Str,Normal,40,f2,false,CClassSClass);
+  EditFieldTL(h,v+=vs,f,"Klientas",M4Str,Normal,40,f3,false,CUSClass);
+  v = v + 50;
+  ButtonFrame(h,v,123,5,"Ieškoti"); 
+  RadioButton(h,v,2,0,"Pavadinimas",ArtMode);
+  RadioButton(h,v+=16,1,0,"Nr.",ArtMode);
+//  RadioButton(h,v+=16,3,0,"Trumas",ArtMode);
+// RadioButton(h,v+=16,4,0,"Kategorija",ArtMode);
+  RadioButton(h,v+=16,5,0,"Telefonas",ArtMode);
+//  RadioButton(h,v+=16,6,0,"Kontaktas",ArtMode);
+//  RadioButton(h,v+=16,7,0,"Skyrius",ArtMode);
+  RadioButton(h,v+=16,8,0,"El. paštas",ArtMode);
+  RadioButton(h,v+=16,0,0,"Visi",ArtMode);
+  
+
+  switch (GuiType) begin
+    case kGuiAndroid:
+    otherwise
+      v = keypadv+10;
+  end;
+  POSKeyPad(v,keypadh,v + 250,keypadh2,2,"NPTSPaymentToolKeyPad",kKeyPadEnter);  //!!SAMETRANSLATION
+  v = v + 250;
+  SplitButton(keypadh,v,keypadh2,v + vs,2,"CancelAndOverrideLogout","Atšaukti" & F_Label("F2"),"ProceedNPTSSearchCURClass","Tęsti" & F_Label("F1"),20);  //!!SAMETRANSLATION
+  ColourPushButton(keypadh2+50,v,keypadh2+150,v+vs,"CUNPTSSClassNewCustomer","Naujas kontaktas",20);
+  
   EndWindow;
 end;
